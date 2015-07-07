@@ -9,7 +9,7 @@ import org.gradle.api.plugins.quality.Pmd
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.bundling.Jar
 
-class GradlePlugin implements Plugin<Project> {
+class StaticCodeAnalysis implements Plugin<Project> {
 
     def void apply(Project project) {
 
