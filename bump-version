@@ -1,0 +1,14 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+        exit 0
+fi
+
+# -dev versions are -SNAPSHOT, RCs and releases are left untouched
+version=$1
+if [[ $1 =~ -dev$ ]]; then
+	version=${1%-dev}-SNAPSHOT
+fi
+
+perl -0777 -pi -e "s/version\s=\s\".*/version = \"$version\"/" build.gradle
+
