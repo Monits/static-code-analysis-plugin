@@ -9,6 +9,15 @@ dependencies {
 group='com.monits'
 version='1.0-SNAPSHOT'
 
+if (version.endsWith('-SNAPSHOT')) {
+    ext.nexusRepo = 'http://nexus.monits.com/content/repositories/oss-snapshots'
+} else {
+    ext.nexusRepo = 'http://nexus.monits.com/content/repositories/oss-releases'
+}
+
+ext.nexusUsername = has("nexusUsername") ? nexusUsername : ""
+ext.nexusPassword = has("nexusPassword") ? nexusPassword : ""
+
 // To upload artifact to Nexus
 uploadArchives {
     configuration = configurations.archives
