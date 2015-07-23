@@ -2,6 +2,7 @@ package com.monits
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileTree
 import org.gradle.api.plugins.quality.Checkstyle
 import org.gradle.api.plugins.quality.FindBugs
@@ -100,6 +101,7 @@ class StaticCodeAnalysis implements Plugin<Project> {
             }
 
             pluginClasspath = project.configurations.findbugsPlugins
+
         }
 
         /*
@@ -140,21 +142,20 @@ class StaticCodeAnalysis implements Plugin<Project> {
             }
 
             ruleSets = ['http://static.monits.com/pmd.xml']
+
         }
 
-        project.task("cpd") {
-            File outDir = new File("$project.buildDir/reports/pmd/")
-            outDir.mkdirs()
-            ant.taskdef(name: 'cpd', classname: 'net.sourceforge.pmd.cpd.CPDTask',
-                    classpath: project.configurations.pmd.asPath)
-            ant.cpd(minimumTokenCount: '100', format: 'xml',
-                    outputFile: new File(outDir , 'cpd.xml')) {
-                fileset(dir: "src") {
-                    include(name: '**/*.java')
-                    exclude(name: '**/gen/**')
-                }
-            }
+        project.task("cpd", type: CPDTask) {
+            FileTree srcDir = project.fileTree("$project.projectDir/src/");
+            srcDir.include '**/*.java'
+            srcDir.exclude '**/gen/**'
+
+            FileCollection collection = project.files(srcDir.getFiles());
+
+            inputFiles = collection
+            outputFile = new File("$project.buildDir/reports/pmd/cpd.xml")
         }
+
 
         project.tasks.check.dependsOn project.tasks.checkstyle, project.tasks.findbugs, project.tasks.pmd, project.tasks.cpd
     }
