@@ -9,10 +9,55 @@ dependencies {
 group='com.monits'
 version='1.0-SNAPSHOT'
 
+if (version.endsWith('-SNAPSHOT')) {
+    ext.nexusRepo = 'http://nexus.monits.com/content/repositories/oss-snapshots'
+} else {
+    ext.nexusRepo = 'http://nexus.monits.com/content/repositories/oss-releases'
+}
+
+ext.nexusUsername = has("nexusUsername") ? nexusUsername : ""
+ext.nexusPassword = has("nexusPassword") ? nexusPassword : ""
+
+// To upload artifact to Nexus
 uploadArchives {
+    configuration = configurations.archives
     repositories {
         mavenDeployer {
-            repository(url: uri('../repo'))
+            repository(url: project.ext.nexusRepo) {
+                authentication(userName: project.ext.nexusUsername, password: project.ext.nexusPassword)
+            }
+
+            pom.project {
+                name 'Static code analysis'
+                packaging 'aar'
+                description 'Extension gradle plugin for static code analysis'
+
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        distribution 'repo'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'jsotuyod'
+                        name 'Juan Martin Sotuyo Dodero'
+                        email 'jmsotuyo@monits.com'
+                    }
+                    developer {
+                        id 'MartuPuri'
+                        name 'Martin Purita'
+                        email 'mpurita@monits.com'
+                    }
+                    developer {
+                        id 'lbritez'
+                        name 'Leandro Britez'
+                        email 'lbritez@monits.com'
+                    }
+                }
+            }
         }
     }
 }
