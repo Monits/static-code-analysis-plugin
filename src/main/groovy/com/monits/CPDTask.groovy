@@ -17,7 +17,7 @@ class CPDTask extends DefaultTask {
         ant.taskdef(name: 'cpd', classname: 'net.sourceforge.pmd.cpd.CPDTask',
             classpath: project.configurations.pmd.asPath)
         ant.cpd(minimumTokenCount: '100', format: 'xml',
-            outputFile: outputFile){
+            outputFile: outputFile) {
             inputFiles.addToAntBuilder(ant, 'fileset', FileCollection.AntType.FileSet)
         }
     }
