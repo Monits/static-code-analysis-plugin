@@ -31,14 +31,15 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     def void apply(Project project) {
         this.project = project
 
-        String currentGradleVersion = project.gradle.gradleVersion
+        project.task("versionCheck") << {
+            String currentGradleVersion = project.gradle.gradleVersion
+            if (currentGradleVersion < GRADLE_VERSION) {
+                throw new GradleException('Gradle version should be ' + GRADLE_VERSION + ' or higher. '
+                        + 'Current version: ' + currentGradleVersion)
 
-        if (currentGradleVersion < GRADLE_VERSION) {
-            throw new GradleException('Gradle version should be ' + GRADLE_VERSION + ' or higher. '
-                + 'Current version: ' + currentGradleVersion)
-
+            }
         }
-
+        
         extension = new StaticCodeAnalysisExtension(project);
         project.extensions.add(StaticCodeAnalysisExtension.NAME, extension);
 
@@ -52,6 +53,12 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
                 }
             }
             compile.extendsFrom provided
+        }
+
+        //FIXME: This is here so that projects that use Findbugs can compile... but it ignores DSL completely
+
+        project.dependencies {
+            provided 'com.google.code.findbugs:annotations:' + FINDBUGS_ANNOTATIONS_VERSION
         }
 
         project.afterEvaluate {
@@ -75,6 +82,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             if (extension.cpd) {
                 cpd();
             }
+
         }
     }
 
@@ -82,6 +90,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         project.plugins.apply 'pmd'
 
         project.task("cpd", type: CPDTask) {
+            dependsOn project.tasks.versionCheck
             FileTree srcDir = project.fileTree("$project.projectDir/src/");
             srcDir.include '**/*.java'
             srcDir.exclude '**/gen/**'
@@ -170,11 +179,10 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     }
 
     private void findbugs() {
+
         project.plugins.apply 'findbugs'
 
         project.dependencies {
-            provided 'com.google.code.findbugs:annotations:' + FINDBUGS_ANNOTATIONS_VERSION
-
             findbugs 'com.google.code.findbugs:findbugs:' + FINDBUGS_TOOL_VERSION
             findbugs project.configurations.findbugsPlugins.dependencies
 
@@ -187,6 +195,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
 
         project.task("findbugs", type: FindBugs) {
             dependsOn project.tasks.withType(JavaCompile)
+
             ignoreFailures = true
             effort = "max"
 
@@ -233,4 +242,5 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
 
         project.tasks.check.dependsOn project.tasks.findbugs
     }
+
 }
