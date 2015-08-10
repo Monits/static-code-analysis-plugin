@@ -39,8 +39,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
 
             }
         }
-
-
+        
         extension = new StaticCodeAnalysisExtension(project);
         project.extensions.add(StaticCodeAnalysisExtension.NAME, extension);
 
@@ -54,6 +53,12 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
                 }
             }
             compile.extendsFrom provided
+        }
+
+        //FIXME: This is here so that projects that use Findbugs can compile... but it ignores DSL completely
+
+        project.dependencies {
+            provided 'com.google.code.findbugs:annotations:' + FINDBUGS_ANNOTATIONS_VERSION
         }
 
         project.afterEvaluate {
@@ -174,11 +179,10 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     }
 
     private void findbugs() {
+
         project.plugins.apply 'findbugs'
 
         project.dependencies {
-            provided 'com.google.code.findbugs:annotations:' + FINDBUGS_ANNOTATIONS_VERSION
-
             findbugs 'com.google.code.findbugs:findbugs:' + FINDBUGS_TOOL_VERSION
             findbugs project.configurations.findbugsPlugins.dependencies
 
