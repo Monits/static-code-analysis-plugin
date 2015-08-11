@@ -1,6 +1,5 @@
 package com.monits
 
-import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
@@ -12,13 +11,17 @@ import org.gradle.api.tasks.compile.JavaCompile
 
 class StaticCodeAnalysisPlugin implements Plugin<Project> {
 
-    private final static String PMD_TOOL_VERSION = '5.3.3'
-    private final static String GRADLE_VERSION = '2.5'
+    private final static String LATEST_PMD_TOOL_VERSION = '5.3.3'
+    private final static String BACKWARDS_PMD_TOOL_VERSION = '5.1.2'
+    private final static String GRADLE_VERSION_PMD = '2.4'
     private final static String CHECKSTYLE_VERSION = '6.7'
     private final static String FINDBUGS_ANNOTATIONS_VERSION = '3.0.0'
     private final static String FINDBUGS_TOOL_VERSION = '3.0.1'
     private final static String FINDBUGS_MONITS_VERSION = '0.2.0-SNAPSHOT'
     private final static String FB_CONTRIB_VERSION = '6.2.1'
+
+    private String currentGradleVersion = GRADLE_VERSION_PMD;
+    private String currentPmdVersion = LATEST_PMD_TOOL_VERSION;
 
     private String checkstyleRules;
     private List<String> pmdRules;
@@ -30,16 +33,16 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
 
     def void apply(Project project) {
         this.project = project
+        currentGradleVersion = project.gradle.gradleVersion;
 
-        project.task("versionCheck") << {
-            String currentGradleVersion = project.gradle.gradleVersion
-            if (currentGradleVersion < GRADLE_VERSION) {
-                throw new GradleException('Gradle version should be ' + GRADLE_VERSION + ' or higher. '
-                        + 'Current version: ' + currentGradleVersion)
-
+        project.task("pmdVersionCheck") {
+            if (currentGradleVersion < GRADLE_VERSION_PMD) {
+                currentPmdVersion = BACKWARDS_PMD_TOOL_VERSION;
+            } else {
+                currentPmdVersion = LATEST_PMD_TOOL_VERSION;
             }
         }
-        
+
         extension = new StaticCodeAnalysisExtension(project);
         project.extensions.add(StaticCodeAnalysisExtension.NAME, extension);
 
@@ -90,14 +93,16 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         project.plugins.apply 'pmd'
 
         project.task("cpd", type: CPDTask) {
-            dependsOn project.tasks.versionCheck
+
+            dependsOn project.tasks.pmdVersionCheck
+
             FileTree srcDir = project.fileTree("$project.projectDir/src/");
             srcDir.include '**/*.java'
             srcDir.exclude '**/gen/**'
 
             FileCollection collection = project.files(srcDir.getFiles());
 
-            toolVersion = PMD_TOOL_VERSION
+            toolVersion = currentPmdVersion
             inputFiles = collection
             outputFile = new File("$project.buildDir/reports/pmd/cpd.xml")
         }
@@ -110,10 +115,12 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         project.plugins.apply 'pmd'
 
         project.pmd {
-             toolVersion = PMD_TOOL_VERSION
+            toolVersion = currentPmdVersion
         }
 
         project.task("pmd", type: Pmd) {
+            dependsOn project.tasks.pmdVersionCheck
+
             ignoreFailures = true
 
             source 'src'

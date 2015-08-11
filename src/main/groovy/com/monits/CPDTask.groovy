@@ -18,7 +18,6 @@ class CPDTask extends DefaultTask {
 
     @TaskAction
     void run() {
-
         createConfigurations()  // TODO : shouldn't be here
         resolveDependencies()  // TODO : shouldn't be here
 
@@ -52,10 +51,12 @@ class CPDTask extends DefaultTask {
     // FIXME : This is copy pasted from PmdPlugin... it shouldn't
     private void resolveDependencies() {
         def config = project.configurations['cpd']
-        config.defaultDependencies { dependencies ->
-            VersionNumber version = VersionNumber.parse(getToolVersion())
-            String dependency = calculateDefaultDependencyNotation(version)
-            dependencies.add(this.project.dependencies.create(dependency))
+        config.incoming.beforeResolve {
+            if (config.dependencies.empty) {
+                VersionNumber version = VersionNumber.parse(getToolVersion())
+                String dependency = calculateDefaultDependencyNotation(version)
+                config.dependencies.add(project.dependencies.create(dependency))
+            }
         }
     }
 
