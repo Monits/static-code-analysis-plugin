@@ -8,7 +8,7 @@ dependencies {
 
 group = 'com.monits'
 
-version = "1.2.0-SNAPSHOT"
+version = "1.2.0-RC1"
 
 if (version.endsWith('-SNAPSHOT')) {
     ext.nexusRepo = 'http://nexus.monits.com/content/repositories/oss-snapshots'
