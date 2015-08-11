@@ -20,7 +20,7 @@ Then add the plugin as dependency
 
 ```
 dependencies {
-    classpath 'com.monits:static-code-analysis-plugin:1.1.2'
+    classpath 'com.monits:static-code-analysis-plugin:1.2.0'
 }
 ```
 
@@ -29,6 +29,13 @@ And apply it
 ```
 apply plugin: 'com.monits.staticCodeAnalysis'
 ```
+
+##History
+
+#v1.2
+
+* PMD & CPD compatible with Gradle v2.3+. It resolves dependencies and  tool versions according to
+the used gradle version.
 
 ## Why use it?
 
