@@ -145,10 +145,6 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     private void checkstyle() {
         project.plugins.apply 'checkstyle'
 
-        project.dependencies {
-            checkstyle 'com.puppycrawl.tools:checkstyle:' + CHECKSTYLE_VERSION
-        }
-
         boolean remoteLocation;
         File configSource;
         if (checkstyleRules.startsWith("http://")
@@ -172,7 +168,6 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             ignoreFailures = ignoreErrors;
             showViolations = false
             configFile configSource
-
         }
 
         project.task("checkstyle", type: Checkstyle) {
@@ -194,7 +189,6 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         project.plugins.apply 'findbugs'
 
         project.dependencies {
-            findbugs 'com.google.code.findbugs:findbugs:' + FINDBUGS_TOOL_VERSION
             findbugs project.configurations.findbugsPlugins.dependencies
 
             // To keep everything tidy, we set these apart
