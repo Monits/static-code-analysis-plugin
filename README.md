@@ -32,9 +32,13 @@ apply plugin: 'com.monits.staticCodeAnalysis'
 
 ##History
 
+#v1.3
+
+* Plugin can be configured with ``ignoreErrors`` parameter to stop build if errors are found.
+
 #v1.2
 
-* PMD & CPD compatible with Gradle v2.3+. It resolves dependencies and  tool versions according to
+* PMD & CPD compatible with Gradle v2.3+. It resolves dependencies and tool versions according to
 the used gradle version.
 
 ## Why use it?
@@ -60,6 +64,8 @@ staticCodeAnalysis {
     pmd = true
     cpd = false
 
+    ignoreErrors = true
+
     findbugsExclude = new File("$project.rootProject.projectDir/config/findbugs/excludeFilter.xml")
     checkstyleRules = "http://static.monits.com/checkstyle.xml"
     pmdRules = [ "http://static.monits.com/pmd.xml", "http://static.monits.com/pmd-android.xml" ]
@@ -72,6 +78,8 @@ All configurations values in the example are the default ones, but you must take
 begin with "http://" or "https://", else it will be considered local) and ``pmdRules`` is a
 collection of ``String``.
 
+As of version 1.3, ``ignoreErrors`` decides whether the build is stopped if errors are reported. Its default
+value is ``true`` meaning that it will continue the build regardless of reported errors.
 
 And that's it! As always feel free to contribute in any shape or form, we look forward to your feedback!.
 
