@@ -6,6 +6,8 @@ class StaticCodeAnalysisExtension {
 
     static final String NAME = "staticCodeAnalysis";
 
+    boolean ignoreErrors;
+
     boolean findbugs;
     boolean pmd;
     boolean checkstyle;
@@ -16,6 +18,7 @@ class StaticCodeAnalysisExtension {
     File findbugsExclude;
 
     StaticCodeAnalysisExtension(Project project) {
+        ignoreErrors = true;
         findbugs = true;
         pmd = true;
         checkstyle = true;

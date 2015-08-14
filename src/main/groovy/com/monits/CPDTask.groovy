@@ -1,12 +1,17 @@
 import org.gradle.api.DefaultTask
+import org.gradle.api.GradleException
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
+import org.gradle.logging.ConsoleRenderer
 import org.gradle.util.VersionNumber
 
 class CPDTask extends DefaultTask {
+
+    boolean ignoreFailures;
+
     @Input
     def String toolVersion
 
@@ -28,6 +33,39 @@ class CPDTask extends DefaultTask {
                 outputFile: outputFile) {
             inputFiles.addToAntBuilder(ant, 'fileset', FileCollection.AntType.FileSet)
         }
+
+        if (cpdFileHasErrors(outputFile)) {
+            String message = "CPD rule violations were found. See the report at: ";
+            def reportUrl = new ConsoleRenderer().asClickableFileUrl(outputFile);
+            message += reportUrl;
+            if (!ignoreFailures) {
+                throw new GradleException(message);
+            } else {
+                logger.warn(message);
+            }
+        }
+
+    }
+    /*
+        When no errors are found, CPD generates an xml report with this exact
+        content:
+        <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+        <pmd-cpd/>
+        So naturally, if the second line of the outputFile is '<pmd-cpd/>', it
+        means that cpd didn't find errors.
+     */
+    private boolean cpdFileHasErrors(File output) {
+        BufferedReader br = new BufferedReader(new FileReader(output));
+        String line;
+        br.readLine();
+        if ((line = br.readLine()) == null) {
+            return false;
+        } else {
+            if (line.equals("<pmd-cpd/>")) {
+                return false;
+            }
+        }
+        return true;
     }
 
     // FIXME : This is copy pasted from AbstractCodeQualityPlugin... it shouldn't
