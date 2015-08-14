@@ -1,5 +1,4 @@
 package com.monits
-
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
@@ -22,6 +21,8 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
 
     private String currentGradleVersion = GRADLE_VERSION_PMD;
     private String currentPmdVersion = LATEST_PMD_TOOL_VERSION;
+
+    private boolean ignoreErrors;
 
     private String checkstyleRules;
     private List<String> pmdRules;
@@ -66,6 +67,8 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
 
         project.afterEvaluate {
 
+            ignoreErrors = extension.ignoreErrors;
+
             checkstyleRules = extension.checkstyleRules;
             pmdRules = extension.pmdRules;
             findbugsExclude = extension.findbugsExclude;
@@ -94,6 +97,8 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
 
         project.task("cpd", type: CPDTask) {
 
+            ignoreFailures = ignoreErrors
+
             dependsOn project.tasks.pmdVersionCheck
 
             FileTree srcDir = project.fileTree("$project.projectDir/src/");
@@ -116,12 +121,12 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
 
         project.pmd {
             toolVersion = currentPmdVersion
+            ignoreFailures = ignoreErrors;
+            ruleSets = pmdRules
         }
 
         project.task("pmd", type: Pmd) {
             dependsOn project.tasks.pmdVersionCheck
-
-            ignoreFailures = true
 
             source 'src'
             include '**/*.java'
@@ -131,8 +136,6 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
                 xml.enabled = true
                 html.enabled = false
             }
-
-            ruleSets = pmdRules
 
         }
 
@@ -162,23 +165,20 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
 
         project.checkstyle {
             toolVersion = CHECKSTYLE_VERSION
+            ignoreFailures = ignoreErrors;
+            showViolations = false
+            configFile configSource
         }
 
         project.task("checkstyle", type: Checkstyle) {
-
-            showViolations false
-
             if (remoteLocation) {
                 dependsOn project.tasks.downloadCheckstyleXml
             }
-
-            configFile configSource
-
             source 'src'
             include '**/*.java'
             exclude '**/gen/**'
-
             classpath = project.configurations.compile
+
         }
 
         project.tasks.check.dependsOn project.tasks.checkstyle
@@ -200,13 +200,13 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
 
         project.findbugs {
             toolVersion = FINDBUGS_TOOL_VERSION
+            effort = "max"
+            ignoreFailures = ignoreErrors
+            excludeFilter = findbugsExclude
         }
 
         project.task("findbugs", type: FindBugs) {
             dependsOn project.tasks.withType(JavaCompile)
-
-            ignoreFailures = true
-            effort = "max"
 
             FileTree tree = project.fileTree(dir: "${project.buildDir}/intermediates/classes/")
 
@@ -221,8 +221,6 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             source 'src'
             include '**/*.java'
             exclude '**/gen/**'
-
-            excludeFilter = findbugsExclude
 
             reports {
                 xml {
