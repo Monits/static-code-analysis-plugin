@@ -17,7 +17,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     private final static String FINDBUGS_ANNOTATIONS_VERSION = '3.0.0'
     private final static String FINDBUGS_TOOL_VERSION = '3.0.1'
     private final static String FINDBUGS_MONITS_VERSION = '0.2.0-SNAPSHOT'
-    private final static String FB_CONTRIB_VERSION = '6.2.1'
+    private final static String FB_CONTRIB_VERSION = '6.2.2'
 
     private String currentGradleVersion = GRADLE_VERSION_PMD;
     private String currentPmdVersion = LATEST_PMD_TOOL_VERSION;
