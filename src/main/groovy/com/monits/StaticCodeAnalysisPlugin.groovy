@@ -13,14 +13,20 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     private final static String LATEST_PMD_TOOL_VERSION = '5.3.3'
     private final static String BACKWARDS_PMD_TOOL_VERSION = '5.1.2'
     private final static String GRADLE_VERSION_PMD = '2.4'
-    private final static String CHECKSTYLE_VERSION = '6.7'
+
+    private final static String LATEST_CHECKSTYLE_VERSION = '6.9'
+    private final static String BACKWARDS_CHECKSTYLE_VERSION = '6.7'
+    private final static String GRADLE_VERSION_CHECKSTYLE = '2.7'
+
     private final static String FINDBUGS_ANNOTATIONS_VERSION = '3.0.0'
     private final static String FINDBUGS_TOOL_VERSION = '3.0.1'
     private final static String FINDBUGS_MONITS_VERSION = '0.2.0-SNAPSHOT'
     private final static String FB_CONTRIB_VERSION = '6.2.2'
 
+
     private String currentGradleVersion = GRADLE_VERSION_PMD;
     private String currentPmdVersion = LATEST_PMD_TOOL_VERSION;
+    private String currentCheckstyleVersion = LATEST_CHECKSTYLE_VERSION;
 
     private boolean ignoreErrors;
 
@@ -34,15 +40,8 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
 
     def void apply(Project project) {
         this.project = project
-        currentGradleVersion = project.gradle.gradleVersion;
 
-        project.task("pmdVersionCheck") {
-            if (currentGradleVersion < GRADLE_VERSION_PMD) {
-                currentPmdVersion = BACKWARDS_PMD_TOOL_VERSION;
-            } else {
-                currentPmdVersion = LATEST_PMD_TOOL_VERSION;
-            }
-        }
+        checkVersions();
 
         extension = new StaticCodeAnalysisExtension(project);
         project.extensions.add(StaticCodeAnalysisExtension.NAME, extension);
@@ -89,6 +88,26 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
                 cpd();
             }
 
+        }
+    }
+
+    private void checkVersions() {
+        currentGradleVersion = project.gradle.gradleVersion;
+
+        project.task("pmdVersionCheck") {
+            if (currentGradleVersion < GRADLE_VERSION_PMD) {
+                currentPmdVersion = BACKWARDS_PMD_TOOL_VERSION;
+            } else {
+                currentPmdVersion = LATEST_PMD_TOOL_VERSION;
+            }
+        }
+
+        project.task("checkstyleVersionCheck") {
+            if (currentGradleVersion < GRADLE_VERSION_CHECKSTYLE) {
+                currentCheckstyleVersion = BACKWARDS_CHECKSTYLE_VERSION;
+            } else {
+                currentCheckstyleVersion = LATEST_CHECKSTYLE_VERSION;
+            }
         }
     }
 
@@ -164,13 +183,15 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         }
 
         project.checkstyle {
-            toolVersion = CHECKSTYLE_VERSION
+            toolVersion = currentCheckstyleVersion
             ignoreFailures = ignoreErrors;
             showViolations = false
             configFile configSource
         }
 
         project.task("checkstyle", type: Checkstyle) {
+            dependsOn project.tasks.checkstyleVersionCheck
+
             if (remoteLocation) {
                 dependsOn project.tasks.downloadCheckstyleXml
             }
