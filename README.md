@@ -20,7 +20,7 @@ Then add the plugin as dependency
 
 ```
 dependencies {
-    classpath 'com.monits:static-code-analysis-plugin:1.2.0'
+    classpath 'com.monits:static-code-analysis-plugin:1.+'
 }
 ```
 
@@ -31,6 +31,14 @@ apply plugin: 'com.monits.staticCodeAnalysis'
 ```
 
 ##History
+
+#v1.3.2
+
+* Checkstyle uses v6.9 if Gradle v2.7 is used. Else, it runs with v6.7.
+
+#v1.3.1
+
+* FB_CONTRIB updated to v6.2.2
 
 #v1.3
 
