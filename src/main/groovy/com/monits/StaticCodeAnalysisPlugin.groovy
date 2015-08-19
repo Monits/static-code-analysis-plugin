@@ -11,7 +11,7 @@ import org.gradle.api.tasks.compile.JavaCompile
 class StaticCodeAnalysisPlugin implements Plugin<Project> {
 
     private final static String LATEST_PMD_TOOL_VERSION = '5.3.3'
-    private final static String BACKWARDS_PMD_TOOL_VERSION = '5.1.2'
+    private final static String BACKWARDS_PMD_TOOL_VERSION = '5.1.3'
     private final static String GRADLE_VERSION_PMD = '2.4'
 
     private final static String LATEST_CHECKSTYLE_VERSION = '6.9'
