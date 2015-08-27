@@ -32,6 +32,15 @@ apply plugin: 'com.monits.staticCodeAnalysis'
 
 ##History
 
+#v1.4.1
+
+* FB_CONTRIB updated to v6.2.3
+
+#v1.4.0
+
+* PMD updated to v5.1.3
+* PMD for Gradle < 2.4
+
 #v1.3.2
 
 * Checkstyle uses v6.9 if Gradle v2.7 is used. Else, it runs with v6.7.
