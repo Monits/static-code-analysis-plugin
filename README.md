@@ -32,6 +32,10 @@ apply plugin: 'com.monits.staticCodeAnalysis'
 
 ##History
 
+#v1.4.2
+
+* Checkstyle updated to v6.10.1
+
 #v1.4.1
 
 * FB_CONTRIB updated to v6.2.3
