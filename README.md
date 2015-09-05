@@ -24,6 +24,18 @@ dependencies {
 }
 ```
 
+Make sure the project has the needed repositories set
+
+```
+allprojects {
+    repositories {
+        maven {
+            url 'http://nexus.monits.com/content/repositories/oss-snapshots'
+        }
+    }
+}
+```
+
 And apply it
 
 ```
