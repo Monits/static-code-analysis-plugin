@@ -20,6 +20,10 @@ if (version.endsWith('-SNAPSHOT')) {
 ext.nexusUsername = has("nexusUsername") ? nexusUsername : ""
 ext.nexusPassword = has("nexusPassword") ? nexusPassword : ""
 
+// Java versions
+project.sourceCompatibility = 1.7
+project.targetCompatibility = 1.7
+
 // To upload artifact to Nexus
 uploadArchives {
     configuration = configurations.archives
@@ -57,6 +61,11 @@ uploadArchives {
                         id 'lbritez'
                         name 'Leandro Britez'
                         email 'lbritez@monits.com'
+                    }
+                    developer {
+                        id 'jcnoriega'
+                        name 'José Noriega'
+                        email 'jcnoriega@monits.com'
                     }
                 }
             }
