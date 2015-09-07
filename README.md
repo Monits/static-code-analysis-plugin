@@ -44,6 +44,10 @@ apply plugin: 'com.monits.staticCodeAnalysis'
 
 ##History
 
+#v1.5
+
+* Findbugs accepts remote location for ``findbugsExclude``
+
 #v1.4.4
 
 * Bug fix: doesn't crash when ``findbugsExclude`` is not defined
@@ -107,7 +111,7 @@ staticCodeAnalysis {
 
     ignoreErrors = true
 
-    findbugsExclude = new File("$project.rootProject.projectDir/config/findbugs/excludeFilter.xml")
+    findbugsExclude = "$project.rootProject.projectDir/config/findbugs/excludeFilter.xml"
     checkstyleRules = "http://static.monits.com/checkstyle.xml"
     pmdRules = [ "http://static.monits.com/pmd.xml", "http://static.monits.com/pmd-android.xml" ]
 }
@@ -115,7 +119,7 @@ staticCodeAnalysis {
 
 There are things to consider though, like running plugins are always set to ``true`` by default.
 All configurations values in the example are the default ones, but you must take notice of their types;
-``findbugsExclude`` is a ``File``, ``checkstyleRules`` is a ``String`` (Note: for remote files, it must
+``findbugsExclude`` and ``checkstyleRules`` are a ``String`` (Note: for remote files, it must
 begin with "http://" or "https://", else it will be considered local) and ``pmdRules`` is a
 collection of ``String``.
 

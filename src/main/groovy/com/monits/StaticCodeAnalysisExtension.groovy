@@ -15,7 +15,7 @@ class StaticCodeAnalysisExtension {
 
     String checkstyleRules;
     List<String> pmdRules;
-    File findbugsExclude;
+    String findbugsExclude;
 
     StaticCodeAnalysisExtension(Project project) {
         ignoreErrors = true;
@@ -24,7 +24,7 @@ class StaticCodeAnalysisExtension {
         checkstyle = true;
         cpd = true;
         checkstyleRules = "http://static.monits.com/checkstyle.xml"
-        findbugsExclude = new File("$project.rootProject.projectDir/config/findbugs/excludeFilter.xml");
+        findbugsExclude = "$project.rootProject.projectDir/config/findbugs/excludeFilter.xml";
         pmdRules = [ "http://static.monits.com/pmd.xml", "http://static.monits.com/pmd-android.xml" ]
     }
 }
