@@ -223,7 +223,9 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             toolVersion = FINDBUGS_TOOL_VERSION
             effort = "max"
             ignoreFailures = ignoreErrors
-            excludeFilter = findbugsExclude
+            if (findbugsExclude.exists() && !findbugsExclude.isDirectory()) {
+                excludeFilter = findbugsExclude
+            }
         }
 
         project.task("findbugs", type: FindBugs) {
