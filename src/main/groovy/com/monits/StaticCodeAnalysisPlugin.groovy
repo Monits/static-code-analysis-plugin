@@ -32,7 +32,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
 
     private String checkstyleRules;
     private List<String> pmdRules;
-    private File findbugsExclude;
+    private String findbugsExclude;
 
     private StaticCodeAnalysisExtension extension;
 
@@ -161,23 +161,32 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         project.tasks.check.dependsOn project.tasks.pmd
     }
 
+    private boolean isRemoteLocation(String path) {
+        return path.startsWith("http://") || path.startsWith("https://");
+    }
+
+    private File createDownloadFileTask(String remotePath, String destination, String taskName, String plugin) {
+        File downloadedFile;
+        project.task(taskName) {
+            File directory = new File("${project.rootDir}/config/" + plugin + "/");
+            directory.mkdirs();
+            downloadedFile = new File(directory, destination);
+            ant.get(src: checkstyleRules, dest: downloadedFile.getAbsolutePath());
+        }
+
+        return downloadedFile;
+    }
+
     private void checkstyle() {
         project.plugins.apply 'checkstyle'
 
-        boolean remoteLocation;
+        boolean remoteLocation = isRemoteLocation(checkstyleRules);
         File configSource;
-        if (checkstyleRules.startsWith("http://")
-                || checkstyleRules.startsWith("https://")) {
-
-            remoteLocation = true;
-            project.task("downloadCheckstyleXml") {
-                File directory = new File("${project.rootDir}/config/checkstyle/");
-                directory.mkdirs();
-                configSource = new File(directory, "checkstyle.xml");
-                ant.get(src: checkstyleRules, dest: configSource.getAbsolutePath());
-            }
+        String downloadTaskName = "downloadCheckstyleXml"
+        if (remoteLocation) {
+            configSource = createDownloadFileTask(checkstyleRules,"checkstyle.xml",
+                    downloadTaskName, "checkstyle");
         } else {
-            remoteLocation = false;
             configSource = new File(checkstyleRules);
             configSource.parentFile.mkdirs();
         }
@@ -193,7 +202,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             dependsOn project.tasks.checkstyleVersionCheck
 
             if (remoteLocation) {
-                dependsOn project.tasks.downloadCheckstyleXml
+                dependsOn project.tasks.findByName(downloadTaskName)
             }
             source 'src'
             include '**/*.java'
@@ -219,17 +228,31 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             findbugsPlugins 'com.mebigfatguy.fb-contrib:fb-contrib:' + FB_CONTRIB_VERSION
         }
 
+        boolean remoteLocation = isRemoteLocation(findbugsExclude);
+        File filterSource;
+        String downloadTaskName = "downloadFindbugsExcludeFilter"
+        if (remoteLocation) {
+            filterSource = createDownloadFileTask(findbugsExclude,"excludeFilter.xml",
+                    downloadTaskName, "findbugs");
+        } else {
+            filterSource = new File(findbugsExclude);
+            filterSource.parentFile.mkdirs();
+        }
+
         project.findbugs {
             toolVersion = FINDBUGS_TOOL_VERSION
             effort = "max"
             ignoreFailures = ignoreErrors
-            if (findbugsExclude.exists() && !findbugsExclude.isDirectory()) {
-                excludeFilter = findbugsExclude
+            if (filterSource.exists() && !filterSource.isDirectory()) {
+                excludeFilter = filterSource
             }
         }
 
         project.task("findbugs", type: FindBugs) {
             dependsOn project.tasks.withType(JavaCompile)
+            if (remoteLocation) {
+                dependsOn project.tasks.findByName(downloadTaskName)
+            }
 
             FileTree tree = project.fileTree(dir: "${project.buildDir}/intermediates/classes/")
 
