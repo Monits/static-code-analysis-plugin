@@ -44,6 +44,14 @@ apply plugin: 'com.monits.staticCodeAnalysis'
 
 ##History
 
+#v1.4.4
+
+* Bug fix: doesn't crash when ``findbugsExclude`` is not defined
+
+#v1.4.3
+
+* Bug fix: now it works with JDK 1.7
+
 #v1.4.2
 
 * Checkstyle updated to v6.10.1
