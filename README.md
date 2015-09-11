@@ -42,49 +42,50 @@ And apply it
 apply plugin: 'com.monits.staticCodeAnalysis'
 ```
 
-##History
+## History
 
-#v1.5
+# v1.5
 
-* Findbugs accepts remote location for ``findbugsExclude``
+* **1.5.1**
+  * Bug fix: Checkstyle rules compatible with versions grater than 6.7
 
-#v1.4.4
+* **1.5.0**
+  * Findbugs accepts remote location for ``findbugsExclude``
 
-* Bug fix: doesn't crash when ``findbugsExclude`` is not defined
+# v1.4
 
-#v1.4.3
+* **1.4.4**
+  * Bug fix: doesn't crash when ``findbugsExclude`` is not defined
 
-* Bug fix: now it works with JDK 1.7
+* **1.4.3**
+  * Bug fix: now it works with JDK 1.7
 
-#v1.4.2
+* **v1.4.2**
+  * Checkstyle updated to v6.10.1
 
-* Checkstyle updated to v6.10.1
+* **1.4.1**
+  * FB_CONTRIB updated to v6.2.3
 
-#v1.4.1
+* **1.4.0**
+  * PMD updated to v5.1.3
+  * PMD for Gradle < 2.4
 
-* FB_CONTRIB updated to v6.2.3
+# v1.3
 
-#v1.4.0
+* **1.3.2**
+  * Checkstyle uses v6.9 if Gradle v2.7 is used. Else, it runs with v6.7.
 
-* PMD updated to v5.1.3
-* PMD for Gradle < 2.4
+* **1.3.1**
+  * FB_CONTRIB updated to v6.2.2
 
-#v1.3.2
+* **1.3.0**
+  * Plugin can be configured with ``ignoreErrors`` parameter to stop build if errors are found.
 
-* Checkstyle uses v6.9 if Gradle v2.7 is used. Else, it runs with v6.7.
+# v1.2
 
-#v1.3.1
-
-* FB_CONTRIB updated to v6.2.2
-
-#v1.3
-
-* Plugin can be configured with ``ignoreErrors`` parameter to stop build if errors are found.
-
-#v1.2
-
-* PMD & CPD compatible with Gradle v2.3+. It resolves dependencies and tool versions according to
-the used gradle version.
+* **1.2.0**
+  * PMD & CPD compatible with Gradle v2.3+. It resolves dependencies and tool versions according
+   to the used gradle version.
 
 ## Why use it?
 
@@ -96,7 +97,7 @@ to do a more complex analysis because it has access to Android's SDK classes. Ef
 auto generated files (every ``R.class``, ``Manifest.class`` and ``BuildConfig.class``) as part of the
 classpath but not in its analysis, so Findbugs doesn't run every time a resource is modified.
 
-Moreover, Checkstyle now supports remote file configuration.
+Moreover, Checkstyle and Findbugs now support remote file configuration.
 
 ##DSL
 Configuring Static Code Analysis is very simple and intuitive thanks to its DSL. You can choose
@@ -119,7 +120,7 @@ staticCodeAnalysis {
 
 There are things to consider though, like running plugins are always set to ``true`` by default.
 All configurations values in the example are the default ones, but you must take notice of their types;
-``findbugsExclude`` and ``checkstyleRules`` are a ``String`` (Note: for remote files, it must
+``findbugsExclude`` and ``checkstyleRules`` are a ``String`` (Note: for remote files, they must
 begin with "http://" or "https://", else it will be considered local) and ``pmdRules`` is a
 collection of ``String``.
 
@@ -128,5 +129,12 @@ value is ``true`` meaning that it will continue the build regardless of reported
 
 And that's it! As always feel free to contribute in any shape or form, we look forward to your feedback!.
 
+# Copyright and License
+Copyright 2010-2015 Monits.
 
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this work except in compliance with the License. You may obtain a copy of the
+License at:
+
+http://www.apache.org/licenses/LICENSE-2.0
 
