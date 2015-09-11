@@ -1,3 +1,17 @@
+/*
+    Copyright 2010-2015 Monits
+
+    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+    file except in compliance with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software distributed under
+    the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+    ANY KIND, either express or implied. See the License for the specific language governing
+    permissions and limitations under the License.
+ */
+
 package com.monits
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -22,6 +36,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     private final static String FINDBUGS_TOOL_VERSION = '3.0.1'
     private final static String FINDBUGS_MONITS_VERSION = '0.2.0-SNAPSHOT'
     private final static String FB_CONTRIB_VERSION = '6.2.3'
+
 
 
     private String currentGradleVersion = GRADLE_VERSION_PMD;
@@ -90,7 +105,6 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
 
         }
     }
-
     private void checkVersions() {
         currentGradleVersion = project.gradle.gradleVersion;
 
@@ -105,6 +119,14 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         project.task("checkstyleVersionCheck") {
             if (currentGradleVersion < GRADLE_VERSION_CHECKSTYLE) {
                 currentCheckstyleVersion = BACKWARDS_CHECKSTYLE_VERSION;
+                /*
+                    If checkstyleRules are equal to "http://static.monits.com/checkstyle.xml",
+                    that means the user has not defined its own rules. So its the plugins
+                    responsibility to check for compatible ones.
+                */
+                if (checkstyleRules.equals(StaticCodeAnalysisExtension.CHECKSTYLE_DEFAULT_RULES)) {
+                    checkstyleRules = StaticCodeAnalysisExtension.CHECKSTYLE_BACKWARDS_RULES;
+                }
             } else {
                 currentCheckstyleVersion = LATEST_CHECKSTYLE_VERSION;
             }
@@ -171,7 +193,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             File directory = new File("${project.rootDir}/config/" + plugin + "/");
             directory.mkdirs();
             downloadedFile = new File(directory, destination);
-            ant.get(src: checkstyleRules, dest: downloadedFile.getAbsolutePath());
+            ant.get(src: remotePath, dest: downloadedFile.getAbsolutePath());
         }
 
         return downloadedFile;
