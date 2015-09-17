@@ -191,9 +191,11 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         File downloadedFile;
         project.task(taskName) {
             File directory = new File("${project.rootDir}/config/" + plugin + "/");
-            directory.mkdirs();
             downloadedFile = new File(directory, destination);
-            ant.get(src: remotePath, dest: downloadedFile.getAbsolutePath());
+            doFirst {
+                directory.mkdirs();
+                ant.get(src: remotePath, dest: downloadedFile.getAbsolutePath());
+            }
         }
 
         return downloadedFile;
@@ -210,7 +212,6 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
                     downloadTaskName, "checkstyle");
         } else {
             configSource = new File(checkstyleRules);
-            configSource.parentFile.mkdirs();
         }
 
         project.checkstyle {
@@ -258,16 +259,13 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
                     downloadTaskName, "findbugs");
         } else {
             filterSource = new File(findbugsExclude);
-            filterSource.parentFile.mkdirs();
         }
 
         project.findbugs {
             toolVersion = FINDBUGS_TOOL_VERSION
             effort = "max"
             ignoreFailures = ignoreErrors
-            if (filterSource.exists() && !filterSource.isDirectory()) {
-                excludeFilter = filterSource
-            }
+            excludeFilter = filterSource
         }
 
         project.task("findbugs", type: FindBugs) {
