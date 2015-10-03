@@ -46,6 +46,9 @@ apply plugin: 'com.monits.staticCodeAnalysis'
 
 # v1.5
 
+* **1.5.2**
+  * PMD for Gradle >= 2.4 updated to 5.3.4
+
 * **1.5.1**
   * Bug fix: Checkstyle rules compatible with versions grater than 6.7
 
