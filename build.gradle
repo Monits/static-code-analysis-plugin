@@ -8,7 +8,7 @@ dependencies {
 
 group = 'com.monits'
 
-version = "1.5.3"
+version = "1.5.4"
 
 
 if (version.endsWith('-SNAPSHOT')) {
