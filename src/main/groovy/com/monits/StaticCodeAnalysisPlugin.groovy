@@ -37,7 +37,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     private final static String FINDBUGS_MONITS_VERSION = '0.2.0-SNAPSHOT'
     private final static String FB_CONTRIB_VERSION = '6.2.3'
 
-
+    private final static String GRADLE_VERSION_PMD_CLASSPATH_SUPPORT = '2.8'
 
     private String currentGradleVersion = GRADLE_VERSION_PMD;
     private String currentPmdVersion = LATEST_PMD_TOOL_VERSION;
@@ -177,7 +177,14 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
                 xml.enabled = true
                 html.enabled = false
             }
+        }
 
+        if (GRADLE_VERSION_PMD_CLASSPATH_SUPPORT <= currentGradleVersion) {
+            /*
+             * For best results, PMD needs ALL classes, including Android's SDK,
+             * but the task is created dynamically, so we need to set it afterEvaluate
+             */
+            configTaskClasspath(Pmd);
         }
 
         project.tasks.check.dependsOn project.tasks.pmd
@@ -303,7 +310,13 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
          * For best results, Findbugs needs ALL classes, including Android's SDK,
          * but the task is created dynamically, so we need to set it afterEvaluate
          */
-        project.tasks.withType(FindBugs).each {
+        configTaskClasspath(FindBugs);
+
+        project.tasks.check.dependsOn project.tasks.findbugs
+    }
+
+    private void configTaskClasspath(task) {
+        project.tasks.withType(task).each {
             def t = project.tasks.findByName('mockableAndroidJar');
             if (t != null) {
                 it.dependsOn project.tasks.findByName('mockableAndroidJar')
@@ -312,8 +325,5 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
                     project.fileTree(dir: "${project.buildDir}/intermediates/exploded-aar/", include: '**/*.jar') +
                     project.fileTree(dir: "${project.buildDir}/intermediates/", include: 'mockable-android-*.jar')
         }
-
-        project.tasks.check.dependsOn project.tasks.findbugs
     }
-
 }
