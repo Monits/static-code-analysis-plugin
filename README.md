@@ -46,8 +46,11 @@ apply plugin: 'com.monits.staticCodeAnalysis'
 
 # v1.5
 
-* **1.5.4**
+* **1.5.5**
   * Add classpath to PMD for Gradle >= 2.8
+
+* **1.5.4**
+  * PMD updated to v5.4.0
 
 * **1.5.3**
   * Checkstyle for Gradle >= 2.7 updated to 6.11.1
