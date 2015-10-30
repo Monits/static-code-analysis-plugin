@@ -6,12 +6,14 @@ buildscript {
     }
     dependencies {
         classpath 'gradle.plugin.nl.javadude.gradle.plugins:license-gradle-plugin:0.12.1'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.3.1'
     }
 }
 
 apply plugin: 'groovy'
 apply plugin: 'maven'
 apply plugin: 'com.github.hierynomus.license'
+apply plugin: 'com.jfrog.bintray'
 
 dependencies {
     compile gradleApi()
@@ -98,3 +100,28 @@ license {
     we make it depend on license
  */
 tasks.license.dependsOn tasks.licenseFormat
+
+ext.bintrayUsername = has("bintrayUsername") ? bintrayUsername : ""
+ext.bintrayApiKey = has("bintrayApiKey") ? bintrayApiKey : ""
+
+bintray {
+
+    user = project.ext.bintrayUsername
+    key = project.ext.bintrayApiKey
+    publish = true
+    pkg {
+        repo = 'monits-android'
+        name = 'static-code-analysis-plugin'
+        userOrg = 'monits'
+        licenses = ['Apache-2.0']
+        issueTrackerUrl = 'https://github.com/Monits/static-code-analysis-plugin/issues'
+        vcsUrl = 'https://github.com/Monits/static-code-analysis-plugin.git'
+        version {
+            name = project.version
+            desc = 'StaticCodeAnalysis plugin'
+            released = new Date()
+            vcsTag = project.version
+        }
+    }
+    configurations = ['archives']
+}

@@ -1,38 +1,25 @@
 # Static Code Analysis
 
+[![Download](https://api.bintray.com/packages/monits/monits-android/static-code-analysis-plugin/images/download.svg) ](https://bintray.com/monits/monits-android/static-code-analysis-plugin/_latestVersion)
+
 Static Code Analysis is a Gradle plugin that encapsulates CheckStyle,
 Findbugs, PMD and CPD plugins, focusing on efficiency and easy configuration
 by exposing a simple DSL.
 
 # Add to Project
 
-Add the dependency by adding our maven repositories
+Add the jcenter repository
 
 ```
 repositories {
-    maven {
-        url 'http://nexus.monits.com/content/repositories/oss-releases'
-    }
+    jcenter()
 }
 ```
-
 Then add the plugin as dependency
 
 ```
 dependencies {
     classpath 'com.monits:static-code-analysis-plugin:1.+'
-}
-```
-
-Make sure the project has the needed repositories set
-
-```
-allprojects {
-    repositories {
-        maven {
-            url 'http://nexus.monits.com/content/repositories/oss-snapshots'
-        }
-    }
 }
 ```
 
@@ -42,9 +29,21 @@ And apply it
 apply plugin: 'com.monits.staticCodeAnalysis'
 ```
 
+For older versions you need to use our repository.
+```
+repositories {
+    maven {
+        url 'http://nexus.monits.com/content/repositories/oss-releases'
+    }
+}
+```
+
 ## History
 
 # v1.5
+
+* **1.5.7**
+  * Move to Bintray
 
 * **1.5.6**
   * Add license gradle plugin 0.12.1
