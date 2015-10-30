@@ -1,5 +1,17 @@
+buildscript {
+    repositories {
+        maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
+    }
+    dependencies {
+        classpath 'gradle.plugin.nl.javadude.gradle.plugins:license-gradle-plugin:0.12.1'
+    }
+}
+
 apply plugin: 'groovy'
 apply plugin: 'maven'
+apply plugin: 'com.github.hierynomus.license'
 
 dependencies {
     compile gradleApi()
@@ -72,3 +84,17 @@ uploadArchives {
         }
     }
 }
+
+license {
+    header rootProject.file('license/licenseHeader')
+    ignoreFailures true // Set to avoid to show the report of missing license and allow replace them
+    strictCheck true // Set to get files with missing or incorrect licenses
+    include "**/*.groovy"
+    ext.year = Calendar.getInstance().get(Calendar.YEAR)
+}
+
+/*
+    We noticed that LicenseFormat was not within check's dependency tree, so
+    we make it depend on license
+ */
+tasks.license.dependsOn tasks.licenseFormat

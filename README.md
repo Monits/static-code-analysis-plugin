@@ -46,6 +46,9 @@ apply plugin: 'com.monits.staticCodeAnalysis'
 
 # v1.5
 
+* **1.5.6**
+  * Add license gradle plugin 0.12.1
+
 * **1.5.5**
   * Add classpath to PMD for Gradle >= 2.8
 
