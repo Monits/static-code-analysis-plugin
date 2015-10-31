@@ -42,6 +42,9 @@ repositories {
 
 # v1.5
 
+* **1.5.8**
+  * Publish sources and Javadocs
+
 * **1.5.7**
   * Move to Bintray
 
