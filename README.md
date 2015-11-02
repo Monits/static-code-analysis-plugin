@@ -120,7 +120,7 @@ Moreover, Checkstyle and Findbugs now support remote file configuration.
 Configuring Static Code Analysis is very simple and intuitive thanks to its DSL. You can choose
 which encapsulated plugin to run and set its configuration files. Here is a quick example
 
-<code>
+```
 staticCodeAnalysis {
     findbugs = true
     checkstyle = true
@@ -133,7 +133,7 @@ staticCodeAnalysis {
     checkstyleRules = "http://static.monits.com/checkstyle.xml"
     pmdRules = [ "http://static.monits.com/pmd.xml", "http://static.monits.com/pmd-android.xml" ]
 }
-</code>
+```
 
 There are things to consider though, like running plugins are always set to ``true`` by default.
 All configurations values in the example are the default ones, but you must take notice of their types;
