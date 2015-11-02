@@ -42,6 +42,9 @@ repositories {
 
 # v1.5
 
+* **1.5.9**
+  * Update Checkstyle to 6.12
+
 * **1.5.8**
   * Publish sources and Javadocs
 
