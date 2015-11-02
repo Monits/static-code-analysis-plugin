@@ -114,6 +114,10 @@ to do a more complex analysis because it has access to Android's SDK classes. Ef
 auto generated files (every ``R.class``, ``Manifest.class`` and ``BuildConfig.class``) as part of the
 classpath but not in its analysis, so Findbugs doesn't run every time a resource is modified.
 
+When using Gradle 2.8, this plugin also configures PMD's classpath to allow it to do proper type resolution,
+and therefore, detect more issues. On Android, this also means making it depend on *mockableAndroidJarTask*,
+to be able to see Android's SDK classes.
+
 Moreover, Checkstyle and Findbugs now support remote file configuration.
 
 ##DSL
@@ -147,7 +151,7 @@ value is ``true`` meaning that it will continue the build regardless of reported
 And that's it! As always feel free to contribute in any shape or form, we look forward to your feedback!.
 
 # Copyright and License
-Copyright 2010-2015 Monits.
+Copyright 2010-2015 Monits S.A.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 this work except in compliance with the License. You may obtain a copy of the
