@@ -42,6 +42,9 @@ repositories {
 
 # v1.5
 
+* **1.5.11**
+  * Update Checkstyle to 6.13
+
 * **1.5.10**
   * Update Checkstyle to 6.12.1
   * Update fb-contrib to 6.4.0
