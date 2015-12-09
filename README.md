@@ -42,6 +42,9 @@ repositories {
 
 # v1.5
 
+* **1.5.12**
+  * Update PMD to 5.4.1
+
 * **1.5.11**
   * Update Checkstyle to 6.13
 
