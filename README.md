@@ -1,38 +1,25 @@
 # Static Code Analysis
 
+[![Download](https://api.bintray.com/packages/monits/monits-android/static-code-analysis-plugin/images/download.svg) ](https://bintray.com/monits/monits-android/static-code-analysis-plugin/_latestVersion)
+
 Static Code Analysis is a Gradle plugin that encapsulates CheckStyle,
 Findbugs, PMD and CPD plugins, focusing on efficiency and easy configuration
 by exposing a simple DSL.
 
 # Add to Project
 
-Add the dependency by adding our maven repositories
+Add the jcenter repository
 
 ```
 repositories {
-    maven {
-        url 'http://nexus.monits.com/content/repositories/oss-releases'
-    }
+    jcenter()
 }
 ```
-
 Then add the plugin as dependency
 
 ```
 dependencies {
     classpath 'com.monits:static-code-analysis-plugin:1.+'
-}
-```
-
-Make sure the project has the needed repositories set
-
-```
-allprojects {
-    repositories {
-        maven {
-            url 'http://nexus.monits.com/content/repositories/oss-snapshots'
-        }
-    }
 }
 ```
 
@@ -42,9 +29,52 @@ And apply it
 apply plugin: 'com.monits.staticCodeAnalysis'
 ```
 
+For older versions you need to use our repository.
+```
+repositories {
+    maven {
+        url 'http://nexus.monits.com/content/repositories/oss-releases'
+    }
+}
+```
+
 ## History
 
 # v1.5
+
+* **1.5.14**
+  * Update checkstyle to 6.14
+
+* **1.5.13**
+  * Update fb-contrib to 6.4.1
+
+* **1.5.12**
+  * Update PMD to 5.4.1
+
+* **1.5.11**
+  * Update Checkstyle to 6.13
+
+* **1.5.10**
+  * Update Checkstyle to 6.12.1
+  * Update fb-contrib to 6.4.0
+
+* **1.5.9**
+  * Update Checkstyle to 6.12
+
+* **1.5.8**
+  * Publish sources and Javadocs
+
+* **1.5.7**
+  * Move to Bintray
+
+* **1.5.6**
+  * Add license gradle plugin 0.12.1
+
+* **1.5.5**
+  * Add classpath to PMD for Gradle >= 2.8
+
+* **1.5.4**
+  * PMD updated to v5.4.0
 
 * **1.5.3**
   * Checkstyle for Gradle >= 2.7 updated to 6.11.1
@@ -103,13 +133,17 @@ to do a more complex analysis because it has access to Android's SDK classes. Ef
 auto generated files (every ``R.class``, ``Manifest.class`` and ``BuildConfig.class``) as part of the
 classpath but not in its analysis, so Findbugs doesn't run every time a resource is modified.
 
+When using Gradle 2.8, this plugin also configures PMD's classpath to allow it to do proper type resolution,
+and therefore, detect more issues. On Android, this also means making it depend on *mockableAndroidJarTask*,
+to be able to see Android's SDK classes.
+
 Moreover, Checkstyle and Findbugs now support remote file configuration.
 
 ##DSL
 Configuring Static Code Analysis is very simple and intuitive thanks to its DSL. You can choose
 which encapsulated plugin to run and set its configuration files. Here is a quick example
 
-<code>
+```
 staticCodeAnalysis {
     findbugs = true
     checkstyle = true
@@ -122,7 +156,7 @@ staticCodeAnalysis {
     checkstyleRules = "http://static.monits.com/checkstyle.xml"
     pmdRules = [ "http://static.monits.com/pmd.xml", "http://static.monits.com/pmd-android.xml" ]
 }
-</code>
+```
 
 There are things to consider though, like running plugins are always set to ``true`` by default.
 All configurations values in the example are the default ones, but you must take notice of their types;
@@ -136,7 +170,7 @@ value is ``true`` meaning that it will continue the build regardless of reported
 And that's it! As always feel free to contribute in any shape or form, we look forward to your feedback!.
 
 # Copyright and License
-Copyright 2010-2015 Monits.
+Copyright 2010-2015 Monits S.A.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 this work except in compliance with the License. You may obtain a copy of the

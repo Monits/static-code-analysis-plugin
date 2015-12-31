@@ -1,18 +1,18 @@
 /*
-    Copyright 2010-2015 Monits
-
-    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
-    file except in compliance with the License. You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software distributed under
-    the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
-    ANY KIND, either express or implied. See the License for the specific language governing
-    permissions and limitations under the License.
+ * Copyright 2010-2015 Monits S.A.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under
+ * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+ * ANY KIND, either express or implied. See the License for the specific language governing
+ * permissions and limitations under the License.
  */
-
 package com.monits
+
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
@@ -24,20 +24,20 @@ import org.gradle.api.tasks.compile.JavaCompile
 
 class StaticCodeAnalysisPlugin implements Plugin<Project> {
 
-    private final static String LATEST_PMD_TOOL_VERSION = '5.3.4'
+    private final static String LATEST_PMD_TOOL_VERSION = '5.4.1'
     private final static String BACKWARDS_PMD_TOOL_VERSION = '5.1.3'
     private final static String GRADLE_VERSION_PMD = '2.4'
 
-    private final static String LATEST_CHECKSTYLE_VERSION = '6.11.1'
+    private final static String LATEST_CHECKSTYLE_VERSION = '6.14'
     private final static String BACKWARDS_CHECKSTYLE_VERSION = '6.7'
     private final static String GRADLE_VERSION_CHECKSTYLE = '2.7'
 
     private final static String FINDBUGS_ANNOTATIONS_VERSION = '3.0.0'
     private final static String FINDBUGS_TOOL_VERSION = '3.0.1'
     private final static String FINDBUGS_MONITS_VERSION = '0.2.0-SNAPSHOT'
-    private final static String FB_CONTRIB_VERSION = '6.2.3'
+    private final static String FB_CONTRIB_VERSION = '6.4.1'
 
-
+    private final static String GRADLE_VERSION_PMD_CLASSPATH_SUPPORT = '2.8'
 
     private String currentGradleVersion = GRADLE_VERSION_PMD;
     private String currentPmdVersion = LATEST_PMD_TOOL_VERSION;
@@ -177,7 +177,14 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
                 xml.enabled = true
                 html.enabled = false
             }
+        }
 
+        if (GRADLE_VERSION_PMD_CLASSPATH_SUPPORT <= currentGradleVersion) {
+            /*
+             * For best results, PMD needs ALL classes, including Android's SDK,
+             * but the task is created dynamically, so we need to set it afterEvaluate
+             */
+            configTaskClasspath(Pmd);
         }
 
         project.tasks.check.dependsOn project.tasks.pmd
@@ -303,7 +310,13 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
          * For best results, Findbugs needs ALL classes, including Android's SDK,
          * but the task is created dynamically, so we need to set it afterEvaluate
          */
-        project.tasks.withType(FindBugs).each {
+        configTaskClasspath(FindBugs);
+
+        project.tasks.check.dependsOn project.tasks.findbugs
+    }
+
+    private void configTaskClasspath(task) {
+        project.tasks.withType(task).each {
             def t = project.tasks.findByName('mockableAndroidJar');
             if (t != null) {
                 it.dependsOn project.tasks.findByName('mockableAndroidJar')
@@ -312,8 +325,5 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
                     project.fileTree(dir: "${project.buildDir}/intermediates/exploded-aar/", include: '**/*.jar') +
                     project.fileTree(dir: "${project.buildDir}/intermediates/", include: 'mockable-android-*.jar')
         }
-
-        project.tasks.check.dependsOn project.tasks.findbugs
     }
-
 }
