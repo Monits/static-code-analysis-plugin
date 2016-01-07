@@ -6,6 +6,9 @@
 
 # v1.5
 
+* **1.5.15**
+  * CPD no longer fails when no java files are found
+
 * **1.5.14**
   * Update checkstyle to 6.14
 
