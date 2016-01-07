@@ -36,6 +36,8 @@ class CPDTask extends DefaultTask {
 
     @TaskAction
     void run() {
+        inputFiles.stopExecutionIfEmpty()
+
         createConfigurations()  // TODO : shouldn't be here
         resolveDependencies()  // TODO : shouldn't be here
 
