@@ -22,7 +22,7 @@ dependencies {
 
 group = 'com.monits'
 
-version = "1.5.15-HF1"
+version = "1.5.15"
 
 
 if (version.endsWith('-SNAPSHOT')) {
