@@ -3,8 +3,13 @@
 # v1.6 - unreleased
 * **1.6.0**
  * PMD / Findbugs ignore changes to resources in module dependencies, just as it does for it's own.
+ * Custom jars with Android lint rules can be specified as dependencies under `androidLint`
 
 # v1.5
+
+* **1.5.16**
+  * Make sure Monits' repository is added to resolve dependencies
+  * Upgrade to Checkstyle 6.14.1
 
 * **1.5.15**
   * CPD no longer fails when no java files are found
