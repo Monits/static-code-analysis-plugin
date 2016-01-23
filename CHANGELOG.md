@@ -1,6 +1,6 @@
 ## History
 
-# v1.6 - unreleased
+# v1.6
 * **1.6.0**
  * PMD / Findbugs ignore changes to resources in module dependencies, just as it does for it's own.
  * Custom jars with Android lint rules can be specified as dependencies under `androidLint`
