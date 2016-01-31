@@ -1,6 +1,10 @@
 ## History
 
 # v1.6
+* **1.6.1**
+ * Update Checkstyle to 6.15
+ * Update fb-contrib to 6.6.0
+
 * **1.6.0**
  * PMD / Findbugs ignore changes to resources in module dependencies, just as it does for it's own.
  * Custom jars with Android lint rules can be specified as dependencies under `androidLint`
