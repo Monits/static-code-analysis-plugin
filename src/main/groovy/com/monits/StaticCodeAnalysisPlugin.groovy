@@ -34,7 +34,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
 
     private final static String LATEST_CHECKSTYLE_VERSION = '6.15'
     private final static String BACKWARDS_CHECKSTYLE_VERSION = '6.7'
-    private final static GradleVersion GRADLE_VERSION_CHECKSTYLE = GradleVersion.ersion('2.7');
+    private final static GradleVersion GRADLE_VERSION_CHECKSTYLE = GradleVersion.version('2.7');
 
     private final static String FINDBUGS_ANNOTATIONS_VERSION = '3.0.0'
     private final static String FINDBUGS_TOOL_VERSION = '3.0.1'
