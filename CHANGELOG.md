@@ -1,6 +1,12 @@
 ## History
 
 # v1.6
+* **1.6.3**
+ * Works with Gradle 2.10 or later as intended 
+
+* **1.6.2**
+ * Botched release. Don't use.
+
 * **1.6.1**
  * Update Checkstyle to 6.15
  * Update fb-contrib to 6.6.0
