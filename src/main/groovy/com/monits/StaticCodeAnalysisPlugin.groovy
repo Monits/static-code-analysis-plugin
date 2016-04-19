@@ -32,14 +32,14 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     private final static String BACKWARDS_PMD_TOOL_VERSION = '5.1.3'
     private final static GradleVersion GRADLE_VERSION_PMD = GradleVersion.version('2.4');
 
-    private final static String LATEST_CHECKSTYLE_VERSION = '6.15'
+    private final static String LATEST_CHECKSTYLE_VERSION = '6.17'
     private final static String BACKWARDS_CHECKSTYLE_VERSION = '6.7'
     private final static GradleVersion GRADLE_VERSION_CHECKSTYLE = GradleVersion.version('2.7');
 
     private final static String FINDBUGS_ANNOTATIONS_VERSION = '3.0.0'
     private final static String FINDBUGS_TOOL_VERSION = '3.0.1'
     private final static String FINDBUGS_MONITS_VERSION = '0.2.0-SNAPSHOT'
-    private final static String FB_CONTRIB_VERSION = '6.6.0'
+    private final static String FB_CONTRIB_VERSION = '6.6.1'
 
     private final static GradleVersion GRADLE_VERSION_PMD_CLASSPATH_SUPPORT = GradleVersion.version('2.8');
 
