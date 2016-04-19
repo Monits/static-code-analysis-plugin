@@ -141,3 +141,7 @@ bintray {
     }
     configurations = ['archives']
 }
+
+wrapper {
+    gradleVersion = '2.12'
+}
