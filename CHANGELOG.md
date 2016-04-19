@@ -3,6 +3,8 @@
 # v1.6
 * **1.6.4**
  * Remote config is now downloaded with a conditional request 
+ * Update checkstyle to 6.17
+ * Update fb-contrib to 6.6.1
 
 * **1.6.3**
  * Works with Gradle 2.10 or later as intended 
