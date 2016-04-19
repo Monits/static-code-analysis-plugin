@@ -24,25 +24,25 @@ import org.gradle.api.plugins.quality.Checkstyle
 import org.gradle.api.plugins.quality.FindBugs
 import org.gradle.api.plugins.quality.Pmd
 import org.gradle.api.tasks.compile.JavaCompile
+import org.gradle.util.GradleVersion;
 
 class StaticCodeAnalysisPlugin implements Plugin<Project> {
 
     private final static String LATEST_PMD_TOOL_VERSION = '5.4.1'
     private final static String BACKWARDS_PMD_TOOL_VERSION = '5.1.3'
-    private final static String GRADLE_VERSION_PMD = '2.4'
+    private final static GradleVersion GRADLE_VERSION_PMD = GradleVersion.version('2.4');
 
-    private final static String LATEST_CHECKSTYLE_VERSION = '6.14.1'
+    private final static String LATEST_CHECKSTYLE_VERSION = '6.17'
     private final static String BACKWARDS_CHECKSTYLE_VERSION = '6.7'
-    private final static String GRADLE_VERSION_CHECKSTYLE = '2.7'
+    private final static GradleVersion GRADLE_VERSION_CHECKSTYLE = GradleVersion.version('2.7');
 
     private final static String FINDBUGS_ANNOTATIONS_VERSION = '3.0.0'
     private final static String FINDBUGS_TOOL_VERSION = '3.0.1'
     private final static String FINDBUGS_MONITS_VERSION = '0.2.0-SNAPSHOT'
-    private final static String FB_CONTRIB_VERSION = '6.4.1'
+    private final static String FB_CONTRIB_VERSION = '6.6.1'
 
-    private final static String GRADLE_VERSION_PMD_CLASSPATH_SUPPORT = '2.8'
+    private final static GradleVersion GRADLE_VERSION_PMD_CLASSPATH_SUPPORT = GradleVersion.version('2.8');
 
-    private String currentGradleVersion = GRADLE_VERSION_PMD;
     private String currentPmdVersion = LATEST_PMD_TOOL_VERSION;
     private String currentCheckstyleVersion = LATEST_CHECKSTYLE_VERSION;
 
@@ -142,10 +142,8 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     }
 
     private void checkVersions() {
-        currentGradleVersion = project.gradle.gradleVersion;
-
         project.task("pmdVersionCheck") {
-            if (currentGradleVersion < GRADLE_VERSION_PMD) {
+            if (GradleVersion.current() < GRADLE_VERSION_PMD) {
                 currentPmdVersion = BACKWARDS_PMD_TOOL_VERSION;
             } else {
                 currentPmdVersion = LATEST_PMD_TOOL_VERSION;
@@ -153,7 +151,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         }
 
         project.task("checkstyleVersionCheck") {
-            if (currentGradleVersion < GRADLE_VERSION_CHECKSTYLE) {
+            if (GradleVersion.current() < GRADLE_VERSION_CHECKSTYLE) {
                 currentCheckstyleVersion = BACKWARDS_CHECKSTYLE_VERSION;
                 /*
                     If checkstyleRules are equal to "http://static.monits.com/checkstyle.xml",
@@ -215,7 +213,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             }
         }
 
-        if (GRADLE_VERSION_PMD_CLASSPATH_SUPPORT <= currentGradleVersion) {
+        if (GRADLE_VERSION_PMD_CLASSPATH_SUPPORT <= GradleVersion.current()) {
             /*
              * For best results, PMD needs ALL classes, including Android's SDK,
              * but the task is created dynamically, so we need to set it afterEvaluate
@@ -231,14 +229,13 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     }
 
     private File createDownloadFileTask(String remotePath, String destination, String taskName, String plugin) {
-        File downloadedFile;
+        File downloadedFile, directory;
         project.task(taskName) {
-            File directory = new File("${project.rootDir}/config/" + plugin + "/");
+            directory = new File("${project.rootDir}/config/" + plugin + "/");
             downloadedFile = new File(directory, destination);
-            doFirst {
-                directory.mkdirs();
-                ant.get(src: remotePath, dest: downloadedFile.getAbsolutePath());
-            }
+        } << {
+            directory.mkdirs();
+            ant.get(src: remotePath, dest: downloadedFile.getAbsolutePath(), usetimestamp: true);
         }
 
         return downloadedFile;

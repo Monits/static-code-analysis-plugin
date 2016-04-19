@@ -1,6 +1,21 @@
 ## History
 
 # v1.6
+* **1.6.4**
+ * Remote config is now downloaded with a conditional request 
+ * Update checkstyle to 6.17
+ * Update fb-contrib to 6.6.1
+
+* **1.6.3**
+ * Works with Gradle 2.10 or later as intended 
+
+* **1.6.2**
+ * Botched release. Don't use.
+
+* **1.6.1**
+ * Update Checkstyle to 6.15
+ * Update fb-contrib to 6.6.0
+
 * **1.6.0**
  * PMD / Findbugs ignore changes to resources in module dependencies, just as it does for it's own.
  * Custom jars with Android lint rules can be specified as dependencies under `androidLint`

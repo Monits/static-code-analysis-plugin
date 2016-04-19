@@ -18,6 +18,7 @@ and look into Android's SDK classes when performing analysis.
 used Gradle version. Just updating Gradle will introduce newer tools.
  * Checkstyle and Findbugs support remote file configuration, which they normally don't.
  * Easy configuration through DSL.
+ * Easily and reliably include [custom Android Lint rules](http://tools.android.com/tips/lint-custom-rules) accross teams and CI servers.
 
 # Adding it to your project
 
@@ -78,6 +79,15 @@ collection of ``String``.
 
 As of version 1.3, ``ignoreErrors`` decides whether the build is stopped if errors are reported. Its default
 value is ``true`` meaning that it will continue the build regardless of reported errors.
+
+To include custom lint rules, you can simply include the jars as dependencies under `androidLint`.
+For instance, you could include [Moints' Androd Linters](https://github.com/monits/android-linters) by adding:
+
+```
+dependencies {
+    androidLint 'com.monits:android-linters:1.+'
+}
+```
 
 And that's it! As always feel free to contribute in any shape or form, we look forward to your feedback!.
 
