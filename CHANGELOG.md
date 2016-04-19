@@ -1,6 +1,9 @@
 ## History
 
 # v1.6
+* **1.6.4**
+ * Remote config is now downloaded with a conditional request 
+
 * **1.6.3**
  * Works with Gradle 2.10 or later as intended 
 

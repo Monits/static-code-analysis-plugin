@@ -229,14 +229,13 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     }
 
     private File createDownloadFileTask(String remotePath, String destination, String taskName, String plugin) {
-        File downloadedFile;
+        File downloadedFile, directory;
         project.task(taskName) {
-            File directory = new File("${project.rootDir}/config/" + plugin + "/");
+            directory = new File("${project.rootDir}/config/" + plugin + "/");
             downloadedFile = new File(directory, destination);
-            doFirst {
-                directory.mkdirs();
-                ant.get(src: remotePath, dest: downloadedFile.getAbsolutePath());
-            }
+        } << {
+            directory.mkdirs();
+            ant.get(src: remotePath, dest: downloadedFile.getAbsolutePath(), usetimestamp: true);
         }
 
         return downloadedFile;
