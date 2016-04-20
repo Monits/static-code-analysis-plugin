@@ -1,0 +1,102 @@
+apply plugin: 'maven'
+apply plugin: 'com.jfrog.bintray'
+
+if (version.endsWith('-SNAPSHOT')) {
+    ext.nexusRepo = 'http://nexus.monits.com/content/repositories/oss-snapshots'
+} else {
+    ext.nexusRepo = 'http://nexus.monits.com/content/repositories/oss-releases'
+}
+
+ext.nexusUsername = has("nexusUsername") ? nexusUsername : ""
+ext.nexusPassword = has("nexusPassword") ? nexusPassword : ""
+
+// Generate sources
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+// generate javadocs
+task javadocJar(type: Jar, dependsOn: groovydoc) {
+    classifier = 'javadoc'
+    from groovydoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+// To upload artifact to Nexus
+uploadArchives {
+    configuration = configurations.archives
+    repositories {
+        mavenDeployer {
+            repository(url: project.ext.nexusRepo) {
+                authentication(userName: project.ext.nexusUsername, password: project.ext.nexusPassword)
+            }
+
+            pom.project {
+                name 'Static code analysis'
+                packaging 'aar'
+                description 'Extension gradle plugin for static code analysis'
+
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        distribution 'repo'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'jsotuyod'
+                        name 'Juan Martin Sotuyo Dodero'
+                        email 'jmsotuyo@monits.com'
+                    }
+                    developer {
+                        id 'MartuPuri'
+                        name 'Martin Purita'
+                        email 'mpurita@monits.com'
+                    }
+                    developer {
+                        id 'lbritez'
+                        name 'Leandro Britez'
+                        email 'lbritez@monits.com'
+                    }
+                    developer {
+                        id 'jcnoriega'
+                        name 'José Noriega'
+                        email 'jcnoriega@monits.com'
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Upload to bintray
+ext.bintrayUsername = has("bintrayUsername") ? bintrayUsername : ""
+ext.bintrayApiKey = has("bintrayApiKey") ? bintrayApiKey : ""
+
+bintray {
+    user = project.ext.bintrayUsername
+    key = project.ext.bintrayApiKey
+    publish = true
+    pkg {
+        repo = 'monits-android'
+        name = 'static-code-analysis-plugin'
+        userOrg = 'monits'
+        licenses = ['Apache-2.0']
+        issueTrackerUrl = 'https://github.com/Monits/static-code-analysis-plugin/issues'
+        vcsUrl = 'https://github.com/Monits/static-code-analysis-plugin.git'
+        version {
+            name = project.version
+            desc = 'StaticCodeAnalysis plugin'
+            released = new Date()
+            vcsTag = project.version
+        }
+    }
+    configurations = ['archives']
+}

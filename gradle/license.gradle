@@ -1,0 +1,11 @@
+apply plugin: 'com.github.hierynomus.license'
+
+license {
+    header rootProject.file('license/licenseHeader')
+    ignoreFailures true // Set to avoid to show the report of missing license and allow replace them
+    strictCheck true // Set to get files with missing or incorrect licenses
+    include "**/*.groovy"
+    ext.year = Calendar.getInstance().get(Calendar.YEAR)
+}
+
+tasks.license.dependsOn tasks.licenseFormat
