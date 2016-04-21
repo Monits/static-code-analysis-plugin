@@ -18,6 +18,7 @@ apply plugin: 'groovy'
 apply from: 'gradle/idea.gradle'
 apply from: 'gradle/license.gradle'
 apply from: 'gradle/publish.gradle'
+apply from: 'gradle/integTest.gradle'
 
 dependencies {
     compile gradleApi()
@@ -35,4 +36,3 @@ project.targetCompatibility = 1.7
 wrapper {
     gradleVersion = '2.12'
 }
-
