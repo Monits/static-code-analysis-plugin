@@ -11,13 +11,12 @@
  * ANY KIND, either express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-package com.monits
+package com.monits.gradle.sca
 
-import com.monits.fixture.AbstractPluginIntegTestFixture
+import com.monits.gradle.sca.fixture.AbstractPluginIntegTestFixture
 import org.gradle.util.GradleVersion
 import spock.lang.Unroll
 
-import static org.gradle.testkit.runner.TaskOutcome.SKIPPED
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 
 class CpdIntegTest extends AbstractPluginIntegTestFixture {

@@ -11,7 +11,7 @@
  * ANY KIND, either express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-package com.monits.io
+package com.monits.gradle.sca.io
 
 import org.hamcrest.Matcher
 

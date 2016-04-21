@@ -11,9 +11,9 @@
  * ANY KIND, either express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-package com.monits.fixture
+package com.monits.gradle.sca.fixture
 
-import com.monits.io.TestFile
+import com.monits.gradle.sca.io.TestFile
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder

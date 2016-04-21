@@ -11,7 +11,7 @@
  * ANY KIND, either express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-package com.monits
+package com.monits.gradle.sca.task
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
