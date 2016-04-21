@@ -59,8 +59,6 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     def void apply(Project project) {
         this.project = project
 
-        checkVersions();
-
         extension = new StaticCodeAnalysisExtension(project);
         project.extensions.add(StaticCodeAnalysisExtension.NAME, extension);
 
@@ -102,6 +100,9 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             checkstyleRules = extension.checkstyleRules;
             pmdRules = extension.pmdRules;
             findbugsExclude = extension.findbugsExclude;
+
+            // Make sure versions and config are ok
+            checkVersions();
 
             if (extension.findbugs) {
                 findbugs();
@@ -145,6 +146,15 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         project.task("pmdVersionCheck") {
             if (GradleVersion.current() < GRADLE_VERSION_PMD) {
                 currentPmdVersion = BACKWARDS_PMD_TOOL_VERSION;
+                /*
+                   If pmdRules contains "http://static.monits.com/pmd.xml",
+                   that means the user has not defined its own rules. So its the plugins
+                   responsibility to check for compatible ones.
+               */
+                if (pmdRules.contains(StaticCodeAnalysisExtension.PMD_DEFAULT_RULES)) {
+                    pmdRules.remove(StaticCodeAnalysisExtension.PMD_DEFAULT_RULES)
+                    pmdRules.add(StaticCodeAnalysisExtension.PMD_BACKWARDS_RULES)
+                }
             } else {
                 currentPmdVersion = LATEST_PMD_TOOL_VERSION;
             }
@@ -248,7 +258,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         File configSource;
         String downloadTaskName = "downloadCheckstyleXml"
         if (remoteLocation) {
-            configSource = createDownloadFileTask(checkstyleRules,"checkstyle.xml",
+            configSource = createDownloadFileTask(checkstyleRules, "checkstyle.xml",
                     downloadTaskName, "checkstyle");
         } else {
             configSource = new File(checkstyleRules);
@@ -295,7 +305,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         File filterSource;
         String downloadTaskName = "downloadFindbugsExcludeFilter"
         if (remoteLocation) {
-            filterSource = createDownloadFileTask(findbugsExclude,"excludeFilter.xml",
+            filterSource = createDownloadFileTask(findbugsExclude, "excludeFilter.xml",
                     downloadTaskName, "findbugs");
         } else {
             filterSource = new File(findbugsExclude);
@@ -328,7 +338,6 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             }
 
             pluginClasspath = project.configurations.findbugsPlugins
-
         }
 
         /*
