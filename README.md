@@ -1,5 +1,6 @@
 # Static Code Analysis
 
+[![Build Status](https://travis-ci.org/Monits/static-code-analysis-plugin.svg?branch=master)](https://travis-ci.org/Monits/static-code-analysis-plugin)
 [![Download](https://api.bintray.com/packages/monits/monits-android/static-code-analysis-plugin/images/download.svg) ](https://bintray.com/monits/monits-android/static-code-analysis-plugin/_latestVersion)
 
 Static Code Analysis wraps around Checkstyle, Findbugs, PMD and CPD, offering new features

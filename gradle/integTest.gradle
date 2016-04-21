@@ -21,16 +21,20 @@ dependencies {
     }
 }
 
+// output test failure causes for easier Travis integration
+test {
+    testLogging {
+        events "failed"
+        exceptionFormat "full"
+    }
+}
+
 task integTest(type: Test) {
     testClassesDir = sourceSets.integTest.output.classesDir
     classpath = sourceSets.integTest.runtimeClasspath
 }
 
 check.dependsOn integTest
-
-/*
- Until we move to Gradle 2.13 + java-gradle-plugin, we must manually inject the classpath
-*/
 
 // Write the plugin's classpath to a file to share with the tests
 task createClasspathManifest {
