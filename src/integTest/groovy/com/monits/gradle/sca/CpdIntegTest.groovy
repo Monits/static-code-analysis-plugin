@@ -63,7 +63,7 @@ class CpdIntegTest extends AbstractPluginIntegTestFixture {
     }
 
     String taskName() {
-        ":cpd"
+        ':cpd'
     }
 
     String toolName() {

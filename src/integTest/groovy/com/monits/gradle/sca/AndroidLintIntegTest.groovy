@@ -13,6 +13,7 @@
  */
 package com.monits.gradle.sca
 
+import com.monits.gradle.sca.fixture.AbstractIntegTestFixture
 import com.monits.gradle.sca.fixture.AbstractPluginIntegTestFixture
 import org.gradle.util.GradleVersion
 import spock.lang.Unroll
@@ -20,12 +21,11 @@ import spock.lang.Unroll
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import static org.hamcrest.CoreMatchers.containsString
 
-class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
-    @Unroll("Findbugs #findbugsVersion should run when using gradle #version")
-    def "Findbugs is run"() {
+class AndroidLintIntegTest extends AbstractIntegTestFixture {
+    @Unroll("AndroidLint should run when using gradle #version")
+    def "AndroidLint is run"() {
         given:
         writeBuildFile()
-        writeEmptySuppressionFilter()
         goodCode()
 
         when:
@@ -37,67 +37,31 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
         if (GradleVersion.version(version) >= GradleVersion.version('2.5')) {
             // Executed task capture is only available in Gradle 2.5+
             result.task(taskName()).outcome == SUCCESS
+            result.task(':resolveAndroidLint').outcome == SUCCESS
+            result.task(':cleanupAndroidLint').outcome == SUCCESS
         }
 
         // Make sure report exists and was using the expected tool version
         reportFile().exists()
-        reportFile().assertContents(containsString("<BugCollection version=\"$findbugsVersion\""))
-
-        // Plugins should be automatically added and enabled
-        reportFile().assertContents(containsString('<Plugin id="com.mebigfatguy.fbcontrib" enabled="true"/>'))
-        reportFile().assertContents(containsString('<Plugin id="jp.co.worksap.oss.findbugs" enabled="true"/>'))
 
         where:
         version << ['2.3', '2.4', '2.7', '2.10', GradleVersion.current().version]
-        findbugsVersion = StaticCodeAnalysisPlugin.FINDBUGS_TOOL_VERSION
-    }
-
-    def "Findbugs download remote suppression config"() {
-        given:
-        writeBuildFile()
-        goodCode()
-
-        when:
-        def result = gradleRunner()
-                .build()
-
-        then:
-        result.task(taskName()).outcome == SUCCESS
-
-        // The config must exist
-        file('config/findbugs/excludeFilter.xml').exists()
-
-        // Make sure checkstyle report exists
-        reportFile().exists()
     }
 
     String reportFileName() {
-        'build/reports/findbugs/findbugs.xml'
+        'build/outputs/lint-results.xml'
     }
 
     String taskName() {
-        ':findbugs'
+        ':lint'
     }
 
     String toolName() {
-        'findbugs'
-    }
-
-    def writeEmptySuppressionFilter() {
-        file('config/findbugs-suppressions.xml') << """
-            <FindBugsFilter>
-            </FindBugsFilter>
-        """
-
-        buildScriptFile() << """
-            staticCodeAnalysis {
-                findbugsExclude = "config/findbugs-suppressions.xml"
-            }
-        """
+        'androidLint'
     }
 
     def writeBuildFile(toolsConfig) {
-        // FIXME : Right now findbugs works only on Android projects
+        // Android lint only exists on Android projects
         writeAndroidManifest()
 
         buildScriptFile() << """

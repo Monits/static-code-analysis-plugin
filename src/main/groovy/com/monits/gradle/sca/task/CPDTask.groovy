@@ -19,22 +19,24 @@ import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.VerificationTask
 import org.gradle.logging.ConsoleRenderer
 import org.gradle.util.VersionNumber
 
-class CPDTask extends DefaultTask {
+class CPDTask extends DefaultTask implements VerificationTask {
 
     boolean ignoreFailures;
 
     @Input
-    def String toolVersion
+    String toolVersion
 
     @InputFiles
-    def FileCollection inputFiles
+    FileCollection inputFiles
 
     @OutputFile
-    def File outputFile
+    File outputFile
 
     @TaskAction
     void run() {
@@ -43,26 +45,27 @@ class CPDTask extends DefaultTask {
         createConfigurations()  // TODO : shouldn't be here
         resolveDependencies()  // TODO : shouldn't be here
 
-        outputFile.parentFile.mkdirs()
+        getOutputFile().parentFile.mkdirs()
         ant.taskdef(name: 'cpd', classname: 'net.sourceforge.pmd.cpd.CPDTask',
             classpath: project.configurations.cpd.asPath)
         ant.cpd(minimumTokenCount: '100', format: 'xml',
-                outputFile: outputFile) {
-            inputFiles.addToAntBuilder(ant, 'fileset', FileCollection.AntType.FileSet)
+                outputFile: getOutputFile()) {
+            getInputFiles().addToAntBuilder(ant, 'fileset', FileCollection.AntType.FileSet)
         }
 
-        if (cpdFileHasErrors(outputFile)) {
-            String message = "CPD rule violations were found. See the report at: ";
-            def reportUrl = new ConsoleRenderer().asClickableFileUrl(outputFile);
-            message += reportUrl;
-            if (!ignoreFailures) {
-                throw new GradleException(message);
+        if (cpdFileHasErrors(getOutputFile())) {
+            String message = "CPD rule violations were found. See the report at: "
+            def reportUrl = new ConsoleRenderer().asClickableFileUrl(getOutputFile())
+            message += reportUrl
+            if (getIgnoreFailures()) {
+                logger.warn(message)
             } else {
-                logger.warn(message);
+                throw new GradleException(message)
             }
         }
 
     }
+
     /*
         When no errors are found, CPD generates an xml report with this exact
         content:

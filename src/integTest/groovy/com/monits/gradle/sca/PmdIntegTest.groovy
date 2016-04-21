@@ -80,7 +80,7 @@ class PmdIntegTest extends AbstractPluginIntegTestFixture {
     }
 
     String taskName() {
-        ":pmd"
+        ':pmd'
     }
 
     String toolName() {

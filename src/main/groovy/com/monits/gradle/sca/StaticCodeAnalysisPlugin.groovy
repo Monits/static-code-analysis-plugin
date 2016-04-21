@@ -13,6 +13,9 @@
  */
 package com.monits.gradle.sca
 
+import com.monits.gradle.sca.task.CPDTask
+import com.monits.gradle.sca.task.CleanupAndroidLintTask
+import com.monits.gradle.sca.task.ResolveAndroidLintTask
 import groovy.io.FileType
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -409,86 +412,13 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             return;
         }
 
-        project.task('resolveAndroidLint') {
-            outputs.upToDateWhen({ false }) // never!
-        } << {
-            // Resolve all artifacts
-            project.configurations.androidLint.resolve();
-
-            def f = getAndroidLintHome();
-
-            // Prevent any "undersired" lints from being applied
-            changeAllFileExtensions(f, ".jar", ".bak");
-
-            // Manually copy all artifacts to the corresponding location
-            project.configurations.androidLint.getFiles().each {
-                def target = project.file(f.getAbsolutePath() + File.separator + it.name)
-                def input = it.newDataInputStream()
-                def output = target.newDataOutputStream()
-
-                output << input 
-
-                input.close()
-                output.close()
-            }
+        project.task('resolveAndroidLint', type: ResolveAndroidLintTask) {
         }
 
-        project.task('cleanupAndroidLint') {
-            outputs.upToDateWhen({ false }) // never!
-        } << {
-            def f = getAndroidLintHome();
-
-            // Remove all the .jar files we introduced
-            f.eachFileMatch(FileType.FILES, ~/.*\.jar$/, { it.delete(); });
-
-            // Restore .bak files
-            changeAllFileExtensions(f, ".bak", ".jar");
+        project.task('cleanupAndroidLint', type: CleanupAndroidLintTask) {
         }
 
         t.dependsOn project.tasks.findByName('resolveAndroidLint');
         t.finalizedBy project.tasks.findByName('cleanupAndroidLint');
-    }
-
-    /**
-     * Retrieves a file pointing to the active android lint home, making usre it exits.
-     *
-     * @return A File pointint to the active android lint home.
-    */
-    private File getAndroidLintHome() {
-        // Home candidates and order according to http://tools.android.com/tips/lint-custom-rules
-        String home = System.getProperty('ANDROID_SDK_HOME');
-        if (home == null) {
-            home = System.getenv('ANDROID_SDK_HOME');
-        }
-        if (home == null) {
-            home = System.getProperty('user.home');
-        }
-        if (home == null) {
-            home = System.getenv('HOME');
-        }
-
-        if (home == null) {
-            throw new GradleException("Neither ANDROID_SDK_HOME, nor user.home nor HOME could be found.");
-        }
-
-        File f = project.file("${home}/.android/lint/");
-        if (!f.exists()) {
-            f.mkdirs();
-        }
-
-        return f;
-    }
-
-    /**
-     * Change the file extension of all files in the given folder from one to another
-     *
-     * @param dir The diectory in which to  find for files to rename
-     * @param from The original extension to be changed
-     * @param to The new extension to be used
-    */
-    private void changeAllFileExtensions(File dir, String from, String to) {
-        dir.eachFileMatch(FileType.FILES, ~/.*${from}$/, {
-            it.renameTo(it.getAbsolutePath()[0 ..< it.getAbsolutePath().length()-from.length()] + to)
-        });
     }
 }

@@ -73,7 +73,7 @@ class CheckstyleIntegTest extends AbstractPluginIntegTestFixture {
     }
 
     String taskName() {
-        ":checkstyle"
+        ':checkstyle'
     }
 
     String toolName() {
