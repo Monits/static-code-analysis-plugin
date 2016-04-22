@@ -14,7 +14,6 @@
 package com.monits.gradle.sca.task
 
 import org.gradle.api.DefaultTask
-import org.gradle.api.GradleException
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.ParallelizableTask
