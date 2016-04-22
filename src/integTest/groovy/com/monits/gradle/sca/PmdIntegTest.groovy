@@ -45,8 +45,8 @@ class PmdIntegTest extends AbstractPluginIntegTestFixture {
 
         where:
         version << ['2.3', '2.4', '2.8', '2.10', GradleVersion.current().version]
-        pmdVersion = GradleVersion.version(version) < StaticCodeAnalysisPlugin.GRADLE_VERSION_PMD ?
-                StaticCodeAnalysisPlugin.BACKWARDS_PMD_TOOL_VERSION : StaticCodeAnalysisPlugin.LATEST_PMD_TOOL_VERSION
+        pmdVersion = GradleVersion.version(version) < ToolVersions.GRADLE_VERSION_PMD ?
+                ToolVersions.BACKWARDS_PMD_TOOL_VERSION : ToolVersions.LATEST_PMD_TOOL_VERSION
     }
 
     def "PMD configures auxclasspath"() {

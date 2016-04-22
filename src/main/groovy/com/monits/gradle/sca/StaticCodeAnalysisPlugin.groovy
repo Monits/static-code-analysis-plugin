@@ -13,15 +13,16 @@
  */
 package com.monits.gradle.sca
 
-import com.monits.gradle.sca.task.CPDTask
-import com.monits.gradle.sca.task.CleanupAndroidLintTask
+import com.monits.gradle.sca.config.AnalysisConfigurator
+import com.monits.gradle.sca.config.AndroidLintConfigurator
+import com.monits.gradle.sca.config.CpdConfigurator
 import com.monits.gradle.sca.task.DownloadTask
-import com.monits.gradle.sca.task.ResolveAndroidLintTask
+import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ModuleDependency
-import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileTree
+import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.plugins.quality.Checkstyle
 import org.gradle.api.plugins.quality.FindBugs
 import org.gradle.api.plugins.quality.Pmd
@@ -30,9 +31,6 @@ import org.gradle.util.GradleVersion
 
 class StaticCodeAnalysisPlugin implements Plugin<Project> {
 
-    private final static String LATEST_PMD_TOOL_VERSION = '5.4.1'
-    private final static String BACKWARDS_PMD_TOOL_VERSION = '5.1.3'
-    private final static GradleVersion GRADLE_VERSION_PMD = GradleVersion.version('2.4');
     private final static GradleVersion GRADLE_VERSION_PMD_CLASSPATH_SUPPORT = GradleVersion.version('2.8');
 
     private final static String LATEST_CHECKSTYLE_VERSION = '6.17'
@@ -52,7 +50,6 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     private final static String PMD_BACKWARDS_RULES = "http://static.monits.com/pmd-5.1.3.xml";
     private static final String FINDBUGS_DEFAULT_SUPPRESSION_FILTER = "http://static.monits.com/findbugs-exclusions-android.xml"
 
-    private String currentPmdVersion = LATEST_PMD_TOOL_VERSION;
     private String currentCheckstyleVersion = LATEST_CHECKSTYLE_VERSION;
 
     private StaticCodeAnalysisExtension extension;
@@ -77,6 +74,9 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             provided 'com.google.code.findbugs:annotations:' + FINDBUGS_ANNOTATIONS_VERSION
         }
 
+        // Apply Android Lint configuration
+        withAndroidPlugins AndroidLintConfigurator
+
         project.afterEvaluate {
             // Populate scaconfig
             addDepsButModulesToScaconfig(project.configurations.compile)
@@ -98,10 +98,9 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             }
 
             if (extension.getCpd()) {
-                cpd();
+                withAndroidPlugins CpdConfigurator
+                withPlugin(JavaBasePlugin, CpdConfigurator)
             }
-
-            androidLint();
         }
     }
 
@@ -132,7 +131,13 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             cpd = { true }
             checkstyleRules = { CHECKSTYLE_DEFAULT_RULES }
             findbugsExclude = { FINDBUGS_DEFAULT_SUPPRESSION_FILTER }
-            pmdRules = { [PMD_DEFAULT_RULES, PMD_DEFAULT_ANDROID_RULES] }
+            pmdRules = {
+                if (ToolVersions.isLatestPmdVersion()) {
+                    return [PMD_DEFAULT_RULES, PMD_DEFAULT_ANDROID_RULES]
+                } else {
+                    return [PMD_BACKWARDS_RULES, PMD_DEFAULT_ANDROID_RULES]
+                }
+            }
         }
     }
 
@@ -155,25 +160,6 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     }
 
     private void checkVersions() {
-        project.task("pmdVersionCheck") {
-            if (GradleVersion.current() < GRADLE_VERSION_PMD) {
-                currentPmdVersion = BACKWARDS_PMD_TOOL_VERSION;
-                /*
-                   If pmdRules contains "http://static.monits.com/pmd.xml",
-                   that means the user has not defined its own rules. So its the plugins
-                   responsibility to check for compatible ones.
-               */
-                if (extension.getPmdRules().contains(PMD_DEFAULT_RULES)) {
-                    def rules = extension.getPmdRules()
-                    rules.remove(PMD_DEFAULT_RULES)
-                    rules.add(PMD_BACKWARDS_RULES)
-                    extension.setPmdRules(rules)
-                }
-            } else {
-                currentPmdVersion = LATEST_PMD_TOOL_VERSION;
-            }
-        }
-
         project.task("checkstyleVersionCheck") {
             if (GradleVersion.current() < GRADLE_VERSION_CHECKSTYLE) {
                 currentCheckstyleVersion = BACKWARDS_CHECKSTYLE_VERSION;
@@ -191,41 +177,17 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         }
     }
 
-    private void cpd() {
-        project.plugins.apply 'pmd'
-
-        project.task("cpd", type: CPDTask) {
-            ignoreFailures = extension.getIgnoreErrors()
-
-            dependsOn project.tasks.pmdVersionCheck
-
-            FileTree srcDir = project.fileTree("$project.projectDir/src/");
-            srcDir.include '**/*.java'
-            srcDir.exclude '**/gen/**'
-
-            FileCollection collection = project.files(srcDir.getFiles());
-
-            toolVersion = currentPmdVersion
-            inputFiles = collection
-            outputFile = new File("$project.buildDir/reports/pmd/cpd.xml")
-        }
-
-        project.tasks.check.dependsOn project.tasks.cpd
-    }
-
     private void pmd() {
 
         project.plugins.apply 'pmd'
 
         project.pmd {
-            toolVersion = currentPmdVersion
+            toolVersion = ToolVersions.pmdVersion
             ignoreFailures = extension.getIgnoreErrors();
             ruleSets = extension.getPmdRules()
         }
 
-        project.task("pmd", type: Pmd) {
-            dependsOn project.tasks.pmdVersionCheck
-
+        project.task('pmd', type: Pmd) {
             source 'src'
             include '**/*.java'
             exclude '**/gen/**'
@@ -415,13 +377,32 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         return tree
     }
 
-    private void androidLint() {
-        def t = project.tasks.findByName('lint');
-        if (t == null) {
-            return;
-        }
+    private withAndroidPlugins(Class<AnalysisConfigurator> configClass) {
+        def configurator = configClass.newInstance();
+        def configureAction = { configurator.applyAndroidConfig(project, extension) }
 
-        t.dependsOn project.tasks.create('resolveAndroidLint', ResolveAndroidLintTask)
-        t.finalizedBy project.tasks.create('cleanupAndroidLint', CleanupAndroidLintTask)
+        withOptionalPlugin('com.android.build.gradle.AppPlugin', configureAction)
+        withOptionalPlugin('com.android.build.gradle.LibraryPlugin', configureAction)
+    }
+
+    private withPlugin(Class<? extends Plugin> pluginClass, Class<AnalysisConfigurator> configClass) {
+        def configurator = configClass.newInstance();
+        def configureAction = { configurator.applyConfig(project, extension) }
+
+        withPlugin(pluginClass, configureAction)
+    }
+
+    private withPlugin(Class<? extends Plugin> pluginClass, Action<? extends Plugin> configureAction) {
+        project.plugins.withType(pluginClass, configureAction)
+    }
+
+    private withOptionalPlugin(String pluginClassName, Action<? extends Plugin> configureAction) {
+        try {
+            // Will most likely throw a ClassNotFoundException
+            def pluginClass = Class.forName(pluginClassName)
+            withPlugin(pluginClass, configureAction)
+        } catch (ClassNotFoundException e) {
+            // do nothing
+        }
     }
 }
