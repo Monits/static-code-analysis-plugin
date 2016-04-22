@@ -421,13 +421,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             return;
         }
 
-        project.task('resolveAndroidLint', type: ResolveAndroidLintTask) {
-        }
-
-        project.task('cleanupAndroidLint', type: CleanupAndroidLintTask) {
-        }
-
-        t.dependsOn project.tasks.findByName('resolveAndroidLint');
-        t.finalizedBy project.tasks.findByName('cleanupAndroidLint');
+        t.dependsOn project.tasks.create('resolveAndroidLint', ResolveAndroidLintTask)
+        t.finalizedBy project.tasks.create('cleanupAndroidLint', CleanupAndroidLintTask)
     }
 }
