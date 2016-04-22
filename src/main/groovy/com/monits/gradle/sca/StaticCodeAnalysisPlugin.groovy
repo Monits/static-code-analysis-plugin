@@ -15,9 +15,8 @@ package com.monits.gradle.sca
 
 import com.monits.gradle.sca.task.CPDTask
 import com.monits.gradle.sca.task.CleanupAndroidLintTask
+import com.monits.gradle.sca.task.DownloadTask
 import com.monits.gradle.sca.task.ResolveAndroidLintTask
-import groovy.io.FileType
-import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ModuleDependency
@@ -27,7 +26,7 @@ import org.gradle.api.plugins.quality.Checkstyle
 import org.gradle.api.plugins.quality.FindBugs
 import org.gradle.api.plugins.quality.Pmd
 import org.gradle.api.tasks.compile.JavaCompile
-import org.gradle.util.GradleVersion;
+import org.gradle.util.GradleVersion
 
 class StaticCodeAnalysisPlugin implements Plugin<Project> {
 
@@ -184,7 +183,6 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         project.plugins.apply 'pmd'
 
         project.task("cpd", type: CPDTask) {
-
             ignoreFailures = ignoreErrors
 
             dependsOn project.tasks.pmdVersionCheck
@@ -242,16 +240,16 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     }
 
     private File createDownloadFileTask(String remotePath, String destination, String taskName, String plugin) {
-        File downloadedFile, directory;
-        project.task(taskName) {
-            directory = new File("${project.rootDir}/config/" + plugin + "/");
-            downloadedFile = new File(directory, destination);
-        } << {
-            directory.mkdirs();
-            ant.get(src: remotePath, dest: downloadedFile.getAbsolutePath(), usetimestamp: true);
+        def destPath = "${project.rootDir}/config/${plugin}/"
+        def File destFile = project.file(destPath + destination)
+
+        project.task(taskName, type: DownloadTask) {
+            directory = project.file(destPath)
+            downloadedFile = destFile
+            resourceUri = remotePath
         }
 
-        return downloadedFile;
+        return destFile;
     }
 
     private void checkstyle() {
