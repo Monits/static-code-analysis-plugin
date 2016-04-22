@@ -16,6 +16,7 @@ package com.monits.gradle.sca
 import com.monits.gradle.sca.config.AnalysisConfigurator
 import com.monits.gradle.sca.config.AndroidLintConfigurator
 import com.monits.gradle.sca.config.CpdConfigurator
+import com.monits.gradle.sca.config.PmdConfigurator
 import com.monits.gradle.sca.task.DownloadTask
 import org.gradle.api.Action
 import org.gradle.api.Plugin
@@ -25,14 +26,10 @@ import org.gradle.api.file.FileTree
 import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.plugins.quality.Checkstyle
 import org.gradle.api.plugins.quality.FindBugs
-import org.gradle.api.plugins.quality.Pmd
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.util.GradleVersion
 
 class StaticCodeAnalysisPlugin implements Plugin<Project> {
-
-    private final static GradleVersion GRADLE_VERSION_PMD_CLASSPATH_SUPPORT = GradleVersion.version('2.8');
-
     private final static String LATEST_CHECKSTYLE_VERSION = '6.17'
     private final static String BACKWARDS_CHECKSTYLE_VERSION = '6.7'
     private final static GradleVersion GRADLE_VERSION_CHECKSTYLE = GradleVersion.version('2.7');
@@ -94,7 +91,8 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             }
 
             if (extension.getPmd()) {
-                pmd();
+                withAndroidPlugins PmdConfigurator
+                withPlugin(JavaBasePlugin, PmdConfigurator)
             }
 
             if (extension.getCpd()) {
@@ -175,38 +173,6 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
                 currentCheckstyleVersion = LATEST_CHECKSTYLE_VERSION;
             }
         }
-    }
-
-    private void pmd() {
-
-        project.plugins.apply 'pmd'
-
-        project.pmd {
-            toolVersion = ToolVersions.pmdVersion
-            ignoreFailures = extension.getIgnoreErrors();
-            ruleSets = extension.getPmdRules()
-        }
-
-        project.task('pmd', type: Pmd) {
-            source 'src'
-            include '**/*.java'
-            exclude '**/gen/**'
-
-            reports {
-                xml.enabled = true
-                html.enabled = false
-            }
-        }
-
-        if (GRADLE_VERSION_PMD_CLASSPATH_SUPPORT <= GradleVersion.current()) {
-            /*
-             * For best results, PMD needs ALL classes, including Android's SDK,
-             * but the task is created dynamically, so we need to set it afterEvaluate
-             */
-            configTaskClasspath(Pmd);
-        }
-
-        project.tasks.check.dependsOn project.tasks.pmd
     }
 
     private boolean isRemoteLocation(String path) {
