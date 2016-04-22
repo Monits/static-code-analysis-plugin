@@ -33,6 +33,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     private final static String LATEST_PMD_TOOL_VERSION = '5.4.1'
     private final static String BACKWARDS_PMD_TOOL_VERSION = '5.1.3'
     private final static GradleVersion GRADLE_VERSION_PMD = GradleVersion.version('2.4');
+    private final static GradleVersion GRADLE_VERSION_PMD_CLASSPATH_SUPPORT = GradleVersion.version('2.8');
 
     private final static String LATEST_CHECKSTYLE_VERSION = '6.17'
     private final static String BACKWARDS_CHECKSTYLE_VERSION = '6.7'
@@ -43,16 +44,16 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     private final static String FINDBUGS_MONITS_VERSION = '0.2.0-SNAPSHOT'
     private final static String FB_CONTRIB_VERSION = '6.6.1'
 
-    private final static GradleVersion GRADLE_VERSION_PMD_CLASSPATH_SUPPORT = GradleVersion.version('2.8');
+    private final static String EXTENSION_NAME = "staticCodeAnalysis";
+    private final static String CHECKSTYLE_DEFAULT_RULES = "http://static.monits.com/checkstyle.xml"
+    private final static String CHECKSTYLE_BACKWARDS_RULES = "http://static.monits.com/checkstyle-6.7.xml"
+    private final static String PMD_DEFAULT_RULES = "http://static.monits.com/pmd.xml";
+    private final static String PMD_DEFAULT_ANDROID_RULES = "http://static.monits.com/pmd-android.xml";
+    private final static String PMD_BACKWARDS_RULES = "http://static.monits.com/pmd-5.1.3.xml";
+    private static final String FINDBUGS_DEFAULT_SUPPRESSION_FILTER = "http://static.monits.com/findbugs-exclusions-android.xml"
 
     private String currentPmdVersion = LATEST_PMD_TOOL_VERSION;
     private String currentCheckstyleVersion = LATEST_CHECKSTYLE_VERSION;
-
-    private boolean ignoreErrors;
-
-    private String checkstyleRules;
-    private List<String> pmdRules;
-    private String findbugsExclude;
 
     private StaticCodeAnalysisExtension extension;
 
@@ -60,25 +61,10 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
 
     def void apply(Project project) {
         this.project = project
+        extension = project.extensions.create(EXTENSION_NAME, StaticCodeAnalysisExtension)
 
-        extension = new StaticCodeAnalysisExtension(project);
-        project.extensions.add(StaticCodeAnalysisExtension.NAME, extension);
-
-        project.configurations {
-            archives {
-                extendsFrom project.configurations.default
-            }
-            provided {
-                dependencies.all { dep ->
-                    project.configurations.default.exclude group: dep.group, module: dep.name
-                }
-            }
-            compile.extendsFrom provided
-            scaconfig // Custom configuration for static code analysis
-            androidLint { // Configuration used for android linters
-                transitive = false
-            }
-        }
+        createConfigurations()
+        configureExtensionRule()
 
         //FIXME: This is here so that projects that use Findbugs can compile... but it ignores DSL completely
         project.repositories {
@@ -96,33 +82,57 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             addDepsButModulesToScaconfig(project.configurations.compile)
             addDepsButModulesToScaconfig(project.configurations.testCompile)
 
-            // Take data from extension
-            ignoreErrors = extension.ignoreErrors;
-
-            checkstyleRules = extension.checkstyleRules;
-            pmdRules = extension.pmdRules;
-            findbugsExclude = extension.findbugsExclude;
-
             // Make sure versions and config are ok
             checkVersions();
 
-            if (extension.findbugs) {
+            if (extension.getFindbugs()) {
                 findbugs();
             }
 
-            if (extension.checkstyle) {
+            if (extension.getCheckstyle()) {
                 checkstyle();
             }
 
-            if (extension.pmd) {
+            if (extension.getPmd()) {
                 pmd();
             }
 
-            if (extension.cpd) {
+            if (extension.getCpd()) {
                 cpd();
             }
 
             androidLint();
+        }
+    }
+
+    private void createConfigurations() {
+        project.configurations {
+            archives {
+                extendsFrom project.configurations.default
+            }
+            provided {
+                dependencies.all { dep ->
+                    project.configurations.default.exclude group: dep.group, module: dep.name
+                }
+            }
+            compile.extendsFrom provided
+            scaconfig // Custom configuration for static code analysis
+            androidLint { // Configuration used for android linters
+                transitive = false
+            }
+        }
+    }
+
+    private void configureExtensionRule() {
+        extension.conventionMapping.with {
+            ignoreErrors = { true }
+            findbugs = { true }
+            pmd = { true }
+            checkstyle = { true }
+            cpd = { true }
+            checkstyleRules = { CHECKSTYLE_DEFAULT_RULES }
+            findbugsExclude = { FINDBUGS_DEFAULT_SUPPRESSION_FILTER }
+            pmdRules = { [PMD_DEFAULT_RULES, PMD_DEFAULT_ANDROID_RULES] }
         }
     }
 
@@ -153,9 +163,11 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
                    that means the user has not defined its own rules. So its the plugins
                    responsibility to check for compatible ones.
                */
-                if (pmdRules.contains(StaticCodeAnalysisExtension.PMD_DEFAULT_RULES)) {
-                    pmdRules.remove(StaticCodeAnalysisExtension.PMD_DEFAULT_RULES)
-                    pmdRules.add(StaticCodeAnalysisExtension.PMD_BACKWARDS_RULES)
+                if (extension.getPmdRules().contains(PMD_DEFAULT_RULES)) {
+                    def rules = extension.getPmdRules()
+                    rules.remove(PMD_DEFAULT_RULES)
+                    rules.add(PMD_BACKWARDS_RULES)
+                    extension.setPmdRules(rules)
                 }
             } else {
                 currentPmdVersion = LATEST_PMD_TOOL_VERSION;
@@ -170,8 +182,8 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
                     that means the user has not defined its own rules. So its the plugins
                     responsibility to check for compatible ones.
                 */
-                if (checkstyleRules.equals(StaticCodeAnalysisExtension.CHECKSTYLE_DEFAULT_RULES)) {
-                    checkstyleRules = StaticCodeAnalysisExtension.CHECKSTYLE_BACKWARDS_RULES;
+                if (extension.getCheckstyleRules().equals(CHECKSTYLE_DEFAULT_RULES)) {
+                    extension.setCheckstyleRules(CHECKSTYLE_BACKWARDS_RULES);
                 }
             } else {
                 currentCheckstyleVersion = LATEST_CHECKSTYLE_VERSION;
@@ -183,7 +195,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         project.plugins.apply 'pmd'
 
         project.task("cpd", type: CPDTask) {
-            ignoreFailures = ignoreErrors
+            ignoreFailures = extension.getIgnoreErrors()
 
             dependsOn project.tasks.pmdVersionCheck
 
@@ -207,8 +219,8 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
 
         project.pmd {
             toolVersion = currentPmdVersion
-            ignoreFailures = ignoreErrors;
-            ruleSets = pmdRules
+            ignoreFailures = extension.getIgnoreErrors();
+            ruleSets = extension.getPmdRules()
         }
 
         project.task("pmd", type: Pmd) {
@@ -255,19 +267,19 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     private void checkstyle() {
         project.plugins.apply 'checkstyle'
 
-        boolean remoteLocation = isRemoteLocation(checkstyleRules);
+        boolean remoteLocation = isRemoteLocation(extension.getCheckstyleRules());
         File configSource;
         String downloadTaskName = "downloadCheckstyleXml"
         if (remoteLocation) {
-            configSource = createDownloadFileTask(checkstyleRules, "checkstyle.xml",
+            configSource = createDownloadFileTask(extension.getCheckstyleRules(), "checkstyle.xml",
                     downloadTaskName, "checkstyle");
         } else {
-            configSource = new File(checkstyleRules);
+            configSource = new File(extension.getCheckstyleRules());
         }
 
         project.checkstyle {
             toolVersion = currentCheckstyleVersion
-            ignoreFailures = ignoreErrors;
+            ignoreFailures = extension.getIgnoreErrors();
             showViolations = false
             configFile configSource
         }
@@ -282,7 +294,6 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             include '**/*.java'
             exclude '**/gen/**'
             classpath = project.configurations.compile
-
         }
 
         project.tasks.check.dependsOn project.tasks.checkstyle
@@ -302,20 +313,20 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             findbugsPlugins 'com.mebigfatguy.fb-contrib:fb-contrib:' + FB_CONTRIB_VERSION
         }
 
-        boolean remoteLocation = isRemoteLocation(findbugsExclude);
+        boolean remoteLocation = isRemoteLocation(extension.getFindbugsExclude());
         File filterSource;
         String downloadTaskName = "downloadFindbugsExcludeFilter"
         if (remoteLocation) {
-            filterSource = createDownloadFileTask(findbugsExclude, "excludeFilter.xml",
+            filterSource = createDownloadFileTask(extension.getFindbugsExclude(), "excludeFilter.xml",
                     downloadTaskName, "findbugs");
         } else {
-            filterSource = new File(findbugsExclude);
+            filterSource = new File(extension.getFindbugsExclude());
         }
 
         project.findbugs {
             toolVersion = FINDBUGS_TOOL_VERSION
             effort = "max"
-            ignoreFailures = ignoreErrors
+            ignoreFailures = extension.getIgnoreErrors()
             excludeFilter = filterSource
         }
 
