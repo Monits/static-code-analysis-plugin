@@ -53,6 +53,11 @@ class PmdIntegTest extends AbstractPluginIntegTestFixture {
         given:
         writeBuildFile()
         buildScriptFile() << """
+            dependencies {
+                // Add a dependency so there is something in the classpath
+                testCompile 'junit:junit:4.12'
+            }
+
             afterEvaluate {
                 def pmdTask = project.tasks.getByPath(':pmd');
                 if (pmdTask != null && pmdTask.hasProperty('classpath') && !pmdTask.classpath.empty) {
