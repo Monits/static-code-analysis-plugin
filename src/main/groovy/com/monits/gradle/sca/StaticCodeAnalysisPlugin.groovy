@@ -21,18 +21,16 @@ import org.gradle.api.artifacts.ModuleDependency
 import org.gradle.api.plugins.JavaBasePlugin
 
 class StaticCodeAnalysisPlugin implements Plugin<Project> {
-    private final static String FINDBUGS_ANNOTATIONS_VERSION = '3.0.0'
-
-    private final static String EXTENSION_NAME = "staticCodeAnalysis";
+    private final static String EXTENSION_NAME = "staticCodeAnalysis"
     private final static String CHECKSTYLE_DEFAULT_RULES = "http://static.monits.com/checkstyle.xml"
     private final static String CHECKSTYLE_BACKWARDS_RULES = "http://static.monits.com/checkstyle-6.7.xml"
-    private final static String PMD_DEFAULT_RULES = "http://static.monits.com/pmd.xml";
-    private final static String PMD_DEFAULT_ANDROID_RULES = "http://static.monits.com/pmd-android.xml";
-    private final static String PMD_BACKWARDS_RULES = "http://static.monits.com/pmd-5.1.3.xml";
+    private final static String PMD_DEFAULT_RULES = "http://static.monits.com/pmd.xml"
+    private final static String PMD_DEFAULT_ANDROID_RULES = "http://static.monits.com/pmd-android.xml"
+    private final static String PMD_BACKWARDS_RULES = "http://static.monits.com/pmd-5.1.3.xml"
     private final static String FINDBUGS_DEFAULT_SUPPRESSION_FILTER = "http://static.monits.com/findbugs-exclusions-android.xml"
 
-    private StaticCodeAnalysisExtension extension;
-    private Project project;
+    private StaticCodeAnalysisExtension extension
+    private Project project
 
     def void apply(Project project) {
         this.project = project
@@ -40,17 +38,6 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
 
         createConfigurations()
         configureExtensionRule()
-
-        //FIXME: This is here so that projects that use Findbugs can compile... but it ignores DSL completely
-        project.repositories {
-            maven {
-                url 'http://nexus.monits.com/content/repositories/oss-snapshots'
-            }
-        }
-
-        project.dependencies {
-            provided 'com.google.code.findbugs:annotations:' + FINDBUGS_ANNOTATIONS_VERSION
-        }
 
         // Apply Android Lint configuration
         withAndroidPlugins AndroidLintConfigurator
@@ -144,7 +131,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     }
 
     private withAndroidPlugins(Class<AnalysisConfigurator> configClass) {
-        def configurator = configClass.newInstance();
+        def configurator = configClass.newInstance()
         def configureAction = { configurator.applyAndroidConfig(project, extension) }
 
         withOptionalPlugin('com.android.build.gradle.AppPlugin', configureAction)
@@ -152,7 +139,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     }
 
     private withPlugin(Class<? extends Plugin> pluginClass, Class<AnalysisConfigurator> configClass) {
-        def configurator = configClass.newInstance();
+        def configurator = configClass.newInstance()
         def configureAction = { configurator.applyConfig(project, extension) }
 
         withPlugin(pluginClass, configureAction)

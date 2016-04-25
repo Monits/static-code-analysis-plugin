@@ -37,6 +37,16 @@ class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
             return
         }
 
+        //FIXME: This is here so that projects that use Findbugs can compile... but it ignores DSL completely
+        project.repositories {
+            maven {
+                url 'http://nexus.monits.com/content/repositories/oss-snapshots'
+            }
+        }
+        project.dependencies {
+            provided 'com.google.code.findbugs:annotations:' + ToolVersions.findbugsVersion
+        }
+
         project.plugins.apply 'findbugs'
 
         project.dependencies {
