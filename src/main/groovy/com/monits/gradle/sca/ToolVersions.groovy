@@ -20,8 +20,14 @@ final class ToolVersions {
     private final static String BACKWARDS_PMD_TOOL_VERSION = '5.1.3'
     private final static GradleVersion GRADLE_VERSION_PMD = GradleVersion.version('2.4');
 
+    private final static String LATEST_CHECKSTYLE_VERSION = '6.17'
+    private final static String BACKWARDS_CHECKSTYLE_VERSION = '6.7'
+    private final static GradleVersion GRADLE_VERSION_CHECKSTYLE = GradleVersion.version('2.7');
+
+    private final static String FINDBUGS_TOOL_VERSION = '3.0.1'
+
     private ToolVersions() {
-        // utility class
+        throw new AssertionError("ToolVersions can't be instantiated")
     }
 
     static String getPmdVersion() {
@@ -34,5 +40,21 @@ final class ToolVersions {
 
     static boolean isLatestPmdVersion() {
         return pmdVersion == LATEST_PMD_TOOL_VERSION
+    }
+
+    static String getCheckstyleVersion() {
+        if (GradleVersion.current() < GRADLE_VERSION_CHECKSTYLE) {
+            return BACKWARDS_CHECKSTYLE_VERSION
+        }
+
+        return LATEST_CHECKSTYLE_VERSION;
+    }
+
+    static boolean  isLatestCheckstyleVersion() {
+        return checkstyleVersion == LATEST_CHECKSTYLE_VERSION
+    }
+
+    static String getFindbugsVersion() {
+        return FINDBUGS_TOOL_VERSION
     }
 }

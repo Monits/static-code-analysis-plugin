@@ -45,8 +45,8 @@ class CheckstyleIntegTest extends AbstractPluginIntegTestFixture {
 
         where:
         version << ['2.3', '2.4', '2.7', '2.10', GradleVersion.current().version]
-        checkstyleVersion = GradleVersion.version(version) < StaticCodeAnalysisPlugin.GRADLE_VERSION_CHECKSTYLE ?
-                StaticCodeAnalysisPlugin.BACKWARDS_CHECKSTYLE_VERSION : StaticCodeAnalysisPlugin.LATEST_CHECKSTYLE_VERSION
+        checkstyleVersion = GradleVersion.version(version) < ToolVersions.GRADLE_VERSION_CHECKSTYLE ?
+                ToolVersions.BACKWARDS_CHECKSTYLE_VERSION : ToolVersions.LATEST_CHECKSTYLE_VERSION
     }
 
     def "Checkstyle download remote config"() {

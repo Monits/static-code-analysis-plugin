@@ -49,7 +49,7 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
 
         where:
         version << ['2.3', '2.4', '2.7', '2.10', GradleVersion.current().version]
-        findbugsVersion = StaticCodeAnalysisPlugin.FINDBUGS_TOOL_VERSION
+        findbugsVersion = ToolVersions.findbugsVersion
     }
 
     def "Findbugs download remote suppression config"() {
