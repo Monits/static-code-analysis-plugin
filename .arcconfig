@@ -1,4 +1,9 @@
 {
-  "project_id" : "monits/gradlePlugin",
-  "conduit_uri" : "http://ph.monits.com/"
+  "project_id" : "Monits - Static Code Analysis Gradle Plugin",
+  "repository.callsign": "MSCAGP",
+  "conduit_uri" : "http://ph.monits.com/",
+  "unit.engine": "GradleUnitTestEngine",
+  "load": [
+    "/usr/local/opt/arc-lint"
+  ]
 }

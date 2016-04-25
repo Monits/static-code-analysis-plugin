@@ -19,6 +19,7 @@ apply from: 'gradle/idea.gradle'
 apply from: 'gradle/license.gradle'
 apply from: 'gradle/publish.gradle'
 apply from: 'gradle/integTest.gradle'
+apply from: 'gradle/staticCodeAnalysis.gradle'
 
 dependencies {
     compile gradleApi()
