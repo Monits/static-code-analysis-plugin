@@ -23,8 +23,6 @@ import org.gradle.api.plugins.quality.FindBugs
 import org.gradle.api.tasks.compile.JavaCompile
 
 class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
-    private final static String FINDBUGS_MONITS_VERSION = '0.2.0-SNAPSHOT'
-    private final static String FB_CONTRIB_VERSION = '6.6.1'
 
     @Override
     void applyConfig(final Project project, final StaticCodeAnalysisExtension extension) {
@@ -45,10 +43,10 @@ class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
             findbugs project.configurations.findbugsPlugins.dependencies
 
             // To keep everything tidy, we set these apart
-            findbugsPlugins('com.monits:findbugs-plugin:' + FINDBUGS_MONITS_VERSION) {
+            findbugsPlugins('com.monits:findbugs-plugin:' + ToolVersions.monitsFindbugsVersion) {
                 transitive = false
             }
-            findbugsPlugins 'com.mebigfatguy.fb-contrib:fb-contrib:' + FB_CONTRIB_VERSION
+            findbugsPlugins 'com.mebigfatguy.fb-contrib:fb-contrib:' + ToolVersions.fbContribVersion
         }
 
         boolean remoteLocation = isRemoteLocation(extension.getFindbugsExclude());

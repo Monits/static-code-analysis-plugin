@@ -25,6 +25,8 @@ final class ToolVersions {
     private final static GradleVersion GRADLE_VERSION_CHECKSTYLE = GradleVersion.version('2.7');
 
     private final static String FINDBUGS_TOOL_VERSION = '3.0.1'
+    private final static String FINDBUGS_MONITS_VERSION = '0.2.0-SNAPSHOT'
+    private final static String FB_CONTRIB_VERSION = '6.6.1'
 
     private ToolVersions() {
         throw new AssertionError("ToolVersions can't be instantiated")
@@ -56,5 +58,13 @@ final class ToolVersions {
 
     static String getFindbugsVersion() {
         return FINDBUGS_TOOL_VERSION
+    }
+
+    static String getFbContribVersion() {
+        return FB_CONTRIB_VERSION
+    }
+
+    static String getMonitsFindbugsVersion() {
+        return FINDBUGS_MONITS_VERSION
     }
 }
