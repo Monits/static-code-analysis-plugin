@@ -21,17 +21,15 @@ dependencies {
     }
 }
 
-// output test failure causes for easier Travis integration
-test {
-    testLogging {
-        events "failed"
-        exceptionFormat "full"
-    }
-}
-
 task integTest(type: Test) {
     testClassesDir = sourceSets.integTest.output.classesDir
     classpath = sourceSets.integTest.runtimeClasspath
+
+    // output test failure causes for easier Travis integration
+    testLogging {
+        events "PASSED", "FAILED"
+        exceptionFormat "full"
+    }
 }
 
 check.dependsOn integTest
