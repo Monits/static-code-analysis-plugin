@@ -13,15 +13,18 @@
  */
 package com.monits.gradle.sca
 
+/**
+ * Extension to configure the Static code Analysis Plugin.
+*/
 class StaticCodeAnalysisExtension {
-    boolean ignoreErrors;
+    boolean ignoreErrors
 
-    boolean findbugs;
-    boolean pmd;
-    boolean checkstyle;
-    boolean cpd;
+    boolean findbugs
+    boolean pmd
+    boolean checkstyle
+    boolean cpd
 
-    String checkstyleRules;
-    List<String> pmdRules;
-    String findbugsExclude;
+    String checkstyleRules
+    List<String> pmdRules
+    String findbugsExclude
 }

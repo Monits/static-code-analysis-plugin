@@ -13,18 +13,24 @@
  */
 package com.monits.gradle.sca.fixture
 
+import org.gradle.testkit.runner.BuildResult
+
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import static org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
 
+/**
+ * Base specification to test a single analysis report.
+*/
 abstract class AbstractPluginIntegTestFixture extends AbstractIntegTestFixture {
 
-    def "Tool not configured if disabled"() {
+    @SuppressWarnings('MethodName')
+    void 'tool not configured if disabled'() {
         given:
-        writeBuildFile(any: false) // just make sure to call the proper method
+        writeBuildFile(any:false) // just make sure to call the proper method
         goodCode()
 
         when:
-        def result = gradleRunner().build()
+        BuildResult result = gradleRunner().build()
 
         then:
         // no task should be configured
@@ -34,14 +40,15 @@ abstract class AbstractPluginIntegTestFixture extends AbstractIntegTestFixture {
         !reportFile().exists()
     }
 
-    def "Rerun is up-to-date"() {
+    @SuppressWarnings('MethodName')
+    void 'rerun is up-to-date'() {
         given:
         writeBuildFile()
         goodCode()
 
         when:
-        def firstRun = gradleRunner().build()
-        def secondRun = gradleRunner().build()
+        BuildResult firstRun = gradleRunner().build()
+        BuildResult secondRun = gradleRunner().build()
 
         then:
         //

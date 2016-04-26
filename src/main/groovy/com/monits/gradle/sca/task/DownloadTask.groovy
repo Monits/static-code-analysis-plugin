@@ -20,6 +20,9 @@ import org.gradle.api.tasks.ParallelizableTask
 import org.gradle.api.tasks.TaskAction
 import org.gradle.logging.ConsoleRenderer
 
+/**
+ * A task to download a remote file.
+*/
 @ParallelizableTask
 class DownloadTask extends DefaultTask {
 
@@ -34,27 +37,25 @@ class DownloadTask extends DefaultTask {
 
     DownloadTask() {
         // this task should never be up to date, we need to always check for changes on the remote server
-        outputs.upToDateWhen {
-            return false
-        }
+        outputs.upToDateWhen { false }
     }
 
+    @SuppressWarnings('UnnecessaryGetter')
     @TaskAction
     void run() {
-        directory.mkdirs();
+        directory.mkdirs()
 
         try {
-            ant.get(src: resourceUri, dest: downloadedFile.getAbsolutePath(), usetimestamp: true);
+            ant.get(src:resourceUri, dest:downloadedFile.getAbsolutePath(), usetimestamp:true)
         } catch (SocketException | UnknownHostException e) {
             // network is unreachable, if there is a local file, warn the user, but use that instead of failing
             if (downloadedFile.exists()) {
-                def cachedResource = new ConsoleRenderer().asClickableFileUrl(getDownloadedFile())
-                logger.warn("Couldn't download ${resourceUri}, network seems to be unreachable. Using a possibli outdated version of ${cachedResource}")
+                String cachedResource = new ConsoleRenderer().asClickableFileUrl(getDownloadedFile())
+                logger.warn("Couldn't download ${resourceUri}, network seems to be unreachable. " +
+                        "Using a possibly outdated version of ${cachedResource}")
             } else {
-                throw e;
+                throw e
             }
         }
     }
-
-
 }

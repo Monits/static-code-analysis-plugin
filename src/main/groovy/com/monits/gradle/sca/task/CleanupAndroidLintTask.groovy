@@ -16,16 +16,19 @@ package com.monits.gradle.sca.task
 import groovy.io.FileType
 import org.gradle.api.tasks.TaskAction
 
+/**
+ * Task to clean up and restore Android Lint Home after running.
+*/
 class CleanupAndroidLintTask extends AndroidLintTask {
 
     @TaskAction
     void run() {
-        def f = getAndroidLintHome()
-
         // Remove all the .jar files we introduced
-        f.eachFileMatch(FileType.FILES, ~/.*\.jar$/, { it.delete() })
+        androidLintHome.eachFileMatch(FileType.FILES, ~/.*\.jar$/) {
+            it.delete()
+        }
 
         // Restore .bak files
-        changeAllFileExtensions(f, ".bak", ".jar")
+        changeAllFileExtensions(androidLintHome, '.bak', '.jar')
     }
 }

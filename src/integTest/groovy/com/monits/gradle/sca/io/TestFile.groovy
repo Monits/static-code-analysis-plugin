@@ -15,8 +15,11 @@ package com.monits.gradle.sca.io
 
 import org.hamcrest.Matcher
 
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertThat
 
+/**
+ * A File with useful utilities to assist unit testing.
+*/
 class TestFile extends File {
     TestFile(final String pathname) {
         super(pathname)
@@ -35,11 +38,11 @@ class TestFile extends File {
     }
 
     TestFile(final File file) {
-        super(file.getAbsolutePath())
+        super(file.absolutePath)
     }
 
     TestFile assertContents(Matcher<String> matcher) {
-        assertThat(getText(), matcher);
-        return this;
+        assertThat(text, matcher)
+        this
     }
 }

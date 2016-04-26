@@ -15,14 +15,17 @@ package com.monits.gradle.sca
 
 import org.gradle.util.GradleVersion
 
+/**
+ * Utility class to manage versions of tools being used by the plugin.
+*/
 final class ToolVersions {
     private final static String LATEST_PMD_TOOL_VERSION = '5.4.1'
     private final static String BACKWARDS_PMD_TOOL_VERSION = '5.1.3'
-    private final static GradleVersion GRADLE_VERSION_PMD = GradleVersion.version('2.4');
+    private final static GradleVersion GRADLE_VERSION_PMD = GradleVersion.version('2.4')
 
     private final static String LATEST_CHECKSTYLE_VERSION = '6.17'
     private final static String BACKWARDS_CHECKSTYLE_VERSION = '6.7'
-    private final static GradleVersion GRADLE_VERSION_CHECKSTYLE = GradleVersion.version('2.7');
+    private final static GradleVersion GRADLE_VERSION_CHECKSTYLE = GradleVersion.version('2.7')
 
     private final static String FINDBUGS_TOOL_VERSION = '3.0.1'
     private final static String FINDBUGS_MONITS_VERSION = '0.2.0-SNAPSHOT'
@@ -37,11 +40,11 @@ final class ToolVersions {
             return BACKWARDS_PMD_TOOL_VERSION
         }
 
-        return LATEST_PMD_TOOL_VERSION
+        LATEST_PMD_TOOL_VERSION
     }
 
     static boolean isLatestPmdVersion() {
-        return pmdVersion == LATEST_PMD_TOOL_VERSION
+        pmdVersion == LATEST_PMD_TOOL_VERSION
     }
 
     static String getCheckstyleVersion() {
@@ -49,22 +52,25 @@ final class ToolVersions {
             return BACKWARDS_CHECKSTYLE_VERSION
         }
 
-        return LATEST_CHECKSTYLE_VERSION;
+        LATEST_CHECKSTYLE_VERSION
     }
 
     static boolean  isLatestCheckstyleVersion() {
-        return checkstyleVersion == LATEST_CHECKSTYLE_VERSION
+        checkstyleVersion == LATEST_CHECKSTYLE_VERSION
     }
 
+    @SuppressWarnings('GetterMethodCouldBeProperty')
     static String getFindbugsVersion() {
-        return FINDBUGS_TOOL_VERSION
+        FINDBUGS_TOOL_VERSION
     }
 
+    @SuppressWarnings('GetterMethodCouldBeProperty')
     static String getFbContribVersion() {
-        return FB_CONTRIB_VERSION
+        FB_CONTRIB_VERSION
     }
 
+    @SuppressWarnings('GetterMethodCouldBeProperty')
     static String getMonitsFindbugsVersion() {
-        return FINDBUGS_MONITS_VERSION
+        FINDBUGS_MONITS_VERSION
     }
 }

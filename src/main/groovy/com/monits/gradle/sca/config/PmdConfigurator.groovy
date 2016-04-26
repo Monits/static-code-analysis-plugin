@@ -20,20 +20,25 @@ import org.gradle.api.Project
 import org.gradle.api.plugins.quality.Pmd
 import org.gradle.util.GradleVersion
 
+/**
+ * A configurator for PMD tasks.
+*/
 class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
-    private final static GradleVersion GRADLE_VERSION_PMD_CLASSPATH_SUPPORT = GradleVersion.version('2.8');
+    private final static GradleVersion GRADLE_VERSION_PMD_CLASSPATH_SUPPORT = GradleVersion.version('2.8')
+    private final static String PMD = 'pmd'
 
+    @SuppressWarnings('UnnecessaryGetter')
     @Override
     void applyConfig(final Project project, final StaticCodeAnalysisExtension extension) {
-        project.plugins.apply 'pmd'
+        project.plugins.apply PMD
 
         project.pmd {
             toolVersion = ToolVersions.pmdVersion
-            ignoreFailures = extension.getIgnoreErrors();
+            ignoreFailures = extension.getIgnoreErrors()
             ruleSets = extension.getPmdRules()
         }
 
-        project.task('pmd', type: Pmd) {
+        project.task(PMD, type:Pmd) {
             source 'src'
             include '**/*.java'
             exclude '**/gen/**'
@@ -49,10 +54,10 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
              * For best results, PMD needs ALL classes, including Android's SDK,
              * but the task is created dynamically, so we need to set it afterEvaluate
              */
-            configAndroidClasspath(project.tasks.pmd, project);
+            configAndroidClasspath(project.tasks[PMD], project)
         }
 
-        project.tasks.check.dependsOn project.tasks.pmd
+        project.tasks.check.dependsOn project.tasks[PMD]
     }
 
     @Override

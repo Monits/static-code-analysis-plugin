@@ -14,6 +14,7 @@
 package com.monits.gradle.sca
 
 import com.monits.gradle.sca.fixture.AbstractPluginIntegTestFixture
+import org.gradle.testkit.runner.BuildResult
 import org.gradle.util.GradleVersion
 import spock.lang.Unroll
 
@@ -21,15 +22,19 @@ import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import static org.hamcrest.CoreMatchers.containsString
 import static org.junit.Assert.assertThat
 
+/**
+ * Integration test of PMD tasks.
+ */
 class PmdIntegTest extends AbstractPluginIntegTestFixture {
-    @Unroll("PMD #pmdVersion should run when using gradle #version")
-    def "PMD is run"() {
+    @SuppressWarnings('MethodName')
+    @Unroll('PMD #pmdVersion should run when using gradle #version')
+    void 'pmd is run'() {
         given:
         writeBuildFile()
         goodCode()
 
         when:
-        def result = gradleRunner()
+        BuildResult result = gradleRunner()
             .withGradleVersion(version)
             .build()
 
@@ -49,32 +54,33 @@ class PmdIntegTest extends AbstractPluginIntegTestFixture {
                 ToolVersions.BACKWARDS_PMD_TOOL_VERSION : ToolVersions.LATEST_PMD_TOOL_VERSION
     }
 
-    def "PMD configures auxclasspath"() {
+    @SuppressWarnings('MethodName')
+    void 'pmd configures auxclasspath'() {
         given:
         writeBuildFile()
-        buildScriptFile() << """
+        buildScriptFile() << '''
             dependencies {
                 // Add a dependency so there is something in the classpath
                 testCompile 'junit:junit:4.12'
             }
 
             afterEvaluate {
-                def pmdTask = project.tasks.getByPath(':pmd');
+                Task pmdTask = project.tasks.getByPath(':pmd');
                 if (pmdTask != null && pmdTask.hasProperty('classpath') && !pmdTask.classpath.empty) {
                     println "Auxclasspath is configured"
                 }
             }
-        """
+        '''
         goodCode()
 
         when:
-        def result = gradleRunner()
+        BuildResult result = gradleRunner()
                 .withGradleVersion('2.8')
                 .build()
 
         then:
         // The classpath must be configured, and not empty
-        assertThat(result.output, containsString("Auxclasspath is configured"))
+        assertThat(result.output, containsString('Auxclasspath is configured'))
 
         // Make sure pmd report exists
         reportFile().exists()

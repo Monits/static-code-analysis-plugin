@@ -15,15 +15,26 @@ package com.monits.gradle.sca.task
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.FileCollection
-import org.gradle.api.tasks.*
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.ParallelizableTask
+import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.VerificationTask
 import org.gradle.logging.ConsoleRenderer
 import org.gradle.util.VersionNumber
 
+/**
+ * CPD task.
+*/
 @ParallelizableTask
 class CPDTask extends DefaultTask implements VerificationTask {
 
-    boolean ignoreFailures;
+    private static final CPD = 'cpd'
+
+    boolean ignoreFailures
 
     @Input
     String toolVersion
@@ -38,22 +49,20 @@ class CPDTask extends DefaultTask implements VerificationTask {
     void run() {
         inputFiles.stopExecutionIfEmpty()
 
-        createConfigurations()  // TODO : shouldn't be here
+        addConfigurations()  // TODO : shouldn't be here
         resolveDependencies()  // TODO : shouldn't be here
 
-        getOutputFile().parentFile.mkdirs()
-        ant.taskdef(name: 'cpd', classname: 'net.sourceforge.pmd.cpd.CPDTask',
-            classpath: project.configurations.cpd.asPath)
-        ant.cpd(minimumTokenCount: '100', format: 'xml',
-                outputFile: getOutputFile()) {
-            getInputFiles().addToAntBuilder(ant, 'fileset', FileCollection.AntType.FileSet)
+        outputFile.parentFile.mkdirs()
+        ant.taskdef(name:CPD, classname:'net.sourceforge.pmd.cpd.CPDTask', classpath:project.configurations.cpd.asPath)
+        ant.cpd(minimumTokenCount:'100', format:'xml', outputFile:outputFile) {
+            inputFiles.addToAntBuilder(ant, 'fileset', FileCollection.AntType.FileSet)
         }
 
-        if (cpdFileHasErrors(getOutputFile())) {
-            String message = "CPD rule violations were found. See the report at: "
-            def reportUrl = new ConsoleRenderer().asClickableFileUrl(getOutputFile())
+        if (cpdFileHasErrors(outputFile)) {
+            String message = 'CPD rule violations were found. See the report at: '
+            String reportUrl = new ConsoleRenderer().asClickableFileUrl(outputFile)
             message += reportUrl
-            if (getIgnoreFailures()) {
+            if (ignoreFailures) {
                 logger.warn(message)
             } else {
                 throw new GradleException(message)
@@ -70,44 +79,43 @@ class CPDTask extends DefaultTask implements VerificationTask {
         So naturally, if the second line of the outputFile is '<pmd-cpd/>', it
         means that cpd didn't find errors.
      */
-    private boolean cpdFileHasErrors(File output) {
-        BufferedReader br = new BufferedReader(new FileReader(output));
-        String line;
-        br.readLine();
+    private boolean cpdFileHasErrors(final File output) {
+        BufferedReader br = new BufferedReader(new FileReader(output))
+        String line
+        br.readLine()
         if ((line = br.readLine()) == null) {
-            return false;
-        } else {
-            if (line.equals("<pmd-cpd/>")) {
-                return false;
-            }
+            return false
         }
-        return true;
+        br.close()
+
+        line != '<pmd-cpd/>'
     }
 
     // FIXME : This is copy pasted from AbstractCodeQualityPlugin... it shouldn't
-    private void createConfigurations() {
-        project.configurations.create('cpd').with {
+    @SuppressWarnings('DuplicateStringLiteral')
+    private void addConfigurations() {
+        project.configurations.create(CPD).with {
             visible = false
             transitive = true
-            description = "The cpd libraries to be used for this project."
+            description = 'The cpd libraries to be used for this project.'
             // Don't need these things, they're provided by the runtime
-            exclude group: 'ant', module: 'ant'
-            exclude group: 'org.apache.ant', module: 'ant'
-            exclude group: 'org.apache.ant', module: 'ant-launcher'
-            exclude group: 'org.slf4j', module: 'slf4j-api'
-            exclude group: 'org.slf4j', module: 'jcl-over-slf4j'
-            exclude group: 'org.slf4j', module: 'log4j-over-slf4j'
-            exclude group: 'commons-logging', module: 'commons-logging'
-            exclude group: 'log4j', module: 'log4j'
+            exclude group:'ant', module:'ant'
+            exclude group:'org.apache.ant', module:'ant'
+            exclude group:'org.apache.ant', module:'ant-launcher'
+            exclude group:'org.slf4j', module:'slf4j-api'
+            exclude group:'org.slf4j', module:'jcl-over-slf4j'
+            exclude group:'org.slf4j', module:'log4j-over-slf4j'
+            exclude group:'commons-logging', module:'commons-logging'
+            exclude group:'log4j', module:'log4j'
         }
     }
 
     // FIXME : This is copy pasted from PmdPlugin... it shouldn't
     private void resolveDependencies() {
-        def config = project.configurations['cpd']
+        Configuration config = project.configurations[CPD]
         config.incoming.beforeResolve {
             if (config.dependencies.empty) {
-                VersionNumber version = VersionNumber.parse(getToolVersion())
+                VersionNumber version = VersionNumber.parse(toolVersion)
                 String dependency = calculateDefaultDependencyNotation(version)
                 config.dependencies.add(project.dependencies.create(dependency))
             }
@@ -118,9 +126,9 @@ class CPDTask extends DefaultTask implements VerificationTask {
     protected String calculateDefaultDependencyNotation(VersionNumber toolVersion) {
         if (toolVersion < VersionNumber.version(5)) {
             return "pmd:pmd:$toolVersion"
-        } else if (toolVersion < VersionNumber.parse("5.2.0")) {
+        } else if (toolVersion < VersionNumber.parse('5.2.0')) {
             return "net.sourceforge.pmd:pmd:$toolVersion"
         }
-        return "net.sourceforge.pmd:pmd-java:$toolVersion"
+        "net.sourceforge.pmd:pmd-java:$toolVersion"
     }
 }

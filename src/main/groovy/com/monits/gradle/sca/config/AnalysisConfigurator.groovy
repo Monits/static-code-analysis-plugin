@@ -13,9 +13,12 @@
  */
 package com.monits.gradle.sca.config
 
-import com.monits.gradle.sca.StaticCodeAnalysisExtension;
-import org.gradle.api.Project;
+import com.monits.gradle.sca.StaticCodeAnalysisExtension
+import org.gradle.api.Project
 
+/**
+ * A configurator for a specific type of analysis.
+*/
 interface AnalysisConfigurator {
 
     void applyConfig(Project project, StaticCodeAnalysisExtension extension)

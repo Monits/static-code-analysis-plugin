@@ -16,19 +16,23 @@ package com.monits.gradle.sca.config
 import com.monits.gradle.sca.StaticCodeAnalysisExtension
 import com.monits.gradle.sca.task.CleanupAndroidLintTask
 import com.monits.gradle.sca.task.ResolveAndroidLintTask
-import org.gradle.api.Project;
+import org.gradle.api.Project
+import org.gradle.api.Task
 
+/**
+ * A configurator for Android Lint tasks.
+*/
 class AndroidLintConfigurator implements AnalysisConfigurator {
     @Override
-    void applyConfig(final Project project, final StaticCodeAnalysisExtension extension) {
+    void applyConfig(Project project, StaticCodeAnalysisExtension extension) {
         // nothing to do for non-android projects
     }
 
     @Override
-    void applyAndroidConfig(final Project project, final StaticCodeAnalysisExtension extension) {
-        def t = project.tasks.findByName('lint');
+    void applyAndroidConfig(Project project, StaticCodeAnalysisExtension extension) {
+        Task t = project.tasks.findByName('lint')
         if (t == null) {
-            return;
+            return
         }
 
         t.dependsOn project.tasks.create('resolveAndroidLint', ResolveAndroidLintTask)

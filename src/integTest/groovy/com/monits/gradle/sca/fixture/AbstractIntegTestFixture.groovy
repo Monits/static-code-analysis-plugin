@@ -19,55 +19,61 @@ import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
+/**
+ * Base specification for integration testing of a gradle plugin.
+*/
 abstract class AbstractIntegTestFixture extends Specification {
 
     @Rule
-    final TemporaryFolder testProjectDir = new TemporaryFolder();
+    final TemporaryFolder testProjectDir = new TemporaryFolder()
 
     String pluginClasspathString
 
-    def setup() {
+    @SuppressWarnings('UnnecessaryCollectCall')
+    void setup() {
         // We do it this way to support all versions of gradle in our tests, since we care about backwards comaptibility
-        def pluginClasspathResource = getClass().classLoader.findResource("plugin-classpath.txt")
+        URL pluginClasspathResource = getClass().classLoader.findResource('plugin-classpath.txt')
         if (pluginClasspathResource == null) {
-            throw new IllegalStateException("Did not find plugin classpath resource, run `testClasses` build task.")
+            throw new IllegalStateException('Did not find plugin classpath resource, run `testClasses` build task.')
         }
 
-        def pluginClasspath = pluginClasspathResource.readLines().collect { new File(it) }
+        Collection<File> pluginClasspath = pluginClasspathResource.readLines().collect { new File(it) }
         pluginClasspathString = pluginClasspath
                 .collect { it.absolutePath } // get absolute paths
                 .findAll { !it.contains(".gradle${File.separator}wrapper${File.separator}dists${File.separator}") }
                 .collect { it.replace('\\', '\\\\') } // escape backslashes in Windows paths
                 .collect { "'$it'" }
-                .join(", ")
+                .join(', ')
     }
 
-    def gradleRunner() {
+    GradleRunner gradleRunner() {
         GradleRunner.create()
             .withProjectDir(testProjectDir.root)
             .withArguments('check', '--stacktrace')
     }
 
-    def file(path) {
-        def f = new File(testProjectDir.root, path)
+    TestFile file(path) {
+        File f = new File(testProjectDir.root, path)
         f.parentFile.mkdirs()
-        return new TestFile(f)
+        new TestFile(f)
     }
 
-    def goodCode(int numberOfClasses = 1) {
+    void goodCode(int numberOfClasses = 1) {
         1.upto(numberOfClasses) {
-            file("src/main/java/com/monits/Class${it}.java") << "package com.monits; public class Class${it} { public boolean isFoo(Object arg) { return true; } }"
-            file("src/test/java/com/monits/Class${it}Test.java") << "package com.monits; public class Class${it}Test { public boolean isFoo(Object arg) { return true; } }"
+            file("src/main/java/com/monits/Class${it}.java") <<
+                "package com.monits; public class Class${it} { public boolean isFoo(Object arg) { return true; } }"
+            file("src/test/java/com/monits/Class${it}Test.java") <<
+                "package com.monits; public class Class${it}Test { public boolean isFoo(Object arg) { return true; } }"
         }
     }
 
-    def writeBuildFile() {
-        def configMap = new LinkedHashMap<>();
-        configMap.put(toolName(), true);
+    TestFile writeBuildFile() {
+        Map<String, Boolean> configMap = [:]
+        configMap.put(toolName(), Boolean.TRUE)
         writeBuildFile(configMap)
     }
 
-    def writeBuildFile(toolsConfig) {
+    TestFile writeBuildFile(toolsConfig) {
         buildScriptFile() << """
             buildscript {
                 dependencies {
@@ -89,14 +95,15 @@ abstract class AbstractIntegTestFixture extends Specification {
                 findbugs = ${toolsConfig.get('findbugs', false)}
                 pmd = ${toolsConfig.get('pmd', false)}
             }
-        """
+        """ as TestFile
     }
 
-    def buildScriptFile() {
+    @SuppressWarnings('FactoryMethodName')
+    TestFile buildScriptFile() {
         file('build.gradle')
     }
 
-    def reportFile() {
+    TestFile reportFile() {
         file(reportFileName())
     }
 

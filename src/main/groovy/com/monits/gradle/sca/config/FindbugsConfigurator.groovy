@@ -22,18 +22,23 @@ import org.gradle.api.file.FileTree
 import org.gradle.api.plugins.quality.FindBugs
 import org.gradle.api.tasks.compile.JavaCompile
 
+/**
+ * A configurator for Findbugs tasks
+*/
 class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
+    private static final String FINDBUGS = 'findbugs'
 
     @Override
-    void applyConfig(final Project project, final StaticCodeAnalysisExtension extension) {
+    void applyConfig(Project project, StaticCodeAnalysisExtension extension) {
         // TODO : Not currently working on java projects
         applyAndroidConfig(project, extension)
     }
 
+    @SuppressWarnings('UnnecessaryGetter')
     @Override
-    void applyAndroidConfig(final Project project, final StaticCodeAnalysisExtension extension) {
+    void applyAndroidConfig(Project project, StaticCodeAnalysisExtension extension) {
         // prevent applying it twice
-        if (project.tasks.findByName('findbugs')) {
+        if (project.tasks.findByName(FINDBUGS)) {
             return
         }
 
@@ -47,7 +52,7 @@ class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
             provided 'com.google.code.findbugs:annotations:' + ToolVersions.findbugsVersion
         }
 
-        project.plugins.apply 'findbugs'
+        project.plugins.apply FINDBUGS
 
         project.dependencies {
             findbugs project.configurations.findbugsPlugins.dependencies
@@ -59,14 +64,14 @@ class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
             findbugsPlugins 'com.mebigfatguy.fb-contrib:fb-contrib:' + ToolVersions.fbContribVersion
         }
 
-        boolean remoteLocation = isRemoteLocation(extension.getFindbugsExclude());
-        File filterSource;
+        boolean remoteLocation = isRemoteLocation(extension.getFindbugsExclude())
+        File filterSource
         String downloadTaskName = 'downloadFindbugsExcludeFilter'
         if (remoteLocation) {
-            filterSource = createDownloadFileTask(project, extension.getFindbugsExclude(),
-                    'excludeFilter.xml', downloadTaskName, 'findbugs');
+            filterSource = makeDownloadFileTask(project, extension.getFindbugsExclude(),
+                    'excludeFilter.xml', downloadTaskName, FINDBUGS)
         } else {
-            filterSource = new File(extension.getFindbugsExclude());
+            filterSource = new File(extension.getFindbugsExclude())
         }
 
         project.findbugs {
@@ -76,13 +81,7 @@ class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
             excludeFilter = filterSource
         }
 
-        println project.tasks.findByName('findbugs')
-        try {
-            throw new IOException()
-        } catch (IOException e) {
-            e.printStackTrace()
-        }
-        project.task('findbugs', type: FindBugs) {
+        project.task(FINDBUGS, type:FindBugs) {
             dependsOn project.tasks.withType(JavaCompile)
             if (remoteLocation) {
                 dependsOn project.tasks.findByName(downloadTaskName)
@@ -108,27 +107,27 @@ class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
          * For best results, Findbugs needs ALL classes, including Android's SDK,
          * but the task is created dynamically, so we need to set it afterEvaluate
          */
-        configAndroidClasspath(project.tasks.findbugs, project);
+        configAndroidClasspath(project.tasks[FINDBUGS], project)
 
-        project.tasks.check.dependsOn project.tasks.findbugs
+        project.tasks.check.dependsOn project.tasks[FINDBUGS]
     }
 
     private static boolean isRemoteLocation(String path) {
-        return path.startsWith('http://') || path.startsWith('https://');
+        path.startsWith('http://') || path.startsWith('https://')
     }
 
-    private File createDownloadFileTask(Project project, String remotePath, String destination,
-                                        String taskName, String plugin) {
-        def destPath = "${project.rootDir}/config/${plugin}/"
-        def File destFile = project.file(destPath + destination)
+    private File makeDownloadFileTask(Project project, String remotePath, String destination,
+                                      String taskName, String plugin) {
+        GString destPath = "${project.rootDir}/config/${plugin}/"
+        File destFile = project.file(destPath + destination)
 
-        project.task(taskName, type: DownloadTask) {
+        project.task(taskName, type:DownloadTask) {
             directory = project.file(destPath)
             downloadedFile = destFile
             resourceUri = remotePath
         }
 
-        return destFile;
+        destFile
     }
 
     /**
@@ -139,15 +138,17 @@ class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
      * @return FileTree pointing to all interesting .class files
      */
     private static FileTree getProjectClassTree(Project proj) {
-        FileTree tree = proj.fileTree(dir: "${proj.buildDir}/intermediates/classes/")
+        FileTree tree = proj.fileTree(dir:"${proj.buildDir}/intermediates/classes/")
 
-        tree.exclude '**/R.class' //exclude generated R.java
-        tree.exclude '**/R$*.class' //exclude generated R.java inner classes
-        tree.exclude '**/Manifest.class' //exclude generated Manifest.java
-        tree.exclude '**/Manifest$*.class' //exclude generated Manifest.java inner classes
-        tree.exclude '**/BuildConfig.class' //exclude generated BuildConfig.java
-        tree.exclude '**/BuildConfig$*.class' //exclude generated BuildConfig.java inner classes
+        tree.with {
+            exclude '**/R.class' //exclude generated R.java
+            exclude '**/R$*.class' //exclude generated R.java inner classes
+            exclude '**/Manifest.class' //exclude generated Manifest.java
+            exclude '**/Manifest$*.class' //exclude generated Manifest.java inner classes
+            exclude '**/BuildConfig.class' //exclude generated BuildConfig.java
+            exclude '**/BuildConfig$*.class' //exclude generated BuildConfig.java inner classes
+        }
 
-        return tree
+        tree
     }
 }

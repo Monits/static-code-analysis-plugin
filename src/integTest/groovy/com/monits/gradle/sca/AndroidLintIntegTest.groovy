@@ -14,22 +14,26 @@
 package com.monits.gradle.sca
 
 import com.monits.gradle.sca.fixture.AbstractIntegTestFixture
-import com.monits.gradle.sca.fixture.AbstractPluginIntegTestFixture
+import com.monits.gradle.sca.io.TestFile
+import org.gradle.testkit.runner.BuildResult
 import org.gradle.util.GradleVersion
 import spock.lang.Unroll
 
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
-import static org.hamcrest.CoreMatchers.containsString
 
+/**
+ * Integration test of Android Lint tasks.
+ */
 class AndroidLintIntegTest extends AbstractIntegTestFixture {
-    @Unroll("AndroidLint should run when using gradle #version")
-    def "AndroidLint is run"() {
+    @SuppressWarnings('MethodName')
+    @Unroll('AndroidLint should run when using gradle #version')
+    void 'androidLint is run'() {
         given:
         writeBuildFile()
         goodCode()
 
         when:
-        def result = gradleRunner()
+        BuildResult result = gradleRunner()
             .withGradleVersion(version)
             .build()
 
@@ -60,7 +64,7 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
         'androidLint'
     }
 
-    def writeBuildFile(toolsConfig) {
+    TestFile writeBuildFile(toolsConfig) {
         // Android lint only exists on Android projects
         writeAndroidManifest()
 
@@ -95,15 +99,15 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
                 compileSdkVersion 23
                 buildToolsVersion "23.0.2"
             }
-        """
+        """ as TestFile
     }
 
-    def writeAndroidManifest() {
-        file('src/main/AndroidManifest.xml') << """
+    TestFile writeAndroidManifest() {
+        file('src/main/AndroidManifest.xml') << '''
             <manifest xmlns:android="http://schemas.android.com/apk/res/android"
                 package="com.monits.staticCodeAnalysis"
                 android:versionCode="1">
             </manifest>
-        """
+        ''' as TestFile
     }
 }

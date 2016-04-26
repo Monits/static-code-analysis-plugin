@@ -15,27 +15,41 @@ package com.monits.gradle.sca
 
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileTree
 
+/**
+ * Trait for configuring classpath aware tasks.
+*/
 trait ClasspathAware {
-    void configAndroidClasspath(final Task task, final Project project) {
-        def t = project.tasks.findByName('mockableAndroidJar');
+    @SuppressWarnings('TrailingComma')
+    void configAndroidClasspath(Task task, Project project) {
+        Task t = project.tasks.findByName('mockableAndroidJar')
         if (t != null) {
             task.dependsOn t
         }
 
         // Manually add classes of module dependencies
-        def classTree = project.files()
-        project.fileTree(dir: "${project.buildDir}/intermediates/exploded-aar/${project.rootProject.name}/", include: "*/unspecified/").visit({
-            if (!it.isDirectory()) return;
-            if (it.path.contains('/')) return;
-            classTree += getProjectClassTree(it.path)
-        })
+        FileCollection classTree = project.files()
+        project.fileTree(
+            dir:"${project.buildDir}/intermediates/exploded-aar/${project.rootProject.name}/",
+            include:'*/unspecified/').visit {
+                if (!it.isDirectory()) {
+                    return
+                }
+                if (it.path.contains('/')) {
+                    return
+                }
+                classTree += getProjectClassTree(it.path)
+            }
 
         task.classpath = project.configurations.scaconfig +
-                project.fileTree(dir: "${project.buildDir}/intermediates/exploded-aar/", include: '**/*.jar',
-                        exclude: "${project.rootProject.name}/*/unspecified/jars/classes.jar") +
-                project.fileTree(dir: "${project.buildDir}/intermediates/", include: 'mockable-android-*.jar') +
+                project.fileTree(
+                        dir:"${project.buildDir}/intermediates/exploded-aar/",
+                        include:'**/*.jar',
+                        exclude:"${project.rootProject.name}/*/unspecified/jars/classes.jar") +
+                project.fileTree(
+                        dir:"${project.buildDir}/intermediates/", include:'mockable-android-*.jar') +
                 classTree
     }
 
@@ -47,6 +61,6 @@ trait ClasspathAware {
      * @return FileTree pointing to all interesting .class files
      */
     private FileTree getProjectClassTree(path) {
-        return getProjectClassTree(project.rootProject.findProject(':' + path));
+        getProjectClassTree(project.rootProject.findProject(':' + path))
     }
 }

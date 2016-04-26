@@ -14,22 +14,28 @@
 package com.monits.gradle.sca
 
 import com.monits.gradle.sca.fixture.AbstractPluginIntegTestFixture
+import com.monits.gradle.sca.io.TestFile
+import org.gradle.testkit.runner.BuildResult
 import org.gradle.util.GradleVersion
 import spock.lang.Unroll
 
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import static org.hamcrest.CoreMatchers.containsString
 
+/**
+ * Integration test of Findbugs tasks.
+ */
 class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
-    @Unroll("Findbugs #findbugsVersion should run when using gradle #version")
-    def "Findbugs is run"() {
+    @SuppressWarnings('MethodName')
+    @Unroll('Findbugs #findbugsVersion should run when using gradle #version')
+    void 'findbugs is run'() {
         given:
         writeBuildFile()
         writeEmptySuppressionFilter()
         goodCode()
 
         when:
-        def result = gradleRunner()
+        BuildResult result = gradleRunner()
             .withGradleVersion(version)
             .build()
 
@@ -52,13 +58,14 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
         findbugsVersion = ToolVersions.findbugsVersion
     }
 
-    def "Findbugs download remote suppression config"() {
+    @SuppressWarnings('MethodName')
+    void 'findbugs download remote suppression config'() {
         given:
         writeBuildFile()
         goodCode()
 
         when:
-        def result = gradleRunner()
+        BuildResult result = gradleRunner()
                 .build()
 
         then:
@@ -83,20 +90,20 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
         'findbugs'
     }
 
-    def writeEmptySuppressionFilter() {
-        file('config/findbugs-suppressions.xml') << """
+    void writeEmptySuppressionFilter() {
+        file('config/findbugs-suppressions.xml') << '''
             <FindBugsFilter>
             </FindBugsFilter>
-        """
+        '''
 
-        buildScriptFile() << """
+        buildScriptFile() << '''
             staticCodeAnalysis {
                 findbugsExclude = "config/findbugs-suppressions.xml"
             }
-        """
+        '''
     }
 
-    def writeBuildFile(toolsConfig) {
+    TestFile writeBuildFile(toolsConfig) {
         // FIXME : Right now findbugs works only on Android projects
         writeAndroidManifest()
 
@@ -131,15 +138,15 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
                 compileSdkVersion 23
                 buildToolsVersion "23.0.2"
             }
-        """
+        """ as TestFile
     }
 
-    def writeAndroidManifest() {
-        file('src/main/AndroidManifest.xml') << """
+    TestFile writeAndroidManifest() {
+        file('src/main/AndroidManifest.xml') << '''
             <manifest xmlns:android="http://schemas.android.com/apk/res/android"
                 package="com.monits.staticCodeAnalysis"
                 android:versionCode="1">
             </manifest>
-        """
+        ''' as TestFile
     }
 }

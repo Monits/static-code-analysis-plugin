@@ -16,8 +16,16 @@ package com.monits.gradle.sca.task
 import groovy.io.FileType
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
+import org.gradle.api.tasks.TaskAction
 
+/**
+ * Base class for Android Lint tasks.
+*/
 abstract class AndroidLintTask extends DefaultTask {
+    private static final String ANDROID_SDK_HOME = 'ANDROID_SDK_HOME'
+
+    @TaskAction
+    abstract void run()
 
     /**
      * Retrieves a file pointing to the active android lint home, making usre it exits.
@@ -26,27 +34,27 @@ abstract class AndroidLintTask extends DefaultTask {
      */
     protected File getAndroidLintHome() {
         // Home candidates and order according to http://tools.android.com/tips/lint-custom-rules
-        String home = System.getProperty('ANDROID_SDK_HOME');
+        String home = System.getProperty(ANDROID_SDK_HOME)
         if (home == null) {
-            home = System.getenv('ANDROID_SDK_HOME');
+            home = System.getenv(ANDROID_SDK_HOME)
         }
         if (home == null) {
-            home = System.getProperty('user.home');
+            home = System.getProperty('user.home')
         }
         if (home == null) {
-            home = System.getenv('HOME');
-        }
-
-        if (home == null) {
-            throw new GradleException("Neither ANDROID_SDK_HOME, nor user.home nor HOME could be found.");
+            home = System.getenv('HOME')
         }
 
-        File f = project.file("${home}/.android/lint/");
+        if (home == null) {
+            throw new GradleException('Neither ANDROID_SDK_HOME, nor user.home nor HOME could be found.')
+        }
+
+        File f = project.file("${home}/.android/lint/")
         if (!f.exists()) {
-            f.mkdirs();
+            f.mkdirs()
         }
 
-        return f;
+        f
     }
 
     /**
@@ -57,8 +65,8 @@ abstract class AndroidLintTask extends DefaultTask {
      * @param to The new extension to be used
      */
     protected void changeAllFileExtensions(File dir, String from, String to) {
-        dir.eachFileMatch(FileType.FILES, ~/.*${from}$/, {
-            it.renameTo(it.getAbsolutePath()[0 ..< it.getAbsolutePath().length()-from.length()] + to)
-        });
+        dir.eachFileMatch(FileType.FILES, ~/.*${from}$/) {
+            it.renameTo(it.absolutePath[0 ..< it.absolutePath.length() - from.length()] + to)
+        }
     }
 }

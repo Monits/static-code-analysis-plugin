@@ -14,22 +14,27 @@
 package com.monits.gradle.sca
 
 import com.monits.gradle.sca.fixture.AbstractPluginIntegTestFixture
+import org.gradle.testkit.runner.BuildResult
 import org.gradle.util.GradleVersion
 import spock.lang.Unroll
 
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import static org.hamcrest.CoreMatchers.containsString
 
+/**
+ * Integration test of Checkstyle tasks.
+*/
 class CheckstyleIntegTest extends AbstractPluginIntegTestFixture {
-    @Unroll("Checkstyle #checkstyleVersion should run when using gradle #version")
-    def "Checkstyle is run"() {
+    @SuppressWarnings('MethodName')
+    @Unroll('Checkstyle #checkstyleVersion should run when using gradle #version')
+    void 'checkstyle is run'() {
         given:
         writeBuildFile()
         writeEmptyCheckstyleConfig()
         goodCode()
 
         when:
-        def result = gradleRunner()
+        BuildResult result = gradleRunner()
             .withGradleVersion(version)
             .build()
 
@@ -49,13 +54,14 @@ class CheckstyleIntegTest extends AbstractPluginIntegTestFixture {
                 ToolVersions.BACKWARDS_CHECKSTYLE_VERSION : ToolVersions.LATEST_CHECKSTYLE_VERSION
     }
 
-    def "Checkstyle download remote config"() {
+    @SuppressWarnings('MethodName')
+    void 'checkstyle download remote config'() {
         given:
         writeBuildFile()
         goodCode()
 
         when:
-        def result = gradleRunner()
+        BuildResult result = gradleRunner()
                 .build()
 
         then:
@@ -80,22 +86,23 @@ class CheckstyleIntegTest extends AbstractPluginIntegTestFixture {
         'checkstyle'
     }
 
-    def writeEmptyCheckstyleConfig() {
+    void writeEmptyCheckstyleConfig() {
         file('config/checkstyle.xml') <<
-        """<?xml version="1.0" encoding="UTF-8"?>
-            <!DOCTYPE module PUBLIC "-//Puppy Crawl//DTD Check Configuration 1.3//EN" "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
+        '''<?xml version="1.0" encoding="UTF-8"?>
+            <!DOCTYPE module PUBLIC "-//Puppy Crawl//DTD Check Configuration 1.3//EN"
+                "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
             <module name="Checker">
                 <property name="severity" value="warning"/>
                 <module name="TreeWalker">
                     <module name="OneTopLevelClass"/>
                 </module>
             </module>
-        """
+        '''
 
-        buildScriptFile() << """
+        buildScriptFile() << '''
             staticCodeAnalysis {
                 checkstyleRules = "config/checkstyle.xml"
             }
-        """
+        '''
     }
 }

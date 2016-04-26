@@ -14,20 +14,25 @@
 package com.monits.gradle.sca
 
 import com.monits.gradle.sca.fixture.AbstractPluginIntegTestFixture
+import org.gradle.testkit.runner.BuildResult
 import org.gradle.util.GradleVersion
 import spock.lang.Unroll
 
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 
+/**
+ * Integration test of CPD tasks.
+ */
 class CpdIntegTest extends AbstractPluginIntegTestFixture {
-    @Unroll("CPD should run when using gradle #version")
-    def "CPD is run"() {
+    @SuppressWarnings('MethodName')
+    @Unroll('CPD should run when using gradle #version')
+    void 'cpd is run'() {
         given:
         writeBuildFile()
         goodCode()
 
         when:
-        def result = gradleRunner()
+        BuildResult result = gradleRunner()
             .withGradleVersion(version)
             .build()
 
@@ -44,12 +49,13 @@ class CpdIntegTest extends AbstractPluginIntegTestFixture {
         version << ['2.3', '2.4', '2.8', '2.10', GradleVersion.current().version]
     }
 
-    def "CPD runs if there is no code"() {
+    @SuppressWarnings('MethodName')
+    void 'cpd runs if there is no code'() {
         given:
         writeBuildFile()
 
         when:
-        def result = gradleRunner().build()
+        BuildResult result = gradleRunner().build()
 
         then:
         result.task(taskName()).outcome == SUCCESS
