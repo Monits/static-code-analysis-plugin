@@ -19,6 +19,7 @@ import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.ParallelizableTask
 import org.gradle.api.tasks.TaskAction
 import org.gradle.logging.ConsoleRenderer
+import org.gradle.util.GradleVersion
 
 /**
  * A task to download a remote file.
@@ -46,7 +47,15 @@ class DownloadTask extends DefaultTask {
         directory.mkdirs()
 
         try {
-            ant.get(src:resourceUri, dest:downloadedFile.getAbsolutePath(), usetimestamp:true)
+            Map<String, Serializable> options =
+                    [src:resourceUri, dest:downloadedFile.getAbsolutePath(), usetimestamp:true]
+
+            // Gradle 2.13 includes ant 1.9.6 which supports gzip
+            if (GradleVersion.current() > GradleVersion.version('2.13')) {
+                options[tryGzipEncoding] = true
+            }
+
+            ant.get(options)
         } catch (SocketException | UnknownHostException e) {
             // network is unreachable, if there is a local file, warn the user, but use that instead of failing
             if (downloadedFile.exists()) {
