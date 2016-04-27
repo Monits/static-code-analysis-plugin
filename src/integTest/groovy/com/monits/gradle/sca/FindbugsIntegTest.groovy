@@ -139,7 +139,7 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
         file('config/findbugs/excludeFilter.xml') << '''
             <FindBugsFilter>
             </FindBugsFilter>
-        '''
+        ''' as TestFile
     }
 
     TestFile writeBuildFile(toolsConfig) {
