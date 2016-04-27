@@ -19,8 +19,10 @@ import org.gradle.testkit.runner.BuildResult
 import org.gradle.util.GradleVersion
 import spock.lang.Unroll
 
+import static org.gradle.testkit.runner.TaskOutcome.FAILED
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import static org.hamcrest.CoreMatchers.containsString
+import static org.junit.Assert.assertThat
 
 /**
  * Integration test of Findbugs tasks.
@@ -31,7 +33,7 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
     void 'findbugs is run'() {
         given:
         writeBuildFile()
-        writeEmptySuppressionFilter()
+        useEmptySuppressionFilter()
         goodCode()
 
         when:
@@ -78,6 +80,39 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
         reportFile().exists()
     }
 
+    @SuppressWarnings('MethodName')
+    void 'running offline fails download'() {
+        given:
+        writeBuildFile()
+        goodCode()
+
+        when:
+        BuildResult result = gradleRunner()
+                .withArguments('check', '--stacktrace', '--offline')
+                .buildAndFail()
+
+        then:
+        result.task(':downloadFindbugsExcludeFilter').outcome == FAILED
+        assertThat(result.output, containsString('Running in offline mode, but there is no cached version'))
+    }
+
+    @SuppressWarnings('MethodName')
+    void 'running offline with a cached file passes but warns'() {
+        given:
+        writeBuildFile()
+        writeEmptySuppressionFilter()
+        goodCode()
+
+        when:
+        BuildResult result = gradleRunner()
+                .withArguments('check', '--stacktrace', '--offline')
+                .build()
+
+        then:
+        result.task(':downloadFindbugsExcludeFilter').outcome == SUCCESS
+        assertThat(result.output, containsString('Running in offline mode. Using a possibly outdated version of'))
+    }
+
     String reportFileName() {
         'build/reports/findbugs/findbugs.xml'
     }
@@ -90,16 +125,20 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
         'findbugs'
     }
 
-    void writeEmptySuppressionFilter() {
-        file('config/findbugs-suppressions.xml') << '''
-            <FindBugsFilter>
-            </FindBugsFilter>
-        '''
+    void useEmptySuppressionFilter() {
+        writeEmptySuppressionFilter()
 
         buildScriptFile() << '''
             staticCodeAnalysis {
-                findbugsExclude = "config/findbugs-suppressions.xml"
+                findbugsExclude = "config/findbugs/excludeFilter.xml"
             }
+        '''
+    }
+
+    TestFile writeEmptySuppressionFilter() {
+        file('config/findbugs/excludeFilter.xml') << '''
+            <FindBugsFilter>
+            </FindBugsFilter>
         '''
     }
 

@@ -14,6 +14,7 @@
 package com.monits.gradle.sca.task
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.GradleException
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.ParallelizableTask
@@ -47,8 +48,20 @@ class DownloadTask extends DefaultTask {
         directory.mkdirs()
 
         try {
+            // Honor --offline
+            if (project.gradle.startParameter.isOffline()) {
+                String cachedResource = new ConsoleRenderer().asClickableFileUrl(downloadedFile)
+                if (downloadedFile.exists()) {
+                    logger.warn('Running in offline mode. ' +
+                            "Using a possibly outdated version of ${cachedResource}")
+                } else {
+                    throw new GradleException('Running in offline mode, ' +
+                            "but there is no cached version of ${cachedResource}")
+                }
+            }
+
             Map<String, Serializable> options =
-                    [src:resourceUri, dest:downloadedFile.getAbsolutePath(), usetimestamp:true]
+                    [src:resourceUri, dest:downloadedFile.absolutePath, usetimestamp:true]
 
             // Gradle 2.13 includes ant 1.9.6 which supports gzip
             if (GradleVersion.current() > GradleVersion.version('2.13')) {
@@ -59,7 +72,7 @@ class DownloadTask extends DefaultTask {
         } catch (SocketException | UnknownHostException e) {
             // network is unreachable, if there is a local file, warn the user, but use that instead of failing
             if (downloadedFile.exists()) {
-                String cachedResource = new ConsoleRenderer().asClickableFileUrl(getDownloadedFile())
+                String cachedResource = new ConsoleRenderer().asClickableFileUrl(downloadedFile)
                 logger.warn("Couldn't download ${resourceUri}, network seems to be unreachable. " +
                         "Using a possibly outdated version of ${cachedResource}")
             } else {

@@ -18,8 +18,10 @@ import org.gradle.testkit.runner.BuildResult
 import org.gradle.util.GradleVersion
 import spock.lang.Unroll
 
+import static org.gradle.testkit.runner.TaskOutcome.FAILED
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import static org.hamcrest.CoreMatchers.containsString
+import static org.junit.Assert.assertThat
 
 /**
  * Integration test of Checkstyle tasks.
@@ -72,6 +74,22 @@ class CheckstyleIntegTest extends AbstractPluginIntegTestFixture {
 
         // Make sure checkstyle report exists
         reportFile().exists()
+    }
+
+    @SuppressWarnings('MethodName')
+    void 'running offline fails download'() {
+        given:
+        writeBuildFile()
+        goodCode()
+
+        when:
+        BuildResult result = gradleRunner()
+            .withArguments('check', '--stacktrace', '--offline')
+            .buildAndFail()
+
+        then:
+        result.task(':downloadCheckstyleXml').outcome == FAILED
+        assertThat(result.output, containsString('Running in offline mode, but there is no cached version'))
     }
 
     String reportFileName() {
