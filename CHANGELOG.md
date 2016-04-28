@@ -8,6 +8,7 @@
  * Default PMD rules are now configured according to the PMD version being used
  * Findbugs annotations are not configured as dependency if findbugs is not enabled
  * Remote checkstyle / findbugs config download now honors the --offline flag
+ * Fix classpath population on an clean project
 
 # v1.6
 * **1.6.4**
