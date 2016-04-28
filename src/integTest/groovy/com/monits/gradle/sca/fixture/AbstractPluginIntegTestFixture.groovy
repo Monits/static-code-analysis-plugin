@@ -51,7 +51,6 @@ abstract class AbstractPluginIntegTestFixture extends AbstractIntegTestFixture {
         BuildResult secondRun = gradleRunner().build()
 
         then:
-        //
         firstRun.task(taskName()).outcome == SUCCESS
         secondRun.task(taskName()).outcome == UP_TO_DATE
 

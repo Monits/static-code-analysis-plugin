@@ -22,6 +22,7 @@ import spock.lang.Unroll
 import static org.gradle.testkit.runner.TaskOutcome.FAILED
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import static org.hamcrest.CoreMatchers.containsString
+import static org.hamcrest.CoreMatchers.not
 import static org.junit.Assert.assertThat
 
 /**
@@ -111,6 +112,49 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
         then:
         result.task(':downloadFindbugsExcludeFilter').outcome == SUCCESS
         assertThat(result.output, containsString('Running in offline mode. Using a possibly outdated version of'))
+    }
+
+    @SuppressWarnings(['MethodName', 'LineLength'])
+    void 'multimodule project has all classes'() {
+        given:
+        writeBuildFile().renameTo(file('liba/build.gradle'))
+        file('src/main/AndroidManifest.xml').renameTo(file('liba/src/main/AndroidManifest.xml'))
+        file('src').deleteDir()
+
+        writeBuildFile().renameTo(file('libb/build.gradle'))
+        file('src/main/AndroidManifest.xml').renameTo(file('libb/src/main/AndroidManifest.xml'))
+        file('src').deleteDir()
+
+        file('libb/build.gradle') << '''
+            dependencies {
+                compile project(':liba')
+            }
+        '''
+
+        file('settings.gradle') << '''
+            include ':liba', ':libb'
+        '''
+        file('build.gradle') // empty root build.gradle
+
+        file('liba/src/main/java/liba/ClassA.java') <<
+                'package liba; public class ClassA { public boolean isFoo(Object arg) { return true; } }'
+        file('libb/src/main/java/libb/ClassB.java') <<
+                'package libb; import liba.ClassA; public class ClassB { public boolean isFoo(Object arg) { ClassA a = new ClassA(); return a.isFoo(arg); } }'
+
+        when:
+        BuildResult result = gradleRunner()
+                .build()
+
+        then:
+        result.task(':libb' + taskName()).outcome == SUCCESS
+
+        // The report must exist, and not complan on missing classes from liba
+        TestFile finbugsReport = file('libb/' + reportFileName())
+        finbugsReport.exists()
+        finbugsReport.assertContents(not(containsString('<MissingClass>liba.ClassA</MissingClass>')))
+
+        // make sure nothing is reported
+        finbugsReport.assertContents(containsString('<Errors errors="0" missingClasses="0">'))
     }
 
     String reportFileName() {

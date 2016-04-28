@@ -66,8 +66,10 @@ class PmdIntegTest extends AbstractPluginIntegTestFixture {
 
             afterEvaluate {
                 Task pmdTask = project.tasks.getByPath(':pmd');
-                if (pmdTask != null && pmdTask.hasProperty('classpath') && !pmdTask.classpath.empty) {
-                    println "Auxclasspath is configured"
+                pmdTask << {
+                    if (!classpath.empty) {
+                        println "Auxclasspath is configured"
+                    }
                 }
             }
         '''

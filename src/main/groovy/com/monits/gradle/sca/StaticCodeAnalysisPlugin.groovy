@@ -22,7 +22,6 @@ import com.monits.gradle.sca.config.PmdConfigurator
 import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.artifacts.ModuleDependency
 import org.gradle.api.plugins.JavaBasePlugin
 
 /**
@@ -54,10 +53,6 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         withAndroidPlugins AndroidLintConfigurator
 
         project.afterEvaluate {
-            // Populate scaconfig
-            addDepsButModulesToScaconfig(project.configurations.compile)
-            addDepsButModulesToScaconfig(project.configurations.testCompile)
-
             if (extension.getFindbugs()) {
                 withAndroidPlugins FindbugsConfigurator
                 withPlugin(JavaBasePlugin, FindbugsConfigurator)
@@ -91,7 +86,10 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
                 }
             }
             compile.extendsFrom provided
-            scaconfig // Custom configuration for static code analysis
+            scaconfig { // Custom configuration for static code analysis
+                extendsFrom project.configurations.compile
+                extendsFrom project.configurations.testCompile
+            }
             androidLint { // Configuration used for android linters
                 transitive = false
                 description = 'Extra Android lint rules to be used'
@@ -120,25 +118,6 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
                 }
 
                 [PMD_BACKWARDS_RULES, PMD_DEFAULT_ANDROID_RULES]
-            }
-        }
-    }
-
-    /**
-     * Adds all dependencies except modules from given config to scaconfig.
-     *
-     * Modules are skipped, but transient dependencies are added
-     * (and transient modules skipped).
-     *
-     * @param config The config whose dependencies are to be added to scaconfig
-    */
-    private void addDepsButModulesToScaconfig(config) {
-        config.allDependencies.each {
-            if (it in ModuleDependency && it.group == project.rootProject.name) {
-                addDepsButModulesToScaconfig(
-                    project.rootProject.findProject(':' + it.name).configurations[it.configuration])
-            } else {
-                project.dependencies.scaconfig it
             }
         }
     }
