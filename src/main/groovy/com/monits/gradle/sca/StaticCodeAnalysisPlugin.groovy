@@ -82,12 +82,14 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
                 extendsFrom project.configurations.default
             }
             provided {
+                description = 'Compile only dependencies'
                 dependencies.all { dep ->
                     project.configurations.default.exclude group:dep.group, module:dep.name
                 }
             }
             compile.extendsFrom provided
             scaconfig { // Custom configuration for static code analysis
+                description = 'Configuraton used for Static Code Analysis'
                 extendsFrom project.configurations.compile
                 extendsFrom project.configurations.testCompile
             }
