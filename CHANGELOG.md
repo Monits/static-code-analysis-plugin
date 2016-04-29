@@ -6,7 +6,6 @@
  * If there is no connectivity, downloading checkstyle / findbugs config will not fail the build if there is a previous downloaded version. A wrning will be issued
  * Non-multimoule projects are now supported
  * Default PMD rules are now configured according to the PMD version being used
- * Findbugs annotations are not configured as dependency if findbugs is not enabled
  * Remote checkstyle / findbugs config download now honors the --offline flag
  * Fix classpath population on an clean project
 

@@ -115,6 +115,41 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
     }
 
     @SuppressWarnings(['MethodName', 'LineLength'])
+    void 'Findbugs-related annotations are available'() {
+        given:
+        writeBuildFile() << '''
+            afterEvaluate {
+                println project.configurations.compile.asPath
+            }
+        '''
+        writeEmptySuppressionFilter()
+        file('src/main/java/com/monits/ClassA.java') << '''
+            package com.monits;
+
+            import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+            import javax.annotation.Nonnull;
+
+            @SuppressFBWarnings(value = "MISSING_FIELD_IN_TO_STRING", justification = "doesn't provide meaningful information")
+            public class ClassA {
+                public boolean isFoo(@Nonnull Object arg) {
+                    return true;
+                }
+            }
+        '''
+
+        when:
+        BuildResult result = gradleRunner()
+                .build()
+
+        then:
+        result.task(taskName()).outcome == SUCCESS
+
+        // The report must exist, and not complain on missing classes from liba
+        reportFile().exists()
+        reportFile().assertContents(containsString('<Errors errors="0" missingClasses="0">'))
+    }
+
+    @SuppressWarnings(['MethodName', 'LineLength'])
     void 'multimodule project has all classes'() {
         given:
         writeBuildFile().renameTo(file('liba/build.gradle'))
@@ -148,7 +183,7 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
         then:
         result.task(':libb' + taskName()).outcome == SUCCESS
 
-        // The report must exist, and not complan on missing classes from liba
+        // The report must exist, and not complain on missing classes from liba
         TestFile finbugsReport = file('libb/' + reportFileName())
         finbugsReport.exists()
         finbugsReport.assertContents(not(containsString('<MissingClass>liba.ClassA</MissingClass>')))

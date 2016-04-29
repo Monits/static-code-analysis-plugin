@@ -47,6 +47,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         extension = project.extensions.create(EXTENSION_NAME, StaticCodeAnalysisExtension)
 
         defineConfigurations()
+        defineFindbugsAnnotationDependencies()
         configureExtensionRule()
 
         // Apply Android Lint configuration
@@ -94,6 +95,18 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
                 transitive = false
                 description = 'Extra Android lint rules to be used'
             }
+        }
+    }
+
+    private void defineFindbugsAnnotationDependencies() {
+        //FIXME: This is here so that projects that use Findbugs can compile... but it ignores DSL completely
+        project.repositories {
+            maven {
+                url 'http://nexus.monits.com/content/repositories/oss-snapshots'
+            }
+        }
+        project.dependencies {
+            provided 'com.google.code.findbugs:annotations:' + ToolVersions.findbugsVersion
         }
     }
 
