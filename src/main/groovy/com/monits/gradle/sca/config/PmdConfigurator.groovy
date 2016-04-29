@@ -31,6 +31,11 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
     @SuppressWarnings('UnnecessaryGetter')
     @Override
     void applyConfig(final Project project, final StaticCodeAnalysisExtension extension) {
+        // prevent applying it twice
+        if (project.tasks.findByName(PMD)) {
+            return
+        }
+
         boolean supportsClasspath = GRADLE_VERSION_PMD_CLASSPATH_SUPPORT <= GradleVersion.current()
 
         project.plugins.apply PMD

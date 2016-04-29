@@ -29,6 +29,11 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
     @SuppressWarnings('UnnecessaryGetter')
     @Override
     void applyConfig(Project project, StaticCodeAnalysisExtension extension) {
+        // prevent applying it twice
+        if (project.tasks.findByName(CHECKSTYLE)) {
+            return
+        }
+
         project.plugins.apply CHECKSTYLE
 
         boolean remoteLocation = isRemoteLocation(extension.getCheckstyleRules())

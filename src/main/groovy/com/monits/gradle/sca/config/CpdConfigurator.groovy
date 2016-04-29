@@ -17,18 +17,26 @@ import com.monits.gradle.sca.StaticCodeAnalysisExtension
 import com.monits.gradle.sca.ToolVersions
 import com.monits.gradle.sca.task.CPDTask
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.file.FileTree
 
 /**
  * A configurator for CPD tasks.
  */
 class CpdConfigurator implements AnalysisConfigurator {
+    private static final String CPD = 'cpd'
+
     @SuppressWarnings('UnnecessaryGetter')
     @Override
     void applyConfig(final Project project, final StaticCodeAnalysisExtension extension) {
+        // prevent applying it twice
+        if (project.tasks.findByName(CPD)) {
+            return
+        }
+
         project.plugins.apply 'pmd'
 
-        project.task('cpd', type:CPDTask) {
+        Task cpdTask = project.task(CPD, type:CPDTask) {
             ignoreFailures = extension.getIgnoreErrors()
 
             FileTree srcDir = project.fileTree("$project.projectDir/src/")
@@ -40,7 +48,7 @@ class CpdConfigurator implements AnalysisConfigurator {
             outputFile = new File("$project.buildDir/reports/pmd/cpd.xml")
         }
 
-        project.tasks.check.dependsOn project.tasks.cpd
+        project.tasks.check.dependsOn cpdTask
     }
 
     @Override
