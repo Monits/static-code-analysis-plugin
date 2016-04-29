@@ -22,6 +22,8 @@ import com.monits.gradle.sca.config.PmdConfigurator
 import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.artifacts.Dependency
+import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.plugins.JavaBasePlugin
 
 /**
@@ -54,6 +56,9 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         withAndroidPlugins AndroidLintConfigurator
 
         project.afterEvaluate {
+            addDepsButModulesToScaconfig project.configurations.compile
+            addDepsButModulesToScaconfig project.configurations.testCompile
+
             if (extension.getFindbugs()) {
                 withAndroidPlugins FindbugsConfigurator
                 withPlugin(JavaBasePlugin, FindbugsConfigurator)
@@ -83,15 +88,13 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             }
             provided {
                 description = 'Compile only dependencies'
-                dependencies.all { dep ->
+                dependencies.all { Dependency dep ->
                     project.configurations.default.exclude group:dep.group, module:dep.name
                 }
             }
             compile.extendsFrom provided
             scaconfig { // Custom configuration for static code analysis
                 description = 'Configuraton used for Static Code Analysis'
-                extendsFrom project.configurations.compile
-                extendsFrom project.configurations.testCompile
             }
             androidLint { // Configuration used for android linters
                 transitive = false
@@ -108,7 +111,13 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             }
         }
         project.dependencies {
-            provided 'com.google.code.findbugs:annotations:' + ToolVersions.findbugsVersion
+            provided('com.google.code.findbugs:annotations:' + ToolVersions.findbugsVersion) {
+                /*
+                 * This jar both includes and depends on jcip and jsr-305. One is enough
+                 * See https://github.com/findbugsproject/findbugs/issues/94
+                 */
+                transitive = false
+            }
         }
     }
 
@@ -133,6 +142,25 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
                 }
 
                 [PMD_BACKWARDS_RULES, PMD_DEFAULT_ANDROID_RULES]
+            }
+        }
+    }
+
+    /**
+     * Adds all dependencies except modules from given config to scaconfig.
+     *
+     * Modules are skipped, but transient dependencies are added
+     * (and transient modules skipped).
+     *
+     * @param config The config whose dependencies are to be added to scaconfig
+     */
+    private void addDepsButModulesToScaconfig(config) {
+        config.allDependencies.each {
+            if (it in ProjectDependency && it.group == project.rootProject.name) {
+                addDepsButModulesToScaconfig(
+                        project.rootProject.findProject(':' + it.name).configurations[it.configuration])
+            } else {
+                project.dependencies.scaconfig it
             }
         }
     }

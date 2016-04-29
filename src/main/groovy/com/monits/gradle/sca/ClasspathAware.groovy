@@ -15,7 +15,6 @@ package com.monits.gradle.sca
 
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.file.ConfigurableFileTree
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileTree
@@ -41,6 +40,7 @@ trait ClasspathAware {
             task.dependsOn t
         }
 
+        // FIXME : This avoids up-to-date check against classpath...
         task.doFirst {
             /*
              * For best results, this task needs ALL classes, including Android's SDK.
@@ -70,7 +70,7 @@ trait ClasspathAware {
             mockableAndroidJar += mockableAndroidJarTask.outputs.files
         }
 
-        task.classpath = project.configurations.scaconfig.fileCollection { !(it in ProjectDependency) } +
+        task.classpath = project.configurations.scaconfig +
                 project.fileTree(
                         dir:"${project.buildDir}/intermediates/exploded-aar/",
                         include:'**/*.jar',
