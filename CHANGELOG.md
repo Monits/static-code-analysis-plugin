@@ -3,12 +3,13 @@
 # v2.0 - unreleased
 * **2.0.0**
  * Remote checkstyle / findbugs config is downloaded gziped on Gradle 2.13 if possible
- * If there is no connectivity, downloading checkstyle / findbugs config will not fail the build if there is a previous downloaded version. A wrning will be issued
+ * If there is no connectivity, downloading checkstyle / findbugs config will not fail the build if there is a previous downloaded version. A warning will be issued
  * Non-multimoule projects are now supported
  * Default PMD rules are now configured according to the PMD version being used
  * Remote checkstyle / findbugs config download now honors the --offline flag
  * Fix classpath population on an clean project
  * Fix classpath population on Android proejcts to include generated classes in classath (though still not analyzed)
+ * Fix path to mockable-androir-xx.jar under Android Gradle plugin 2.+
 
 # v1.6
 * **1.6.4**

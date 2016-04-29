@@ -180,6 +180,35 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
         reportFile().assertContents(containsString('<Errors errors="0" missingClasses="0">'))
     }
 
+    @SuppressWarnings('MethodName')
+    void 'Android SDK classes are available'() {
+        given:
+        writeBuildFile()
+        writeEmptySuppressionFilter()
+        file('src/main/java/com/monits/ClassA.java') << '''
+            package com.monits;
+
+            import android.view.View;
+
+            public class ClassA {
+                public boolean isFoo() {
+                    return new View(null).callOnClick();
+                }
+            }
+        '''
+
+        when:
+        BuildResult result = gradleRunner()
+                .build()
+
+        then:
+        result.task(taskName()).outcome == SUCCESS
+
+        // The report must exist, and not complain on missing classes from liba
+        reportFile().exists()
+        reportFile().assertContents(containsString('<Errors errors="0" missingClasses="0">'))
+    }
+
     @SuppressWarnings(['MethodName', 'LineLength'])
     void 'multimodule project has all classes'() {
         given:
@@ -286,6 +315,10 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
             android {
                 compileSdkVersion 23
                 buildToolsVersion "23.0.2"
+
+                lintOptions {
+                    abortOnError false
+                }
             }
         """ as TestFile
     }

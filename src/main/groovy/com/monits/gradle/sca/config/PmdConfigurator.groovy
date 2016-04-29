@@ -62,13 +62,7 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
         }
 
         if (supportsClasspath) {
-            pmdTask.doFirst {
-                /*
-                 * For best results, PMD needs ALL classes, including Android's SDK.
-                 * We do this now that dependent tasks are done to actually find everything
-                 */
-                configAndroidClasspath(pmdTask, project)
-            }
+            setupAndroidClasspathAwareTask(pmdTask, project)
         }
 
         project.tasks.check.dependsOn pmdTask

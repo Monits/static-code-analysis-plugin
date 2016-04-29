@@ -74,11 +74,6 @@ class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
         Task findbugsTask = project.task(FINDBUGS, type:FindBugs) {
             dependsOn project.tasks.withType(JavaCompile)
 
-            Task t = project.tasks.findByName('mockableAndroidJar')
-            if (t != null) {
-                dependsOn t
-            }
-
             if (remoteLocation) {
                 dependsOn project.tasks.findByName(downloadTaskName)
             }
@@ -100,13 +95,7 @@ class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
             pluginClasspath = project.configurations.findbugsPlugins
         }
 
-        findbugsTask.doFirst {
-            /*
-             * For best results, Findbugs needs ALL classes, including Android's SDK.
-             * We do this now that dependent tasks are done to actually find everything
-             */
-            configAndroidClasspath(findbugsTask, project)
-        }
+        setupAndroidClasspathAwareTask(findbugsTask, project)
 
         project.tasks.check.dependsOn findbugsTask
     }
