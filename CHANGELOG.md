@@ -8,6 +8,7 @@
  * Default PMD rules are now configured according to the PMD version being used
  * Remote checkstyle / findbugs config download now honors the --offline flag
  * Fix classpath population on an clean project
+ * Fix classpath population on Android proejcts to include generated classes in classath (though still not analyzed)
 
 # v1.6
 * **1.6.4**

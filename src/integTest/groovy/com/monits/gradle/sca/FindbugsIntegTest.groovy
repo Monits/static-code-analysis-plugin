@@ -117,11 +117,7 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
     @SuppressWarnings(['MethodName', 'LineLength'])
     void 'Findbugs-related annotations are available'() {
         given:
-        writeBuildFile() << '''
-            afterEvaluate {
-                println project.configurations.compile.asPath
-            }
-        '''
+        writeBuildFile()
         writeEmptySuppressionFilter()
         file('src/main/java/com/monits/ClassA.java') << '''
             package com.monits;
@@ -133,6 +129,41 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
             public class ClassA {
                 public boolean isFoo(@Nonnull Object arg) {
                     return true;
+                }
+            }
+        '''
+
+        when:
+        BuildResult result = gradleRunner()
+                .build()
+
+        then:
+        result.task(taskName()).outcome == SUCCESS
+
+        // The report must exist, and not complain on missing classes from liba
+        reportFile().exists()
+        reportFile().assertContents(containsString('<Errors errors="0" missingClasses="0">'))
+    }
+
+    @SuppressWarnings('MethodName')
+    void 'Android generated classes are available'() {
+        given:
+        writeBuildFile()
+        writeEmptySuppressionFilter()
+        file('src/main/res/values/strings.xml') <<
+            '''<?xml version="1.0" encoding="utf-8"?>
+                <resources>
+                    <string name="greeting">Hey there!</string>
+                </resources>
+            '''
+        file('src/main/java/com/monits/ClassA.java') << '''
+            package com.monits;
+
+            import com.monits.staticCodeAnalysis.R;
+
+            public class ClassA {
+                public boolean isFoo() {
+                    return R.string.greeting == 1;
                 }
             }
         '''
