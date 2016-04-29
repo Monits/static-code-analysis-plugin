@@ -55,10 +55,6 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
                 xml.enabled = true
                 html.enabled = false
             }
-
-            if (supportsClasspath) {
-                classpath = project.files() // empty by default, will be populated lazily
-            }
         }
 
         if (supportsClasspath) {

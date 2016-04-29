@@ -79,7 +79,6 @@ class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
             }
 
             classes = getProjectClassTree(project)
-            classpath = project.files() // empty by default, will be populated lazily
 
             source 'src'
             include '**/*.java'
