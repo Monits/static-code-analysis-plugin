@@ -93,7 +93,7 @@ class CheckstyleIntegTest extends AbstractPluginIntegTestFixture {
     }
 
     String reportFileName(final String sourceSet) {
-        "build/reports/checkstyle/checkstyle${sourceSet ? "-${sourceSet}" : ''}.xml"
+        "build/reports/checkstyle/checkstyle${sourceSet ? "-${sourceSet}" : '-main'}.xml"
     }
 
     String taskName() {

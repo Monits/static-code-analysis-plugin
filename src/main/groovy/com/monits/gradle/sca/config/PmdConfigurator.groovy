@@ -32,8 +32,6 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
     @SuppressWarnings('UnnecessaryGetter')
     @Override
     void applyConfig(final Project project, final StaticCodeAnalysisExtension extension) {
-        boolean supportsClasspath = GRADLE_VERSION_PMD_CLASSPATH_SUPPORT <= GradleVersion.current()
-
         project.plugins.apply PMD
 
         project.pmd {
@@ -46,19 +44,13 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
         Task pmdRootTask = project.tasks.findByName(PMD) ?: project.task(PMD)
         project.sourceSets.all { SourceSet sourceSet ->
             Task pmdTask = getOrCreateTask(project, sourceSet.getTaskName(PMD, null)) {
-                source sourceSet.allJava
-                exclude '**/gen/**'
-
+                // most defaults are good enough
                 reports {
                     xml.enabled = true
                     xml.destination = xml.destination.absolutePath - "${sourceSet.name}.xml" +
                             "pmd-${sourceSet.name}.xml"
                     html.enabled = false
                 }
-            }
-
-            if (supportsClasspath) {
-                setupAndroidClasspathAwareTask(pmdTask, project)
             }
 
             pmdRootTask.dependsOn pmdTask

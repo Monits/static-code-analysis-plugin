@@ -17,8 +17,10 @@ import com.monits.gradle.sca.StaticCodeAnalysisExtension
 import com.monits.gradle.sca.ToolVersions
 import com.monits.gradle.sca.task.DownloadTask
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.plugins.quality.Checkstyle
-
+import org.gradle.api.tasks.SourceSet
+import org.gradle.util.GUtil
 /**
  * A confiurator for Checkstyle tasks.
  */
@@ -29,11 +31,6 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
     @SuppressWarnings('UnnecessaryGetter')
     @Override
     void applyConfig(Project project, StaticCodeAnalysisExtension extension) {
-        // prevent applying it twice
-        if (project.tasks.findByName(CHECKSTYLE)) {
-            return
-        }
-
         project.plugins.apply CHECKSTYLE
 
         boolean remoteLocation = isRemoteLocation(extension.getCheckstyleRules())
@@ -53,22 +50,77 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
             configFile configSource
         }
 
-        project.task(CHECKSTYLE, type:Checkstyle) {
-            if (remoteLocation) {
-                dependsOn project.tasks.findByName(downloadTaskName)
+        // Create a phony pmd task that just executes all real pmd tasks
+        Task checkstyleRootTask = project.tasks.findByName(CHECKSTYLE) ?: project.task(CHECKSTYLE)
+        project.sourceSets.all { SourceSet sourceSet ->
+            Task checkstyleTask = getOrCreateTask(project, sourceSet.getTaskName(CHECKSTYLE, null)) {
+                if (remoteLocation) {
+                    dependsOn project.tasks.findByName(downloadTaskName)
+                }
+
+                reports {
+                    xml.destination = reports.xml.destination.absolutePath - "${sourceSet.name}.xml" +
+                            "checkstyle-${sourceSet.name}.xml"
+
+                    if (hasProperty('html')) {
+                        html.enabled = false // added in gradle 2.10, but unwanted
+                    }
+                }
             }
-            source 'src'
-            include '**/*.java'
-            exclude '**/gen/**'
-            classpath = project.configurations.compile
+
+            checkstyleRootTask.dependsOn checkstyleTask
         }
 
-        project.tasks.check.dependsOn project.tasks[CHECKSTYLE]
+        project.tasks.check.dependsOn checkstyleRootTask
     }
 
     @Override
     void applyAndroidConfig(Project project, StaticCodeAnalysisExtension extension) {
-        applyConfig(project, extension) // no difference at all
+        project.plugins.apply CHECKSTYLE
+
+        boolean remoteLocation = isRemoteLocation(extension.getCheckstyleRules())
+        File configSource
+        String downloadTaskName = 'downloadCheckstyleXml'
+        if (remoteLocation) {
+            configSource = makeDownloadFileTask(project, extension.getCheckstyleRules(),
+                    'checkstyle.xml', downloadTaskName, CHECKSTYLE)
+        } else {
+            configSource = new File(extension.getCheckstyleRules())
+        }
+
+        project.checkstyle {
+            toolVersion = ToolVersions.checkstyleVersion
+            ignoreFailures = extension.getIgnoreErrors()
+            showViolations = false
+            configFile configSource
+        }
+
+        // Create a phony pmd task that just executes all real pmd tasks
+        Task checkstyleRootTask = project.tasks.findByName(CHECKSTYLE) ?: project.task(CHECKSTYLE)
+        project.android.sourceSets.all { sourceSet ->
+            Task checkstyleTask = getOrCreateTask(project, getTaskName(sourceSet.name)) {
+                if (remoteLocation) {
+                    dependsOn project.tasks.findByName(downloadTaskName)
+                }
+                source 'src'
+                include '**/*.java'
+                exclude '**/gen/**'
+                classpath = project.configurations.compile
+
+                reports {
+                    xml.destination = reports.xml.destination.absolutePath - "${sourceSet.name}.xml" +
+                            "checkstyle-${sourceSet.name}.xml"
+
+                    if (hasProperty('html')) {
+                        html.enabled = false // added in gradle 2.10, but unwanted
+                    }
+                }
+            }
+
+            checkstyleRootTask.dependsOn checkstyleTask
+        }
+
+        project.tasks.check.dependsOn checkstyleRootTask
     }
 
     private static boolean isRemoteLocation(String path) {
@@ -87,5 +139,20 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
         }
 
         destFile
+    }
+
+    private static Task getOrCreateTask(final Project project, final String taskName, final Closure closure) {
+        Task pmdTask;
+        if (project.tasks.findByName(taskName)) {
+            pmdTask = project.tasks.findByName(taskName)
+        } else {
+            pmdTask = project.task(taskName, type:Checkstyle)
+        }
+
+        pmdTask.configure closure
+    }
+
+    private static String getTaskName(final String sourceSetName) {
+        GUtil.toLowerCamelCase(String.format('%s %s', CHECKSTYLE, sourceSetName))
     }
 }
