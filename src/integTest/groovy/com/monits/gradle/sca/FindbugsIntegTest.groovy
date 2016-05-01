@@ -252,14 +252,17 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
         finbugsReport.assertContents(containsString('<Errors errors="0" missingClasses="0">'))
     }
 
+    @Override
     String reportFileName(final String sourceSet) {
         "build/reports/findbugs/findbugs${sourceSet ? "-${sourceSet}" : '-main'}.xml"
     }
 
+    @Override
     String taskName() {
         ':findbugs'
     }
 
+    @Override
     String toolName() {
         'findbugs'
     }
@@ -281,6 +284,7 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
         ''' as TestFile
     }
 
+    @Override
     TestFile writeBuildFile(toolsConfig) {
         // FIXME : Right now findbugs works only on Android projects
         writeAndroidManifest()

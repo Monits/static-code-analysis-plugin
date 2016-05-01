@@ -21,6 +21,7 @@ import org.gradle.api.Task
 import org.gradle.api.plugins.quality.Checkstyle
 import org.gradle.api.tasks.SourceSet
 import org.gradle.util.GUtil
+
 /**
  * A confiurator for Checkstyle tasks.
  */
@@ -74,6 +75,8 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
         project.tasks.check.dependsOn checkstyleRootTask
     }
 
+    // DuplicateStringLiteral should be removed once we refactor this
+    @SuppressWarnings(['UnnecessaryGetter', 'DuplicateStringLiteral'])
     @Override
     void applyAndroidConfig(Project project, StaticCodeAnalysisExtension extension) {
         project.plugins.apply CHECKSTYLE
@@ -142,7 +145,7 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
     }
 
     private static Task getOrCreateTask(final Project project, final String taskName, final Closure closure) {
-        Task pmdTask;
+        Task pmdTask
         if (project.tasks.findByName(taskName)) {
             pmdTask = project.tasks.findByName(taskName)
         } else {

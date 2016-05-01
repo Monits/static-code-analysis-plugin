@@ -31,6 +31,7 @@ import org.gradle.util.GUtil
 class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
     private static final String FINDBUGS = 'findbugs'
 
+    @SuppressWarnings('UnnecessaryGetter')
     @Override
     void applyConfig(Project project, StaticCodeAnalysisExtension extension) {
         project.plugins.apply FINDBUGS
@@ -81,7 +82,8 @@ class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
         project.tasks.check.dependsOn findbugsRootTask
     }
 
-    @SuppressWarnings('UnnecessaryGetter')
+    // DuplicateStringLiteral should be removed once we refactor this
+    @SuppressWarnings(['UnnecessaryGetter', 'DuplicateStringLiteral'])
     @Override
     void applyAndroidConfig(Project project, StaticCodeAnalysisExtension extension) {
         project.plugins.apply FINDBUGS
@@ -170,7 +172,7 @@ class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
     }
 
     private static Task getOrCreateTask(final Project project, final String taskName, final Closure closure) {
-        Task findbugsTask;
+        Task findbugsTask
         if (project.tasks.findByName(taskName)) {
             findbugsTask = project.tasks.findByName(taskName)
         } else {

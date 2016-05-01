@@ -64,14 +64,17 @@ class CpdIntegTest extends AbstractPluginIntegTestFixture {
         !reportFile().exists()
     }
 
+    @Override
     String reportFileName(final String sourceSet) {
         "build/reports/pmd/cpd${sourceSet ? "-${sourceSet}" : ''}.xml"
     }
 
+    @Override
     String taskName() {
         ':cpd'
     }
 
+    @Override
     String toolName() {
         'cpd'
     }

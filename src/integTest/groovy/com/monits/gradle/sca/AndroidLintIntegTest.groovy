@@ -52,19 +52,23 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
         version << ['2.3', '2.4', '2.7', '2.10', GradleVersion.current().version]
     }
 
+    @Override
     String reportFileName(final String sourceSet) {
         // Sourceset names are only taken into account when using Android plugin 2.+
         'build/outputs/lint-results.xml'
     }
 
+    @Override
     String taskName() {
         ':lint'
     }
 
+    @Override
     String toolName() {
         'androidLint'
     }
 
+    @Override
     TestFile writeBuildFile(toolsConfig) {
         // Android lint only exists on Android projects
         writeAndroidManifest()

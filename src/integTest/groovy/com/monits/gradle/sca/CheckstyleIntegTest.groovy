@@ -92,14 +92,17 @@ class CheckstyleIntegTest extends AbstractPluginIntegTestFixture {
         assertThat(result.output, containsString('Running in offline mode, but there is no cached version'))
     }
 
+    @Override
     String reportFileName(final String sourceSet) {
         "build/reports/checkstyle/checkstyle${sourceSet ? "-${sourceSet}" : '-main'}.xml"
     }
 
+    @Override
     String taskName() {
         ':checkstyle'
     }
 
+    @Override
     String toolName() {
         'checkstyle'
     }

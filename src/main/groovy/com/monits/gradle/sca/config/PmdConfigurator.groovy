@@ -22,6 +22,7 @@ import org.gradle.api.plugins.quality.Pmd
 import org.gradle.api.tasks.SourceSet
 import org.gradle.util.GUtil
 import org.gradle.util.GradleVersion
+
 /**
  * A configurator for PMD tasks.
 */
@@ -59,6 +60,8 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
         project.tasks.check.dependsOn pmdRootTask
     }
 
+    // DuplicateStringLiteral should be removed once we refactor this
+    @SuppressWarnings(['UnnecessaryGetter', 'DuplicateStringLiteral'])
     @Override
     void applyAndroidConfig(final Project project, final StaticCodeAnalysisExtension extension) {
         boolean supportsClasspath = GRADLE_VERSION_PMD_CLASSPATH_SUPPORT <= GradleVersion.current()
@@ -97,7 +100,7 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
     }
 
     private static Task getOrCreateTask(final Project project, final String taskName, final Closure closure) {
-        Task pmdTask;
+        Task pmdTask
         if (project.tasks.findByName(taskName)) {
             pmdTask = project.tasks.findByName(taskName)
         } else {

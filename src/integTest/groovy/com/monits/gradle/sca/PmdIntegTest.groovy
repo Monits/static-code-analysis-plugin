@@ -93,14 +93,17 @@ class PmdIntegTest extends AbstractPluginIntegTestFixture {
         reportFile().exists()
     }
 
+    @Override
     String reportFileName(final String sourceSet) {
         "build/reports/pmd/pmd${sourceSet ? "-${sourceSet}" : '-main'}.xml"
     }
 
+    @Override
     String taskName() {
         ':pmd'
     }
 
+    @Override
     String toolName() {
         'pmd'
     }
