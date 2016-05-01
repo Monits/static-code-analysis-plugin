@@ -19,8 +19,9 @@ import com.monits.gradle.sca.ToolVersions
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.plugins.quality.Pmd
+import org.gradle.api.tasks.SourceSet
+import org.gradle.util.GUtil
 import org.gradle.util.GradleVersion
-
 /**
  * A configurator for PMD tasks.
 */
@@ -31,11 +32,6 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
     @SuppressWarnings('UnnecessaryGetter')
     @Override
     void applyConfig(final Project project, final StaticCodeAnalysisExtension extension) {
-        // prevent applying it twice
-        if (project.tasks.findByName(PMD)) {
-            return
-        }
-
         boolean supportsClasspath = GRADLE_VERSION_PMD_CLASSPATH_SUPPORT <= GradleVersion.current()
 
         project.plugins.apply PMD
@@ -46,26 +42,80 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
             ruleSets = extension.getPmdRules()
         }
 
-        Task pmdTask = project.task(PMD, type:Pmd) {
-            source 'src'
-            include '**/*.java'
-            exclude '**/gen/**'
+        // Create a phony pmd task that just executes all real pmd tasks
+        Task pmdRootTask = project.tasks.findByName(PMD) ?: project.task(PMD)
+        project.sourceSets.all { SourceSet sourceSet ->
+            Task pmdTask = getOrCreateTask(project, sourceSet.getTaskName(PMD, null)) {
+                source sourceSet.allJava
+                exclude '**/gen/**'
 
-            reports {
-                xml.enabled = true
-                html.enabled = false
+                reports {
+                    xml.enabled = true
+                    xml.destination = xml.destination.absolutePath - "${sourceSet.name}.xml" +
+                            "pmd-${sourceSet.name}.xml"
+                    html.enabled = false
+                }
             }
+
+            if (supportsClasspath) {
+                setupAndroidClasspathAwareTask(pmdTask, project)
+            }
+
+            pmdRootTask.dependsOn pmdTask
         }
 
-        if (supportsClasspath) {
-            setupAndroidClasspathAwareTask(pmdTask, project)
-        }
-
-        project.tasks.check.dependsOn pmdTask
+        project.tasks.check.dependsOn pmdRootTask
     }
 
     @Override
     void applyAndroidConfig(final Project project, final StaticCodeAnalysisExtension extension) {
-        applyConfig(project, extension) // no difference at all
+        boolean supportsClasspath = GRADLE_VERSION_PMD_CLASSPATH_SUPPORT <= GradleVersion.current()
+
+        project.plugins.apply PMD
+
+        project.pmd {
+            toolVersion = ToolVersions.pmdVersion
+            ignoreFailures = extension.getIgnoreErrors()
+            ruleSets = extension.getPmdRules()
+        }
+
+        // Create a phony pmd task that just executes all real pmd tasks
+        Task pmdRootTask = project.tasks.findByName(PMD) ?: project.task(PMD)
+        project.android.sourceSets.all { sourceSet ->
+            Task pmdTask = getOrCreateTask(project, getTaskName(sourceSet.name)) {
+                source sourceSet.java.srcDirs
+                exclude '**/gen/**'
+
+                reports {
+                    xml.enabled = true
+                    xml.destination = xml.destination.absolutePath - "${sourceSet.name}.xml" +
+                            "pmd-${sourceSet.name}.xml"
+                    html.enabled = false
+                }
+            }
+
+            if (supportsClasspath) {
+                setupAndroidClasspathAwareTask(pmdTask, project)
+            }
+
+            pmdRootTask.dependsOn pmdTask
+        }
+
+        project.tasks.check.dependsOn pmdRootTask
+    }
+
+    private static Task getOrCreateTask(final Project project, final String taskName, final Closure closure) {
+        Task pmdTask;
+        if (project.tasks.findByName(taskName)) {
+            pmdTask = project.tasks.findByName(taskName)
+        } else {
+            pmdTask = project.task(taskName, type:Pmd)
+        }
+
+        pmdTask.configure closure
+    }
+
+    private static String getTaskName(final String sourceSetName) {
+        GUtil.toLowerCamelCase(String.format('%s %s', PMD, sourceSetName))
     }
 }

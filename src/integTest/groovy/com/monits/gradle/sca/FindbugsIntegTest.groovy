@@ -252,8 +252,8 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
         finbugsReport.assertContents(containsString('<Errors errors="0" missingClasses="0">'))
     }
 
-    String reportFileName() {
-        'build/reports/findbugs/findbugs.xml'
+    String reportFileName(final String sourceSet) {
+        "build/reports/findbugs/findbugs${sourceSet ? "-${sourceSet}" : '-main'}.xml"
     }
 
     String taskName() {

@@ -42,11 +42,16 @@ class PmdIntegTest extends AbstractPluginIntegTestFixture {
         if (GradleVersion.version(version) >= GradleVersion.version('2.5')) {
             // Executed task capture is only available in Gradle 2.5+
             result.task(taskName()).outcome == SUCCESS
+            result.task(':pmdMain').outcome == SUCCESS
+            result.task(':pmdTest').outcome == SUCCESS
         }
 
         // Make sure report exists and was using the expected tool version
-        reportFile().exists()
-        reportFile().assertContents(containsString("<pmd version=\"$pmdVersion\""))
+        reportFile('main').exists()
+        reportFile('main').assertContents(containsString("<pmd version=\"$pmdVersion\""))
+
+        reportFile('test').exists()
+        reportFile('test').assertContents(containsString("<pmd version=\"$pmdVersion\""))
 
         where:
         version << ['2.3', '2.4', '2.8', '2.10', GradleVersion.current().version]
@@ -65,7 +70,7 @@ class PmdIntegTest extends AbstractPluginIntegTestFixture {
             }
 
             afterEvaluate {
-                Task pmdTask = project.tasks.getByPath(':pmd');
+                Task pmdTask = project.tasks.getByPath(':pmdTest');
                 pmdTask << {
                     if (!classpath.empty) {
                         println "Auxclasspath is configured"
@@ -88,8 +93,8 @@ class PmdIntegTest extends AbstractPluginIntegTestFixture {
         reportFile().exists()
     }
 
-    String reportFileName() {
-        'build/reports/pmd/pmd.xml'
+    String reportFileName(final String sourceSet) {
+        "build/reports/pmd/pmd${sourceSet ? "-${sourceSet}" : '-main'}.xml"
     }
 
     String taskName() {

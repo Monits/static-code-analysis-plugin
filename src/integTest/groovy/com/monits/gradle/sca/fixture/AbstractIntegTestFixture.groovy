@@ -103,11 +103,11 @@ abstract class AbstractIntegTestFixture extends Specification {
         file('build.gradle')
     }
 
-    TestFile reportFile() {
-        file(reportFileName())
+    TestFile reportFile(String sourceSet = '') {
+        file(reportFileName(sourceSet))
     }
 
-    abstract String reportFileName()
+    abstract String reportFileName(String sourceSet)
 
     abstract String taskName()
 

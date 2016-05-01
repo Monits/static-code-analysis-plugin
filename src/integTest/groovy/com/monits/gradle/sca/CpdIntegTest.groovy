@@ -64,8 +64,8 @@ class CpdIntegTest extends AbstractPluginIntegTestFixture {
         !reportFile().exists()
     }
 
-    String reportFileName() {
-        'build/reports/pmd/cpd.xml'
+    String reportFileName(final String sourceSet) {
+        "build/reports/pmd/cpd${sourceSet ? "-${sourceSet}" : ''}.xml"
     }
 
     String taskName() {
