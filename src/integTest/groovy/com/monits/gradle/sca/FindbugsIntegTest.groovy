@@ -75,7 +75,8 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
         result.task(taskName()).outcome == SUCCESS
 
         // The config must exist
-        file('config/findbugs/excludeFilter.xml').exists()
+        file('config/findbugs/excludeFilter-main.xml').exists()
+        file('config/findbugs/excludeFilter-androidTest.xml').exists()
 
         // Make sure checkstyle report exists
         reportFile().exists()
@@ -93,7 +94,7 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
                 .buildAndFail()
 
         then:
-        result.task(':downloadFindbugsExcludeFilter').outcome == FAILED
+        result.task(':downloadFindbugsExcludeFilterAndroidTest').outcome == FAILED
         assertThat(result.output, containsString('Running in offline mode, but there is no cached version'))
     }
 
@@ -101,7 +102,13 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
     void 'running offline with a cached file passes but warns'() {
         given:
         writeBuildFile()
-        writeEmptySuppressionFilter()
+        writeEmptySuppressionFilter('main')
+        writeEmptySuppressionFilter('test')
+        writeEmptySuppressionFilter('testDebug')
+        writeEmptySuppressionFilter('testRelease')
+        writeEmptySuppressionFilter('androidTest')
+        writeEmptySuppressionFilter('debug')
+        writeEmptySuppressionFilter('release')
         goodCode()
 
         when:
@@ -110,7 +117,13 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
                 .build()
 
         then:
-        result.task(':downloadFindbugsExcludeFilter').outcome == SUCCESS
+        result.task(':downloadFindbugsExcludeFilterAndroidTest').outcome == SUCCESS
+        result.task(':downloadFindbugsExcludeFilterMain').outcome == SUCCESS
+        result.task(':downloadFindbugsExcludeFilterDebug').outcome == SUCCESS
+        result.task(':downloadFindbugsExcludeFilterRelease').outcome == SUCCESS
+        result.task(':downloadFindbugsExcludeFilterTest').outcome == SUCCESS
+        result.task(':downloadFindbugsExcludeFilterTestDebug').outcome == SUCCESS
+        result.task(':downloadFindbugsExcludeFilterTestRelease').outcome == SUCCESS
         assertThat(result.output, containsString('Running in offline mode. Using a possibly outdated version of'))
     }
 
@@ -244,7 +257,7 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
         result.task(':libb' + taskName()).outcome == SUCCESS
 
         // The report must exist, and not complain on missing classes from liba
-        TestFile finbugsReport = file('libb/' + reportFileName())
+        TestFile finbugsReport = file('libb/' + reportFileName(null))
         finbugsReport.exists()
         finbugsReport.assertContents(not(containsString('<MissingClass>liba.ClassA</MissingClass>')))
 
@@ -272,13 +285,13 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
 
         buildScriptFile() << '''
             staticCodeAnalysis {
-                findbugsExclude = "config/findbugs/excludeFilter.xml"
+                findbugsExclude = 'config/findbugs/excludeFilter.xml'
             }
         '''
     }
 
-    TestFile writeEmptySuppressionFilter() {
-        file('config/findbugs/excludeFilter.xml') << '''
+    TestFile writeEmptySuppressionFilter(final String sourceSet = null) {
+        file("config/findbugs/excludeFilter${sourceSet ? "-${sourceSet}" : ''}.xml") << '''
             <FindBugsFilter>
             </FindBugsFilter>
         ''' as TestFile

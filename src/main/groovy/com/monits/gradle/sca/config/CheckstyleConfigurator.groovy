@@ -13,6 +13,7 @@
  */
 package com.monits.gradle.sca.config
 
+import com.monits.gradle.sca.RulesConfig
 import com.monits.gradle.sca.StaticCodeAnalysisExtension
 import com.monits.gradle.sca.ToolVersions
 import com.monits.gradle.sca.task.DownloadTask
@@ -34,30 +35,33 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
     void applyConfig(Project project, StaticCodeAnalysisExtension extension) {
         project.plugins.apply CHECKSTYLE
 
-        boolean remoteLocation = isRemoteLocation(extension.getCheckstyleRules())
-        File configSource
-        String downloadTaskName = 'downloadCheckstyleXml'
-        if (remoteLocation) {
-            configSource = makeDownloadFileTask(project, extension.getCheckstyleRules(),
-                    'checkstyle.xml', downloadTaskName, CHECKSTYLE)
-        } else {
-            configSource = new File(extension.getCheckstyleRules())
-        }
-
         project.checkstyle {
             toolVersion = ToolVersions.checkstyleVersion
             ignoreFailures = extension.getIgnoreErrors()
             showViolations = false
-            configFile configSource
         }
 
         // Create a phony pmd task that just executes all real pmd tasks
         Task checkstyleRootTask = project.tasks.findByName(CHECKSTYLE) ?: project.task(CHECKSTYLE)
         project.sourceSets.all { SourceSet sourceSet ->
+            RulesConfig config = extension.sourceSetConfig.maybeCreate(sourceSet.name)
+
+            boolean remoteLocation = isRemoteLocation(config.getCheckstyleRules())
+            File configSource
+            String downloadTaskName = sourceSet.getTaskName('downloadCheckstyleXml', null)
+            if (remoteLocation) {
+                configSource = makeDownloadFileTask(project, config.getCheckstyleRules(),
+                        String.format('checkstyle-%s.xml', sourceSet.name), downloadTaskName, CHECKSTYLE)
+            } else {
+                configSource = new File(config.getCheckstyleRules())
+            }
+
             Task checkstyleTask = getOrCreateTask(project, sourceSet.getTaskName(CHECKSTYLE, null)) {
                 if (remoteLocation) {
                     dependsOn project.tasks.findByName(downloadTaskName)
                 }
+
+                configFile configSource
 
                 reports {
                     xml.destination = reports.xml.destination.absolutePath - "${sourceSet.name}.xml" +
@@ -81,34 +85,38 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
     void applyAndroidConfig(Project project, StaticCodeAnalysisExtension extension) {
         project.plugins.apply CHECKSTYLE
 
-        boolean remoteLocation = isRemoteLocation(extension.getCheckstyleRules())
-        File configSource
-        String downloadTaskName = 'downloadCheckstyleXml'
-        if (remoteLocation) {
-            configSource = makeDownloadFileTask(project, extension.getCheckstyleRules(),
-                    'checkstyle.xml', downloadTaskName, CHECKSTYLE)
-        } else {
-            configSource = new File(extension.getCheckstyleRules())
-        }
-
         project.checkstyle {
             toolVersion = ToolVersions.checkstyleVersion
             ignoreFailures = extension.getIgnoreErrors()
             showViolations = false
-            configFile configSource
         }
 
         // Create a phony pmd task that just executes all real pmd tasks
         Task checkstyleRootTask = project.tasks.findByName(CHECKSTYLE) ?: project.task(CHECKSTYLE)
         project.android.sourceSets.all { sourceSet ->
+            RulesConfig config = extension.sourceSetConfig.maybeCreate(sourceSet.name)
+
+            boolean remoteLocation = isRemoteLocation(config.getCheckstyleRules())
+            File configSource
+            String downloadTaskName = getTaskName('downloadCheckstyleXml', sourceSet.name)
+            if (remoteLocation) {
+                configSource = makeDownloadFileTask(project, config.getCheckstyleRules(),
+                        String.format('checkstyle-%s.xml', sourceSet.name), downloadTaskName, CHECKSTYLE)
+            } else {
+                configSource = new File(config.getCheckstyleRules())
+            }
+
             Task checkstyleTask = getOrCreateTask(project, getTaskName(sourceSet.name)) {
                 if (remoteLocation) {
                     dependsOn project.tasks.findByName(downloadTaskName)
                 }
+
                 source 'src'
                 include '**/*.java'
                 exclude '**/gen/**'
                 classpath = project.configurations.compile
+
+                configFile configSource
 
                 reports {
                     xml.destination = reports.xml.destination.absolutePath - "${sourceSet.name}.xml" +
@@ -155,7 +163,7 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
         pmdTask.configure closure
     }
 
-    private static String getTaskName(final String sourceSetName) {
-        GUtil.toLowerCamelCase(String.format('%s %s', CHECKSTYLE, sourceSetName))
+    private static String getTaskName(final String taskName = CHECKSTYLE, final String sourceSetName) {
+        GUtil.toLowerCamelCase(String.format('%s %s', taskName, sourceSetName))
     }
 }

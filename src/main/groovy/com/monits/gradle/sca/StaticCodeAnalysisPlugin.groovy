@@ -144,6 +144,10 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
                 [PMD_BACKWARDS_RULES, PMD_DEFAULT_ANDROID_RULES]
             }
         }
+
+        extension.sourceSetConfig = project.container(RulesConfig) { String name ->
+            new RulesConfig(name, extension)
+        }
     }
 
     /**

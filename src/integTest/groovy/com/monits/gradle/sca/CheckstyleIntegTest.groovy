@@ -32,7 +32,7 @@ class CheckstyleIntegTest extends AbstractPluginIntegTestFixture {
     void 'checkstyle is run'() {
         given:
         writeBuildFile()
-        writeEmptyCheckstyleConfig()
+        useEmptyCheckstyleConfig()
         goodCode()
 
         when:
@@ -70,7 +70,8 @@ class CheckstyleIntegTest extends AbstractPluginIntegTestFixture {
         result.task(taskName()).outcome == SUCCESS
 
         // The config must exist
-        file('config/checkstyle/checkstyle.xml').exists()
+        file('config/checkstyle/checkstyle-main.xml').exists()
+        file('config/checkstyle/checkstyle-test.xml').exists()
 
         // Make sure checkstyle report exists
         reportFile().exists()
@@ -88,8 +89,27 @@ class CheckstyleIntegTest extends AbstractPluginIntegTestFixture {
             .buildAndFail()
 
         then:
-        result.task(':downloadCheckstyleXml').outcome == FAILED
+        result.task(':downloadCheckstyleXmlMain').outcome == FAILED
         assertThat(result.output, containsString('Running in offline mode, but there is no cached version'))
+    }
+
+    @SuppressWarnings('MethodName')
+    void 'running offline with a cached file passes but warns'() {
+        given:
+        writeBuildFile()
+        writeEmptyCheckstyleConfig('main')
+        writeEmptyCheckstyleConfig('test')
+        goodCode()
+
+        when:
+        BuildResult result = gradleRunner()
+                .withArguments('check', '--stacktrace', '--offline')
+                .build()
+
+        then:
+        result.task(':downloadCheckstyleXmlTest').outcome == SUCCESS
+        result.task(':downloadCheckstyleXmlMain').outcome == SUCCESS
+        assertThat(result.output, containsString('Running in offline mode. Using a possibly outdated version of'))
     }
 
     @Override
@@ -107,9 +127,9 @@ class CheckstyleIntegTest extends AbstractPluginIntegTestFixture {
         'checkstyle'
     }
 
-    void writeEmptyCheckstyleConfig() {
-        file('config/checkstyle.xml') <<
-        '''<?xml version="1.0" encoding="UTF-8"?>
+    void writeEmptyCheckstyleConfig(final String sourceSet = null) {
+        file("config/checkstyle/checkstyle${sourceSet ? "-${sourceSet}" : ''}.xml") <<
+                '''<?xml version="1.0" encoding="UTF-8"?>
             <!DOCTYPE module PUBLIC "-//Puppy Crawl//DTD Check Configuration 1.3//EN"
                 "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
             <module name="Checker">
@@ -119,10 +139,14 @@ class CheckstyleIntegTest extends AbstractPluginIntegTestFixture {
                 </module>
             </module>
         '''
+    }
+
+    void useEmptyCheckstyleConfig() {
+        writeEmptyCheckstyleConfig()
 
         buildScriptFile() << '''
             staticCodeAnalysis {
-                checkstyleRules = "config/checkstyle.xml"
+                checkstyleRules = 'config/checkstyle/checkstyle.xml'
             }
         '''
     }

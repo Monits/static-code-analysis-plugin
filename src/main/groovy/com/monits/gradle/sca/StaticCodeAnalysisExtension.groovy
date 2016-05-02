@@ -13,6 +13,8 @@
  */
 package com.monits.gradle.sca
 
+import org.gradle.api.NamedDomainObjectContainer
+
 /**
  * Extension to configure the Static code Analysis Plugin.
 */
@@ -27,4 +29,6 @@ class StaticCodeAnalysisExtension {
     String checkstyleRules
     List<String> pmdRules
     String findbugsExclude
+
+    NamedDomainObjectContainer<RulesConfig> sourceSetConfig
 }

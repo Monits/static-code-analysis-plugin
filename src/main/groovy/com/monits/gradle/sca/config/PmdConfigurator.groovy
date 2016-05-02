@@ -14,6 +14,7 @@
 package com.monits.gradle.sca.config
 
 import com.monits.gradle.sca.ClasspathAware
+import com.monits.gradle.sca.RulesConfig
 import com.monits.gradle.sca.StaticCodeAnalysisExtension
 import com.monits.gradle.sca.ToolVersions
 import org.gradle.api.Project
@@ -38,14 +39,17 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
         project.pmd {
             toolVersion = ToolVersions.pmdVersion
             ignoreFailures = extension.getIgnoreErrors()
-            ruleSets = extension.getPmdRules()
         }
 
         // Create a phony pmd task that just executes all real pmd tasks
         Task pmdRootTask = project.tasks.findByName(PMD) ?: project.task(PMD)
         project.sourceSets.all { SourceSet sourceSet ->
+            RulesConfig config = extension.sourceSetConfig.maybeCreate(sourceSet.name)
+
             Task pmdTask = getOrCreateTask(project, sourceSet.getTaskName(PMD, null)) {
                 // most defaults are good enough
+                ruleSets = config.getPmdRules()
+
                 reports {
                     xml.enabled = true
                     xml.destination = xml.destination.absolutePath - "${sourceSet.name}.xml" +
@@ -71,13 +75,16 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
         project.pmd {
             toolVersion = ToolVersions.pmdVersion
             ignoreFailures = extension.getIgnoreErrors()
-            ruleSets = extension.getPmdRules()
         }
 
         // Create a phony pmd task that just executes all real pmd tasks
         Task pmdRootTask = project.tasks.findByName(PMD) ?: project.task(PMD)
         project.android.sourceSets.all { sourceSet ->
+            RulesConfig config = extension.sourceSetConfig.maybeCreate(sourceSet.name)
+
             Task pmdTask = getOrCreateTask(project, getTaskName(sourceSet.name)) {
+                ruleSets = config.getPmdRules()
+
                 source sourceSet.java.srcDirs
                 exclude '**/gen/**'
 
