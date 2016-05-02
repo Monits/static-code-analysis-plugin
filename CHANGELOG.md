@@ -1,6 +1,9 @@
 ## History
 
 # v1.6
+* **1.6.5**
+ * Update checkstyle to 6.18
+
 * **1.6.4**
  * Remote config is now downloaded with a conditional request 
  * Update checkstyle to 6.17
