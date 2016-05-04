@@ -159,6 +159,7 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
     }
 
     @SuppressWarnings('MethodName')
+    @Unroll('Android classes are available when using android gradle plugin #androidVersion and gradle #gradleVersion')
     void 'Android generated classes are available'() {
         given:
         writeBuildFile()
@@ -193,10 +194,11 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
         reportFile().assertContents(containsString('<Errors errors="0" missingClasses="0">'))
     }
 
+    @Unroll('Android classes are available when using android gradle plugin #androidVersion and gradle #gradleVersion')
     @SuppressWarnings('MethodName')
     void 'Android SDK classes are available'() {
         given:
-        writeBuildFile()
+        writeBuildFile('findbugs':true, androidVersion:androidVersion)
         writeEmptySuppressionFilter()
         file('src/main/java/com/monits/ClassA.java') << '''
             package com.monits;
@@ -212,14 +214,22 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
 
         when:
         BuildResult result = gradleRunner()
+                .withGradleVersion(gradleVersion)
                 .build()
 
         then:
-        result.task(taskName()).outcome == SUCCESS
+        if (GradleVersion.version(gradleVersion) >= GradleVersion.version('2.5')) {
+            result.task(taskName()).outcome == SUCCESS
+        }
 
         // The report must exist, and not complain on missing classes from liba
         reportFile().exists()
         reportFile().assertContents(containsString('<Errors errors="0" missingClasses="0">'))
+
+        where:
+        // mockable android jar is available since 1.1.0
+        androidVersion << ['1.1.3', '1.2.3', '1.3.1', '1.5.0', '2.0.0', '2.1.0']
+        gradleVersion = androidVersion < '1.5.0' ? '2.9' : GradleVersion.current().version
     }
 
     @SuppressWarnings(['MethodName', 'LineLength'])
@@ -305,7 +315,7 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
         buildScriptFile() << """
             buildscript {
                 dependencies {
-                    classpath 'com.android.tools.build:gradle:1.5.0'
+                    classpath 'com.android.tools.build:gradle:${toolsConfig.get('androidVersion', '2.1.0')}'
                     classpath files($pluginClasspathString)
                 }
 
