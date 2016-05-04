@@ -315,7 +315,7 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
         buildScriptFile() << """
             buildscript {
                 dependencies {
-                    classpath 'com.android.tools.build:gradle:${toolsConfig.get('androidVersion', '2.1.0')}'
+                    classpath 'com.android.tools.build:gradle:${toolsConfig.get('androidVersion', '1.5.0')}'
                     classpath files($pluginClasspathString)
                 }
 
