@@ -18,11 +18,11 @@ import com.monits.gradle.sca.RulesConfig
 import com.monits.gradle.sca.StaticCodeAnalysisExtension
 import com.monits.gradle.sca.ToolVersions
 import com.monits.gradle.sca.task.DownloadTask
+import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.plugins.quality.FindBugs
 import org.gradle.api.reporting.ReportingExtension
-import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.util.GUtil
 
@@ -32,9 +32,37 @@ import org.gradle.util.GUtil
 class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
     private static final String FINDBUGS = 'findbugs'
 
-    @SuppressWarnings('UnnecessaryGetter')
     @Override
-    void applyConfig(Project project, StaticCodeAnalysisExtension extension) {
+    void applyConfig(final Project project, final StaticCodeAnalysisExtension extension) {
+        setupPlugin(project, extension)
+
+        setupTasksPerSourceSet(project, extension, project.sourceSets)
+    }
+
+    @Override
+    void applyAndroidConfig(final Project project, final StaticCodeAnalysisExtension extension) {
+        setupPlugin(project, extension)
+
+        setupTasksPerSourceSet(project, extension, project.android.sourceSets) { FindBugs findbugsTask, sourceSet ->
+            /*
+             * Android doesn't expose name of the task compiling the sourceset, and names vary
+             * widely from version to version of the plugin, plus needs to take flavors into account.
+             * This is inefficient, but safer and simpler.
+            */
+            dependsOn project.tasks.withType(JavaCompile)
+
+            // TODO : Get classes just for the given sourceset, the rest should be in the classpath
+            classes = getProjectClassTree(project)
+
+            source sourceSet.java.srcDirs
+            exclude '**/gen/**'
+
+            setupAndroidClasspathAwareTask(findbugsTask, project)
+        }
+    }
+
+    @SuppressWarnings('UnnecessaryGetter')
+    private static void setupPlugin(final Project project, final StaticCodeAnalysisExtension extension) {
         project.plugins.apply FINDBUGS
 
         project.dependencies {
@@ -49,24 +77,30 @@ class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
             effort = 'max'
             ignoreFailures = extension.getIgnoreErrors()
         }
+    }
 
+    @SuppressWarnings('UnnecessaryGetter')
+    private static void setupTasksPerSourceSet(final Project project, final StaticCodeAnalysisExtension extension,
+                                               final NamedDomainObjectContainer<Object> sourceSets,
+                                               final Closure<?> configuration = null) {
         // Create a phony findbugs task that just executes all real findbugs tasks
         Task findbugsRootTask = project.tasks.findByName(FINDBUGS) ?: project.task(FINDBUGS)
-        project.sourceSets.all { SourceSet sourceSet ->
-            RulesConfig config = extension.sourceSetConfig.maybeCreate(sourceSet.name)
+        sourceSets.all { sourceSet ->
+            String sourceSetName = sourceSets.namer.determineName(sourceSet)
+            RulesConfig config = extension.sourceSetConfig.maybeCreate(sourceSetName)
 
-            // TODO : Avoid multiple downlaods of same file under different names
+            // TODO : Avoid multiple downloads of same file under different names
             boolean remoteLocation = isRemoteLocation(config.getFindbugsExclude())
             File filterSource
-            String downloadTaskName = sourceSet.getTaskName('downloadFindbugsExcludeFilter', null)
+            String downloadTaskName = generateTaskName('downloadFindbugsExcludeFilter', sourceSetName)
             if (remoteLocation) {
                 filterSource = makeDownloadFileTask(project, config.getFindbugsExclude(),
-                    String.format('excludeFilter-%s.xml', sourceSet.name), downloadTaskName, FINDBUGS)
+                        String.format('excludeFilter-%s.xml', sourceSetName), downloadTaskName, FINDBUGS)
             } else {
                 filterSource = new File(config.getFindbugsExclude())
             }
 
-            Task findbugsTask = getOrCreateTask(project, sourceSet.getTaskName(FINDBUGS, null)) {
+            Task findbugsTask = getOrCreateTask(project, generateTaskName(sourceSetName)) {
                 // most defaults are good enough
                 if (remoteLocation) {
                     dependsOn project.tasks.findByName(downloadTaskName)
@@ -74,82 +108,20 @@ class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
 
                 excludeFilter = filterSource
 
-                reports.xml {
-                    destination = new File(project.extensions.getByType(ReportingExtension).file(FINDBUGS),
-                            "findbugs-${sourceSet.name}.xml")
-                    withMessages = true
+                reports {
+                    xml {
+                        destination = new File(project.extensions.getByType(ReportingExtension).file(FINDBUGS),
+                                "findbugs-${sourceSetName}.xml")
+                        withMessages = true
+                    }
                 }
             }
 
-            findbugsRootTask.dependsOn findbugsTask
-        }
-
-        project.tasks.check.dependsOn findbugsRootTask
-    }
-
-    // DuplicateStringLiteral should be removed once we refactor this
-    @SuppressWarnings(['UnnecessaryGetter', 'DuplicateStringLiteral'])
-    @Override
-    void applyAndroidConfig(Project project, StaticCodeAnalysisExtension extension) {
-        project.plugins.apply FINDBUGS
-
-        project.dependencies {
-            findbugsPlugins('com.monits:findbugs-plugin:' + ToolVersions.monitsFindbugsVersion) {
-                transitive = false
-            }
-            findbugsPlugins 'com.mebigfatguy.fb-contrib:fb-contrib:' + ToolVersions.fbContribVersion
-        }
-
-        project.findbugs {
-            toolVersion = ToolVersions.findbugsVersion
-            effort = 'max'
-            ignoreFailures = extension.getIgnoreErrors()
-        }
-
-        // Create a phony findbugs task that just executes all real findbugs tasks
-        Task findbugsRootTask = project.tasks.findByName(FINDBUGS) ?: project.task(FINDBUGS)
-        project.android.sourceSets.all { sourceSet ->
-            RulesConfig config = extension.sourceSetConfig.maybeCreate(sourceSet.name)
-
-            // TODO : Avoid multiple downlaods of same file under different names
-            boolean remoteLocation = isRemoteLocation(config.getFindbugsExclude())
-            File filterSource
-            String downloadTaskName = getTaskName('downloadFindbugsExcludeFilter', sourceSet.name)
-            if (remoteLocation) {
-                filterSource = makeDownloadFileTask(project, config.getFindbugsExclude(),
-                    String.format('excludeFilter-%s.xml', sourceSet.name), downloadTaskName, FINDBUGS)
-            } else {
-                filterSource = new File(config.getFindbugsExclude())
+            if (configuration) {
+                // Add the sourceset as second parameter for configuration closure
+                findbugsTask.configure configuration.rcurry(sourceSet)
             }
 
-            Task findbugsTask = getOrCreateTask(project, getTaskName(sourceSet.name)) {
-                /*
-                 * Android doesn't expose name of the task compiling the sourceset, and names vary
-                 * widely from version to version of the plugin, plus needs to take flavors into account.
-                 * This is inefficient, but safer and simpler.
-                */
-                dependsOn project.tasks.withType(JavaCompile)
-
-                if (remoteLocation) {
-                    dependsOn project.tasks.findByName(downloadTaskName)
-                }
-
-                excludeFilter = filterSource
-
-                // TODO : Get classes just for the given sourceset, the rest should be in the classpath
-                classes = getProjectClassTree(project)
-
-                source sourceSet.java.srcDirs
-                exclude '**/gen/**'
-
-                reports.xml {
-                    destination = new File(project.extensions.getByType(ReportingExtension).file(FINDBUGS),
-                            "findbugs-${sourceSet.name}.xml")
-                    withMessages = true
-                }
-            }
-
-            setupAndroidClasspathAwareTask(findbugsTask, project)
             findbugsRootTask.dependsOn findbugsTask
         }
 
@@ -160,7 +132,7 @@ class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
         path.startsWith('http://') || path.startsWith('https://')
     }
 
-    private File makeDownloadFileTask(final Project project, final String remotePath, final String destination,
+    private static File makeDownloadFileTask(final Project project, final String remotePath, final String destination,
                                       final String taskName, final String plugin) {
         GString destPath = "${project.rootDir}/config/${plugin}/"
         File destFile = project.file(destPath + destination)
@@ -176,7 +148,7 @@ class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
         destFile
     }
 
-    private static String getTaskName(final String taskName = FINDBUGS, final String sourceSetName) {
+    private static String generateTaskName(final String taskName = FINDBUGS, final String sourceSetName) {
         GUtil.toLowerCamelCase(String.format('%s %s', taskName, sourceSetName))
     }
 

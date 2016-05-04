@@ -17,6 +17,7 @@ import com.monits.gradle.sca.ClasspathAware
 import com.monits.gradle.sca.RulesConfig
 import com.monits.gradle.sca.StaticCodeAnalysisExtension
 import com.monits.gradle.sca.ToolVersions
+import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.plugins.quality.Pmd
@@ -31,73 +32,65 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
     private final static GradleVersion GRADLE_VERSION_PMD_CLASSPATH_SUPPORT = GradleVersion.version('2.8')
     private final static String PMD = 'pmd'
 
-    @SuppressWarnings('UnnecessaryGetter')
     @Override
     void applyConfig(final Project project, final StaticCodeAnalysisExtension extension) {
+        setupPlugin(project, extension)
+
+        setupTasksPerSourceSet(project, extension, project.sourceSets)
+    }
+
+    // DuplicateStringLiteral should be removed once we refactor this
+    @Override
+    void applyAndroidConfig(final Project project, final StaticCodeAnalysisExtension extension) {
+        setupPlugin(project, extension)
+
+        setupTasksPerSourceSet(project, extension, project.android.sourceSets) { Pmd pmdTask, sourceSet ->
+            source sourceSet.java.srcDirs
+            exclude '**/gen/**'
+
+            boolean supportsClasspath = GRADLE_VERSION_PMD_CLASSPATH_SUPPORT <= GradleVersion.current()
+
+            if (supportsClasspath) {
+                setupAndroidClasspathAwareTask(pmdTask, project)
+            }
+        }
+    }
+
+    @SuppressWarnings('UnnecessaryGetter')
+    private static void setupPlugin(final Project project, final StaticCodeAnalysisExtension extension) {
         project.plugins.apply PMD
 
         project.pmd {
             toolVersion = ToolVersions.pmdVersion
             ignoreFailures = extension.getIgnoreErrors()
         }
+    }
 
+    @SuppressWarnings('UnnecessaryGetter')
+    private static void setupTasksPerSourceSet(final Project project, final StaticCodeAnalysisExtension extension,
+                                               final NamedDomainObjectContainer<Object> sourceSets,
+                                               final Closure<?> configuration = null) {
         // Create a phony pmd task that just executes all real pmd tasks
         Task pmdRootTask = project.tasks.findByName(PMD) ?: project.task(PMD)
-        project.sourceSets.all { SourceSet sourceSet ->
-            RulesConfig config = extension.sourceSetConfig.maybeCreate(sourceSet.name)
+        sourceSets.all { SourceSet sourceSet ->
+            String sourceSetName = sourceSets.namer.determineName(sourceSet)
+            RulesConfig config = extension.sourceSetConfig.maybeCreate(sourceSetName)
 
-            Task pmdTask = getOrCreateTask(project, sourceSet.getTaskName(PMD, null)) {
+            Task pmdTask = getOrCreateTask(project, generateTaskName(sourceSetName)) {
                 // most defaults are good enough
                 ruleSets = config.getPmdRules()
 
                 reports {
                     xml.enabled = true
-                    xml.destination = xml.destination.absolutePath - "${sourceSet.name}.xml" +
-                            "pmd-${sourceSet.name}.xml"
+                    xml.destination = xml.destination.absolutePath - "${sourceSetName}.xml" +
+                            "pmd-${sourceSetName}.xml"
                     html.enabled = false
                 }
             }
 
-            pmdRootTask.dependsOn pmdTask
-        }
-
-        project.tasks.check.dependsOn pmdRootTask
-    }
-
-    // DuplicateStringLiteral should be removed once we refactor this
-    @SuppressWarnings(['UnnecessaryGetter', 'DuplicateStringLiteral'])
-    @Override
-    void applyAndroidConfig(final Project project, final StaticCodeAnalysisExtension extension) {
-        boolean supportsClasspath = GRADLE_VERSION_PMD_CLASSPATH_SUPPORT <= GradleVersion.current()
-
-        project.plugins.apply PMD
-
-        project.pmd {
-            toolVersion = ToolVersions.pmdVersion
-            ignoreFailures = extension.getIgnoreErrors()
-        }
-
-        // Create a phony pmd task that just executes all real pmd tasks
-        Task pmdRootTask = project.tasks.findByName(PMD) ?: project.task(PMD)
-        project.android.sourceSets.all { sourceSet ->
-            RulesConfig config = extension.sourceSetConfig.maybeCreate(sourceSet.name)
-
-            Task pmdTask = getOrCreateTask(project, getTaskName(sourceSet.name)) {
-                ruleSets = config.getPmdRules()
-
-                source sourceSet.java.srcDirs
-                exclude '**/gen/**'
-
-                reports {
-                    xml.enabled = true
-                    xml.destination = xml.destination.absolutePath - "${sourceSet.name}.xml" +
-                            "pmd-${sourceSet.name}.xml"
-                    html.enabled = false
-                }
-            }
-
-            if (supportsClasspath) {
-                setupAndroidClasspathAwareTask(pmdTask, project)
+            if (configuration) {
+                // Add the sourceset as second parameter for configuration closure
+                pmdTask.configure configuration.rcurry(sourceSet)
             }
 
             pmdRootTask.dependsOn pmdTask
@@ -117,7 +110,7 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
         pmdTask.configure closure
     }
 
-    private static String getTaskName(final String sourceSetName) {
+    private static String generateTaskName(final String sourceSetName) {
         GUtil.toLowerCamelCase(String.format('%s %s', PMD, sourceSetName))
     }
 }

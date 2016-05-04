@@ -17,72 +17,40 @@ import com.monits.gradle.sca.RulesConfig
 import com.monits.gradle.sca.StaticCodeAnalysisExtension
 import com.monits.gradle.sca.ToolVersions
 import com.monits.gradle.sca.task.DownloadTask
+import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.plugins.quality.Checkstyle
-import org.gradle.api.tasks.SourceSet
 import org.gradle.util.GUtil
 
 /**
- * A confiurator for Checkstyle tasks.
+ * A configurator for Checkstyle tasks.
  */
 class CheckstyleConfigurator implements AnalysisConfigurator {
 
     private static final String CHECKSTYLE = 'checkstyle'
 
-    @SuppressWarnings('UnnecessaryGetter')
     @Override
     void applyConfig(Project project, StaticCodeAnalysisExtension extension) {
-        project.plugins.apply CHECKSTYLE
+        setupPlugin(project, extension)
 
-        project.checkstyle {
-            toolVersion = ToolVersions.checkstyleVersion
-            ignoreFailures = extension.getIgnoreErrors()
-            showViolations = false
-        }
-
-        // Create a phony pmd task that just executes all real pmd tasks
-        Task checkstyleRootTask = project.tasks.findByName(CHECKSTYLE) ?: project.task(CHECKSTYLE)
-        project.sourceSets.all { SourceSet sourceSet ->
-            RulesConfig config = extension.sourceSetConfig.maybeCreate(sourceSet.name)
-
-            boolean remoteLocation = isRemoteLocation(config.getCheckstyleRules())
-            File configSource
-            String downloadTaskName = sourceSet.getTaskName('downloadCheckstyleXml', null)
-            if (remoteLocation) {
-                configSource = makeDownloadFileTask(project, config.getCheckstyleRules(),
-                        String.format('checkstyle-%s.xml', sourceSet.name), downloadTaskName, CHECKSTYLE)
-            } else {
-                configSource = new File(config.getCheckstyleRules())
-            }
-
-            Task checkstyleTask = getOrCreateTask(project, sourceSet.getTaskName(CHECKSTYLE, null)) {
-                if (remoteLocation) {
-                    dependsOn project.tasks.findByName(downloadTaskName)
-                }
-
-                configFile configSource
-
-                reports {
-                    xml.destination = reports.xml.destination.absolutePath - "${sourceSet.name}.xml" +
-                            "checkstyle-${sourceSet.name}.xml"
-
-                    if (hasProperty('html')) {
-                        html.enabled = false // added in gradle 2.10, but unwanted
-                    }
-                }
-            }
-
-            checkstyleRootTask.dependsOn checkstyleTask
-        }
-
-        project.tasks.check.dependsOn checkstyleRootTask
+        setupTasksPerSourceSet(project, extension, project.sourceSets)
     }
 
-    // DuplicateStringLiteral should be removed once we refactor this
-    @SuppressWarnings(['UnnecessaryGetter', 'DuplicateStringLiteral'])
     @Override
     void applyAndroidConfig(Project project, StaticCodeAnalysisExtension extension) {
+        setupPlugin(project, extension)
+
+        setupTasksPerSourceSet(project, extension, project.android.sourceSets) { task, sourceSet ->
+            source 'src'
+            include '**/*.java'
+            exclude '**/gen/**'
+            classpath = project.configurations[sourceSet.packageConfigurationName]
+        }
+    }
+
+    @SuppressWarnings('UnnecessaryGetter')
+    private static void setupPlugin(final Project project, final StaticCodeAnalysisExtension extension) {
         project.plugins.apply CHECKSTYLE
 
         project.checkstyle {
@@ -90,42 +58,50 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
             ignoreFailures = extension.getIgnoreErrors()
             showViolations = false
         }
+    }
 
-        // Create a phony pmd task that just executes all real pmd tasks
+    @SuppressWarnings('UnnecessaryGetter')
+    private static void setupTasksPerSourceSet(final Project project, final StaticCodeAnalysisExtension extension,
+                                               final NamedDomainObjectContainer<Object> sourceSets,
+                                               final Closure<?> configuration = null) {
+        // Create a phony checkstyle task that just executes all real checkstyle tasks
         Task checkstyleRootTask = project.tasks.findByName(CHECKSTYLE) ?: project.task(CHECKSTYLE)
-        project.android.sourceSets.all { sourceSet ->
-            RulesConfig config = extension.sourceSetConfig.maybeCreate(sourceSet.name)
 
+        sourceSets.all { sourceSet ->
+            String sourceSetName = sourceSets.namer.determineName(sourceSet)
+            RulesConfig config = extension.sourceSetConfig.maybeCreate(sourceSetName)
+
+            // TODO : Avoid multiple downloads of same file under different names
             boolean remoteLocation = isRemoteLocation(config.getCheckstyleRules())
             File configSource
-            String downloadTaskName = getTaskName('downloadCheckstyleXml', sourceSet.name)
+            String downloadTaskName = generateTaskName('downloadCheckstyleXml', sourceSetName)
             if (remoteLocation) {
                 configSource = makeDownloadFileTask(project, config.getCheckstyleRules(),
-                        String.format('checkstyle-%s.xml', sourceSet.name), downloadTaskName, CHECKSTYLE)
+                        String.format('checkstyle-%s.xml', sourceSetName), downloadTaskName, CHECKSTYLE)
             } else {
                 configSource = new File(config.getCheckstyleRules())
             }
 
-            Task checkstyleTask = getOrCreateTask(project, getTaskName(sourceSet.name)) {
+            Task checkstyleTask = getOrCreateTask(project, generateTaskName(sourceSetName)) {
                 if (remoteLocation) {
                     dependsOn project.tasks.findByName(downloadTaskName)
                 }
 
-                source 'src'
-                include '**/*.java'
-                exclude '**/gen/**'
-                classpath = project.configurations.compile
-
                 configFile configSource
 
                 reports {
-                    xml.destination = reports.xml.destination.absolutePath - "${sourceSet.name}.xml" +
-                            "checkstyle-${sourceSet.name}.xml"
+                    xml.destination = reports.xml.destination.absolutePath - "${sourceSetName}.xml" +
+                            "checkstyle-${sourceSetName}.xml"
 
                     if (hasProperty('html')) {
                         html.enabled = false // added in gradle 2.10, but unwanted
                     }
                 }
+            }
+
+            if (configuration) {
+                // Add the sourceset as second parameter for configuration closure
+                checkstyleTask.configure configuration.rcurry(sourceSet)
             }
 
             checkstyleRootTask.dependsOn checkstyleTask
@@ -138,8 +114,9 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
         path.startsWith('http://') || path.startsWith('https://')
     }
 
-    private File makeDownloadFileTask(Project project, String remotePath, String destination,
-                                      String taskName, String plugin) {
+    private static File makeDownloadFileTask(final Project project, final String remotePath,
+                                             final String destination, final String taskName,
+                                             final String plugin) {
         GString destPath = "${project.rootDir}/config/${plugin}/"
         File destFile = project.file(destPath + destination)
 
@@ -163,7 +140,7 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
         pmdTask.configure closure
     }
 
-    private static String getTaskName(final String taskName = CHECKSTYLE, final String sourceSetName) {
+    private static String generateTaskName(final String taskName = CHECKSTYLE, final String sourceSetName) {
         GUtil.toLowerCamelCase(String.format('%s %s', taskName, sourceSetName))
     }
 }
