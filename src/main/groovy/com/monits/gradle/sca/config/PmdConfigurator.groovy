@@ -64,6 +64,11 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
             toolVersion = ToolVersions.pmdVersion
             ignoreFailures = extension.getIgnoreErrors()
         }
+
+        if (!ToolVersions.isLatestPmdVersion()) {
+            project.logger.warn('Using an outdated PMD version. Update the used Gradle ' +
+                    'version to get better analysis results.')
+        }
     }
 
     @SuppressWarnings('UnnecessaryGetter')
