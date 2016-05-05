@@ -23,6 +23,7 @@ import org.gradle.api.Task
 import org.gradle.api.plugins.quality.Pmd
 import org.gradle.util.GUtil
 import org.gradle.util.GradleVersion
+
 /**
  * A configurator for PMD tasks.
 */

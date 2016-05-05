@@ -15,11 +15,16 @@ package com.monits.gradle.sca.fixture
 
 import org.gradle.testkit.runner.BuildResult
 
+import static org.apache.commons.lang.StringUtils.capitalize
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
+
 /**
  * Base specification to test a single analysis report.
 */
 abstract class AbstractPerSourceSetPluginIntegTestFixture extends AbstractPluginIntegTestFixture {
+
+    static final MAIN_SOURCESET = 'main'
+    static final TEST_SOURCESET = 'test'
 
     @SuppressWarnings('MethodName')
     void 'multimodule android project runs all tasks'() {
@@ -32,17 +37,17 @@ abstract class AbstractPerSourceSetPluginIntegTestFixture extends AbstractPlugin
                 .build()
 
         then:
-        result.task(':liba' + taskName()).outcome == SUCCESS
-        result.task(':liba' + taskName() + 'Main').outcome == SUCCESS
-        result.task(':liba' + taskName() + 'Test').outcome == SUCCESS
-        result.task(':libb' + taskName()).outcome == SUCCESS
-        result.task(':libb' + taskName() + 'Main').outcome == SUCCESS
-        result.task(':libb' + taskName() + 'Test').outcome == SUCCESS
+        result.task(LIBA_PATH + taskName()).outcome == SUCCESS
+        result.task(LIBA_PATH + taskName() + capitalize(MAIN_SOURCESET)).outcome == SUCCESS
+        result.task(LIBA_PATH + taskName() + capitalize(TEST_SOURCESET)).outcome == SUCCESS
+        result.task(LIBB_PATH + taskName()).outcome == SUCCESS
+        result.task(LIBB_PATH + taskName() + capitalize(MAIN_SOURCESET)).outcome == SUCCESS
+        result.task(LIBB_PATH + taskName() + capitalize(TEST_SOURCESET)).outcome == SUCCESS
 
         // The reports must exist
-        file('libb/' + reportFileName(null)).exists()
-        file('libb/' + reportFileName('test')).exists()
-        file('liba/' + reportFileName(null)).exists()
-        file('liba/' + reportFileName('test')).exists()
+        file(LIBA_DIRNAME + reportFileName(MAIN_SOURCESET)).exists()
+        file(LIBA_DIRNAME + reportFileName(TEST_SOURCESET)).exists()
+        file(LIBB_DIRNAME + reportFileName(MAIN_SOURCESET)).exists()
+        file(LIBB_DIRNAME + reportFileName(TEST_SOURCESET)).exists()
     }
 }

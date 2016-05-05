@@ -23,6 +23,13 @@ import spock.lang.Specification
  * Base specification for integration testing of a gradle plugin.
 */
 abstract class AbstractIntegTestFixture extends Specification {
+    static final String ANDROID_VERSION = 'androidVersion'
+    static final String LIBA_DIRNAME = 'liba/'
+    static final String LIBB_DIRNAME = 'libb/'
+    static final String LIBA_PATH = ':liba'
+    static final String LIBB_PATH = ':libb'
+    static final String ANDROID_MANIFEST_PATH = 'src/main/AndroidManifest.xml'
+    static final String BUILD_GRADLE_FILENAME = 'build.gradle'
 
     @Rule
     final TemporaryFolder testProjectDir = new TemporaryFolder()
@@ -88,6 +95,11 @@ abstract class AbstractIntegTestFixture extends Specification {
             apply plugin: 'java'
             apply plugin: 'com.monits.staticCodeAnalysis'
 
+        """ + staticCodeAnalysysConfig(toolsConfig) as TestFile
+    }
+
+    String staticCodeAnalysysConfig(toolsConfig) {
+        """
             // disable all other checks
             staticCodeAnalysis {
                 cpd = ${toolsConfig.get('cpd', false)}
@@ -95,13 +107,13 @@ abstract class AbstractIntegTestFixture extends Specification {
                 findbugs = ${toolsConfig.get('findbugs', false)}
                 pmd = ${toolsConfig.get('pmd', false)}
             }
-        """ as TestFile
+        """
     }
 
     TestFile writeAndroidBuildFile(final String androidVersion = '1.5.0') {
         Map<String, Object> configMap = [:]
         configMap.put(toolName(), Boolean.TRUE)
-        configMap.put('androidVersion', androidVersion)
+        configMap.put(ANDROID_VERSION, androidVersion)
         writeAndroidBuildFile(configMap)
     }
 
@@ -109,7 +121,7 @@ abstract class AbstractIntegTestFixture extends Specification {
         buildScriptFile() << """
             buildscript {
                 dependencies {
-                    classpath 'com.android.tools.build:gradle:${toolsConfig.get('androidVersion', '1.5.0')}'
+                    classpath 'com.android.tools.build:gradle:${toolsConfig.get(ANDROID_VERSION, '1.5.0')}'
                     classpath files($pluginClasspathString)
                 }
 
@@ -125,14 +137,8 @@ abstract class AbstractIntegTestFixture extends Specification {
             apply plugin: 'com.android.library'
             apply plugin: 'com.monits.staticCodeAnalysis'
 
-            // disable all other checks
-            staticCodeAnalysis {
-                cpd = ${toolsConfig.get('cpd', false)}
-                checkstyle = ${toolsConfig.get('checkstyle', false)}
-                findbugs = ${toolsConfig.get('findbugs', false)}
-                pmd = ${toolsConfig.get('pmd', false)}
-            }
-
+        """ + staticCodeAnalysysConfig(toolsConfig) +
+        '''
             android {
                 compileSdkVersion 23
                 buildToolsVersion "23.0.2"
@@ -141,11 +147,11 @@ abstract class AbstractIntegTestFixture extends Specification {
                     abortOnError false
                 }
             }
-        """ as TestFile
+        ''' as TestFile
     }
 
     TestFile writeAndroidManifest() {
-        file('src/main/AndroidManifest.xml') << '''
+        file(ANDROID_MANIFEST_PATH) << '''
             <manifest xmlns:android="http://schemas.android.com/apk/res/android"
                 package="com.monits.staticCodeAnalysis"
                 android:versionCode="1">
@@ -155,7 +161,7 @@ abstract class AbstractIntegTestFixture extends Specification {
 
     @SuppressWarnings('FactoryMethodName')
     TestFile buildScriptFile() {
-        file('build.gradle')
+        file(BUILD_GRADLE_FILENAME)
     }
 
     TestFile reportFile(String sourceSet = '') {
@@ -168,34 +174,36 @@ abstract class AbstractIntegTestFixture extends Specification {
 
     abstract String toolName()
 
+    private void setupAndroidSubProject(final String dir) {
+        writeAndroidBuildFile().renameTo(file(dir + BUILD_GRADLE_FILENAME))
+        writeAndroidManifest().renameTo(file(dir + ANDROID_MANIFEST_PATH))
+        file('src').deleteDir()
+    }
+
     void setupMultimoduleAndroidProject() {
-        writeAndroidBuildFile().renameTo(file('liba/build.gradle'))
-        writeAndroidManifest().renameTo(file('liba/src/main/AndroidManifest.xml'))
-        file('src').deleteDir()
+        setupAndroidSubProject(LIBA_DIRNAME)
+        setupAndroidSubProject(LIBB_DIRNAME)
 
-        writeAndroidBuildFile().renameTo(file('libb/build.gradle'))
-        writeAndroidManifest().renameTo(file('libb/src/main/AndroidManifest.xml'))
-        file('src').deleteDir()
-
-        file('libb/build.gradle') << '''
+        file(LIBB_DIRNAME + BUILD_GRADLE_FILENAME) << """
             dependencies {
-                compile project(':liba')
+                compile project('${LIBA_PATH}')
             }
-        '''
+        """
 
-        file('settings.gradle') << '''
-            include ':liba', ':libb'
-        '''
-        file('build.gradle') // empty root build.gradle
+        file('settings.gradle') << """
+            include '${LIBA_PATH}', '${LIBB_PATH}'
+        """
+        file(BUILD_GRADLE_FILENAME) // empty root build.gradle
 
-        file('liba/src/main/java/liba/ClassA.java') <<
+        file(LIBA_DIRNAME + 'src/main/java/liba/ClassA.java') <<
                 'package liba; public class ClassA { public boolean isFoo(Object arg) { return true; } }'
-        file('liba/src/test/java/liba/ClassATest.java') <<
+        file(LIBA_DIRNAME + 'src/test/java/liba/ClassATest.java') <<
                 'package liba; public class ClassATest { public boolean isFoo(Object arg) { return true; } }'
-        file('libb/src/main/java/libb/ClassB.java') <<
+        file(LIBB_DIRNAME + 'src/main/java/libb/ClassB.java') <<
                 'package libb; import liba.ClassA; public class ClassB { public boolean isFoo(Object arg) {' +
                 ' ClassA a = new ClassA(); return a.isFoo(arg); } }'
-        file('libb/src/test/java/libb/ClassBTest.java') <<
+        file(LIBB_DIRNAME + 'src/test/java/libb/ClassBTest.java') <<
                 'package libb; public class ClassBTest { public boolean isFoo(Object arg) { return true; } }'
     }
 }
+

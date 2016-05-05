@@ -19,6 +19,7 @@ import org.gradle.util.GradleVersion
 import spock.lang.Unroll
 
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
+
 /**
  * Integration test of CPD tasks.
  */
