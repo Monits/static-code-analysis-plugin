@@ -16,7 +16,6 @@ package com.monits.gradle.sca.config
 import com.monits.gradle.sca.RulesConfig
 import com.monits.gradle.sca.StaticCodeAnalysisExtension
 import com.monits.gradle.sca.ToolVersions
-import com.monits.gradle.sca.task.DownloadTask
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -26,9 +25,10 @@ import org.gradle.util.GUtil
 /**
  * A configurator for Checkstyle tasks.
  */
-class CheckstyleConfigurator implements AnalysisConfigurator {
-
+class CheckstyleConfigurator extends AbstractRemoteConfigLocator implements AnalysisConfigurator {
     private static final String CHECKSTYLE = 'checkstyle'
+
+    final String pluginName = CHECKSTYLE
 
     @Override
     void applyConfig(Project project, StaticCodeAnalysisExtension extension) {
@@ -66,7 +66,7 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
     }
 
     @SuppressWarnings('UnnecessaryGetter')
-    private static void setupTasksPerSourceSet(final Project project, final StaticCodeAnalysisExtension extension,
+    private void setupTasksPerSourceSet(final Project project, final StaticCodeAnalysisExtension extension,
                                                final NamedDomainObjectContainer<Object> sourceSets,
                                                final Closure<?> configuration = null) {
         // Create a phony checkstyle task that just executes all real checkstyle tasks
@@ -82,7 +82,7 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
             String downloadTaskName = generateTaskName('downloadCheckstyleXml', sourceSetName)
             if (remoteLocation) {
                 configSource = makeDownloadFileTask(project, config.getCheckstyleRules(),
-                        String.format('checkstyle-%s.xml', sourceSetName), downloadTaskName, CHECKSTYLE)
+                        String.format('checkstyle-%s.xml', sourceSetName), downloadTaskName)
             } else {
                 configSource = new File(config.getCheckstyleRules())
             }
@@ -113,25 +113,6 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
         }
 
         project.tasks.check.dependsOn checkstyleRootTask
-    }
-
-    private static boolean isRemoteLocation(String path) {
-        path.startsWith('http://') || path.startsWith('https://')
-    }
-
-    private static File makeDownloadFileTask(final Project project, final String remotePath,
-                                             final String destination, final String taskName,
-                                             final String plugin) {
-        GString destPath = "${project.rootDir}/config/${plugin}/"
-        File destFile = project.file(destPath + destination)
-
-        project.task(taskName, type:DownloadTask) {
-            directory = project.file(destPath)
-            downloadedFile = destFile
-            resourceUri = remotePath
-        }
-
-        destFile
     }
 
     private static Task getOrCreateTask(final Project project, final String taskName, final Closure closure) {

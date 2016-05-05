@@ -10,6 +10,7 @@
  * Fix classpath population on an clean project
  * Fix classpath population on Android proejcts to include generated classes in classath (though still not analyzed)
  * Fix path to mockable-androir-xx.jar under Android Gradle plugin 2.+
+ * Files are now downloaded only once per run, regardless of number of projects / sourcesets configured
 
 # v1.6
 * **1.6.5**

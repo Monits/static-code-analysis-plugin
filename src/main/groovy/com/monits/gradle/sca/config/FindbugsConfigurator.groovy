@@ -17,7 +17,6 @@ import com.monits.gradle.sca.ClasspathAware
 import com.monits.gradle.sca.RulesConfig
 import com.monits.gradle.sca.StaticCodeAnalysisExtension
 import com.monits.gradle.sca.ToolVersions
-import com.monits.gradle.sca.task.DownloadTask
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -29,8 +28,10 @@ import org.gradle.util.GUtil
 /**
  * A configurator for Findbugs tasks
 */
-class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
+class FindbugsConfigurator extends AbstractRemoteConfigLocator implements AnalysisConfigurator, ClasspathAware {
     private static final String FINDBUGS = 'findbugs'
+
+    final String pluginName = FINDBUGS
 
     @Override
     void applyConfig(final Project project, final StaticCodeAnalysisExtension extension) {
@@ -80,7 +81,7 @@ class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
     }
 
     @SuppressWarnings('UnnecessaryGetter')
-    private static void setupTasksPerSourceSet(final Project project, final StaticCodeAnalysisExtension extension,
+    private void setupTasksPerSourceSet(final Project project, final StaticCodeAnalysisExtension extension,
                                                final NamedDomainObjectContainer<Object> sourceSets,
                                                final Closure<?> configuration = null) {
         // Create a phony findbugs task that just executes all real findbugs tasks
@@ -95,7 +96,7 @@ class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
             String downloadTaskName = generateTaskName('downloadFindbugsExcludeFilter', sourceSetName)
             if (remoteLocation) {
                 filterSource = makeDownloadFileTask(project, config.getFindbugsExclude(),
-                        String.format('excludeFilter-%s.xml', sourceSetName), downloadTaskName, FINDBUGS)
+                        String.format('excludeFilter-%s.xml', sourceSetName), downloadTaskName)
             } else {
                 filterSource = new File(config.getFindbugsExclude())
             }
@@ -126,26 +127,6 @@ class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
         }
 
         project.tasks.check.dependsOn findbugsRootTask
-    }
-
-    private static boolean isRemoteLocation(final String path) {
-        path.startsWith('http://') || path.startsWith('https://')
-    }
-
-    private static File makeDownloadFileTask(final Project project, final String remotePath, final String destination,
-                                      final String taskName, final String plugin) {
-        GString destPath = "${project.rootDir}/config/${plugin}/"
-        File destFile = project.file(destPath + destination)
-
-        if (!project.tasks.findByName(taskName)) {
-            project.task(taskName, type:DownloadTask) {
-                directory = project.file(destPath)
-                downloadedFile = destFile
-                resourceUri = remotePath
-            }
-        }
-
-        destFile
     }
 
     private static String generateTaskName(final String taskName = FINDBUGS, final String sourceSetName) {
