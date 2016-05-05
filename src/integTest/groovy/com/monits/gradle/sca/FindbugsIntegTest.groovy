@@ -13,7 +13,7 @@
  */
 package com.monits.gradle.sca
 
-import com.monits.gradle.sca.fixture.AbstractPluginIntegTestFixture
+import com.monits.gradle.sca.fixture.AbstractPerSourceSetPluginIntegTestFixture
 import com.monits.gradle.sca.io.TestFile
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.util.GradleVersion
@@ -28,7 +28,7 @@ import static org.junit.Assert.assertThat
 /**
  * Integration test of Findbugs tasks.
  */
-class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
+class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
     @SuppressWarnings('MethodName')
     @Unroll('Findbugs #findbugsVersion should run when using gradle #version')
     void 'findbugs is run'() {
@@ -62,7 +62,7 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
     }
 
     @SuppressWarnings('MethodName')
-    void 'findbugs download remote suppression config'() {
+    void 'findbugs downloads remote suppression config'() {
         given:
         writeBuildFile()
         goodCode()
@@ -76,7 +76,7 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
 
         // The config must exist
         file('config/findbugs/excludeFilter-main.xml').exists()
-        file('config/findbugs/excludeFilter-androidTest.xml').exists()
+        file('config/findbugs/excludeFilter-test.xml').exists()
 
         // Make sure checkstyle report exists
         reportFile().exists()
@@ -94,7 +94,7 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
                 .buildAndFail()
 
         then:
-        result.task(':downloadFindbugsExcludeFilterAndroidTest').outcome == FAILED
+        result.task(':downloadFindbugsExcludeFilterMain').outcome == FAILED
         assertThat(result.output, containsString('Running in offline mode, but there is no cached version'))
     }
 
@@ -104,11 +104,6 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
         writeBuildFile()
         writeEmptySuppressionFilter('main')
         writeEmptySuppressionFilter('test')
-        writeEmptySuppressionFilter('testDebug')
-        writeEmptySuppressionFilter('testRelease')
-        writeEmptySuppressionFilter('androidTest')
-        writeEmptySuppressionFilter('debug')
-        writeEmptySuppressionFilter('release')
         goodCode()
 
         when:
@@ -117,13 +112,8 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
                 .build()
 
         then:
-        result.task(':downloadFindbugsExcludeFilterAndroidTest').outcome == SUCCESS
         result.task(':downloadFindbugsExcludeFilterMain').outcome == SUCCESS
-        result.task(':downloadFindbugsExcludeFilterDebug').outcome == SUCCESS
-        result.task(':downloadFindbugsExcludeFilterRelease').outcome == SUCCESS
         result.task(':downloadFindbugsExcludeFilterTest').outcome == SUCCESS
-        result.task(':downloadFindbugsExcludeFilterTestDebug').outcome == SUCCESS
-        result.task(':downloadFindbugsExcludeFilterTestRelease').outcome == SUCCESS
         assertThat(result.output, containsString('Running in offline mode. Using a possibly outdated version of'))
     }
 
@@ -136,11 +126,10 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
             package com.monits;
 
             import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-            import javax.annotation.Nonnull;
 
             @SuppressFBWarnings(value = "MISSING_FIELD_IN_TO_STRING", justification = "doesn't provide meaningful information")
             public class ClassA {
-                public boolean isFoo(@Nonnull Object arg) {
+                public boolean isFoo(Object arg) {
                     return true;
                 }
             }
@@ -162,7 +151,8 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
     @Unroll('Android classes are available when using android gradle plugin #androidVersion and gradle #gradleVersion')
     void 'Android generated classes are available'() {
         given:
-        writeBuildFile()
+        writeAndroidBuildFile()
+        writeAndroidManifest()
         writeEmptySuppressionFilter()
         file('src/main/res/values/strings.xml') <<
             '''<?xml version="1.0" encoding="utf-8"?>
@@ -198,7 +188,8 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
     @SuppressWarnings('MethodName')
     void 'Android SDK classes are available'() {
         given:
-        writeBuildFile('findbugs':true, androidVersion:androidVersion)
+        writeAndroidBuildFile(androidVersion)
+        writeAndroidManifest()
         writeEmptySuppressionFilter()
         file('src/main/java/com/monits/ClassA.java') << '''
             package com.monits;
@@ -232,32 +223,10 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
         gradleVersion = androidVersion < '1.5.0' ? '2.9' : GradleVersion.current().version
     }
 
-    @SuppressWarnings(['MethodName', 'LineLength'])
-    void 'multimodule project has all classes'() {
+    @SuppressWarnings('MethodName')
+    void 'multimodule android project has all classes'() {
         given:
-        writeBuildFile().renameTo(file('liba/build.gradle'))
-        file('src/main/AndroidManifest.xml').renameTo(file('liba/src/main/AndroidManifest.xml'))
-        file('src').deleteDir()
-
-        writeBuildFile().renameTo(file('libb/build.gradle'))
-        file('src/main/AndroidManifest.xml').renameTo(file('libb/src/main/AndroidManifest.xml'))
-        file('src').deleteDir()
-
-        file('libb/build.gradle') << '''
-            dependencies {
-                compile project(':liba')
-            }
-        '''
-
-        file('settings.gradle') << '''
-            include ':liba', ':libb'
-        '''
-        file('build.gradle') // empty root build.gradle
-
-        file('liba/src/main/java/liba/ClassA.java') <<
-                'package liba; public class ClassA { public boolean isFoo(Object arg) { return true; } }'
-        file('libb/src/main/java/libb/ClassB.java') <<
-                'package libb; import liba.ClassA; public class ClassB { public boolean isFoo(Object arg) { ClassA a = new ClassA(); return a.isFoo(arg); } }'
+        setupMultimoduleAndroidProject()
 
         when:
         BuildResult result = gradleRunner()
@@ -304,58 +273,6 @@ class FindbugsIntegTest extends AbstractPluginIntegTestFixture {
         file("config/findbugs/excludeFilter${sourceSet ? "-${sourceSet}" : ''}.xml") << '''
             <FindBugsFilter>
             </FindBugsFilter>
-        ''' as TestFile
-    }
-
-    @Override
-    TestFile writeBuildFile(toolsConfig) {
-        // FIXME : Right now findbugs works only on Android projects
-        writeAndroidManifest()
-
-        buildScriptFile() << """
-            buildscript {
-                dependencies {
-                    classpath 'com.android.tools.build:gradle:${toolsConfig.get('androidVersion', '1.5.0')}'
-                    classpath files($pluginClasspathString)
-                }
-
-                repositories {
-                    jcenter()
-                }
-            }
-
-            repositories {
-                mavenCentral()
-            }
-
-            apply plugin: 'com.android.library'
-            apply plugin: 'com.monits.staticCodeAnalysis'
-
-            // disable all other checks
-            staticCodeAnalysis {
-                cpd = ${toolsConfig.get('cpd', false)}
-                checkstyle = ${toolsConfig.get('checkstyle', false)}
-                findbugs = ${toolsConfig.get('findbugs', false)}
-                pmd = ${toolsConfig.get('pmd', false)}
-            }
-
-            android {
-                compileSdkVersion 23
-                buildToolsVersion "23.0.2"
-
-                lintOptions {
-                    abortOnError false
-                }
-            }
-        """ as TestFile
-    }
-
-    TestFile writeAndroidManifest() {
-        file('src/main/AndroidManifest.xml') << '''
-            <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-                package="com.monits.staticCodeAnalysis"
-                android:versionCode="1">
-            </manifest>
         ''' as TestFile
     }
 }

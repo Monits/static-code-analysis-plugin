@@ -98,6 +98,61 @@ abstract class AbstractIntegTestFixture extends Specification {
         """ as TestFile
     }
 
+    TestFile writeAndroidBuildFile(final String androidVersion = '1.5.0') {
+        Map<String, Object> configMap = [:]
+        configMap.put(toolName(), Boolean.TRUE)
+        configMap.put('androidVersion', androidVersion)
+        writeAndroidBuildFile(configMap)
+    }
+
+    TestFile writeAndroidBuildFile(toolsConfig) {
+        buildScriptFile() << """
+            buildscript {
+                dependencies {
+                    classpath 'com.android.tools.build:gradle:${toolsConfig.get('androidVersion', '1.5.0')}'
+                    classpath files($pluginClasspathString)
+                }
+
+                repositories {
+                    jcenter()
+                }
+            }
+
+            repositories {
+                mavenCentral()
+            }
+
+            apply plugin: 'com.android.library'
+            apply plugin: 'com.monits.staticCodeAnalysis'
+
+            // disable all other checks
+            staticCodeAnalysis {
+                cpd = ${toolsConfig.get('cpd', false)}
+                checkstyle = ${toolsConfig.get('checkstyle', false)}
+                findbugs = ${toolsConfig.get('findbugs', false)}
+                pmd = ${toolsConfig.get('pmd', false)}
+            }
+
+            android {
+                compileSdkVersion 23
+                buildToolsVersion "23.0.2"
+
+                lintOptions {
+                    abortOnError false
+                }
+            }
+        """ as TestFile
+    }
+
+    TestFile writeAndroidManifest() {
+        file('src/main/AndroidManifest.xml') << '''
+            <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                package="com.monits.staticCodeAnalysis"
+                android:versionCode="1">
+            </manifest>
+        ''' as TestFile
+    }
+
     @SuppressWarnings('FactoryMethodName')
     TestFile buildScriptFile() {
         file('build.gradle')
@@ -112,4 +167,35 @@ abstract class AbstractIntegTestFixture extends Specification {
     abstract String taskName()
 
     abstract String toolName()
+
+    void setupMultimoduleAndroidProject() {
+        writeAndroidBuildFile().renameTo(file('liba/build.gradle'))
+        writeAndroidManifest().renameTo(file('liba/src/main/AndroidManifest.xml'))
+        file('src').deleteDir()
+
+        writeAndroidBuildFile().renameTo(file('libb/build.gradle'))
+        writeAndroidManifest().renameTo(file('libb/src/main/AndroidManifest.xml'))
+        file('src').deleteDir()
+
+        file('libb/build.gradle') << '''
+            dependencies {
+                compile project(':liba')
+            }
+        '''
+
+        file('settings.gradle') << '''
+            include ':liba', ':libb'
+        '''
+        file('build.gradle') // empty root build.gradle
+
+        file('liba/src/main/java/liba/ClassA.java') <<
+                'package liba; public class ClassA { public boolean isFoo(Object arg) { return true; } }'
+        file('liba/src/test/java/liba/ClassATest.java') <<
+                'package liba; public class ClassATest { public boolean isFoo(Object arg) { return true; } }'
+        file('libb/src/main/java/libb/ClassB.java') <<
+                'package libb; import liba.ClassA; public class ClassB { public boolean isFoo(Object arg) {' +
+                ' ClassA a = new ClassA(); return a.isFoo(arg); } }'
+        file('libb/src/test/java/libb/ClassBTest.java') <<
+                'package libb; public class ClassBTest { public boolean isFoo(Object arg) { return true; } }'
+    }
 }

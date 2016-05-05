@@ -13,7 +13,7 @@
  */
 package com.monits.gradle.sca
 
-import com.monits.gradle.sca.fixture.AbstractPluginIntegTestFixture
+import com.monits.gradle.sca.fixture.AbstractPerSourceSetPluginIntegTestFixture
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.util.GradleVersion
 import spock.lang.Unroll
@@ -26,7 +26,7 @@ import static org.junit.Assert.assertThat
 /**
  * Integration test of Checkstyle tasks.
 */
-class CheckstyleIntegTest extends AbstractPluginIntegTestFixture {
+class CheckstyleIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
     @SuppressWarnings('MethodName')
     @Unroll('Checkstyle #checkstyleVersion should run when using gradle #version')
     void 'checkstyle is run'() {

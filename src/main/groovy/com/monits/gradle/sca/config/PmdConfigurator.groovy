@@ -21,10 +21,8 @@ import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.plugins.quality.Pmd
-import org.gradle.api.tasks.SourceSet
 import org.gradle.util.GUtil
 import org.gradle.util.GradleVersion
-
 /**
  * A configurator for PMD tasks.
 */
@@ -77,7 +75,7 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
                                                final Closure<?> configuration = null) {
         // Create a phony pmd task that just executes all real pmd tasks
         Task pmdRootTask = project.tasks.findByName(PMD) ?: project.task(PMD)
-        sourceSets.all { SourceSet sourceSet ->
+        sourceSets.all { sourceSet ->
             String sourceSetName = sourceSets.namer.determineName(sourceSet)
             RulesConfig config = extension.sourceSetConfig.maybeCreate(sourceSetName)
 

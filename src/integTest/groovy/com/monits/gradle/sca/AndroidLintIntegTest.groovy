@@ -14,7 +14,6 @@
 package com.monits.gradle.sca
 
 import com.monits.gradle.sca.fixture.AbstractIntegTestFixture
-import com.monits.gradle.sca.io.TestFile
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.util.GradleVersion
 import spock.lang.Unroll
@@ -29,7 +28,8 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
     @Unroll('AndroidLint should run when using gradle #version')
     void 'androidLint is run'() {
         given:
-        writeBuildFile()
+        writeAndroidBuildFile()
+        writeAndroidManifest()
         goodCode()
 
         when:
@@ -65,54 +65,6 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
 
     @Override
     String toolName() {
-        'androidLint'
-    }
-
-    @Override
-    TestFile writeBuildFile(toolsConfig) {
-        // Android lint only exists on Android projects
-        writeAndroidManifest()
-
-        buildScriptFile() << """
-            buildscript {
-                dependencies {
-                    classpath 'com.android.tools.build:gradle:1.5.0'
-                    classpath files($pluginClasspathString)
-                }
-
-                repositories {
-                    jcenter()
-                }
-            }
-
-            repositories {
-                mavenCentral()
-            }
-
-            apply plugin: 'com.android.library'
-            apply plugin: 'com.monits.staticCodeAnalysis'
-
-            // disable all other checks
-            staticCodeAnalysis {
-                cpd = ${toolsConfig.get('cpd', false)}
-                checkstyle = ${toolsConfig.get('checkstyle', false)}
-                findbugs = ${toolsConfig.get('findbugs', false)}
-                pmd = ${toolsConfig.get('pmd', false)}
-            }
-
-            android {
-                compileSdkVersion 23
-                buildToolsVersion "23.0.2"
-            }
-        """ as TestFile
-    }
-
-    TestFile writeAndroidManifest() {
-        file('src/main/AndroidManifest.xml') << '''
-            <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-                package="com.monits.staticCodeAnalysis"
-                android:versionCode="1">
-            </manifest>
-        ''' as TestFile
+        'lint'
     }
 }
