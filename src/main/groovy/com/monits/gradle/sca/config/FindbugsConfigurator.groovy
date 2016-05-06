@@ -17,6 +17,7 @@ import com.monits.gradle.sca.ClasspathAware
 import com.monits.gradle.sca.RulesConfig
 import com.monits.gradle.sca.StaticCodeAnalysisExtension
 import com.monits.gradle.sca.ToolVersions
+import groovy.transform.CompileStatic
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -128,10 +129,12 @@ class FindbugsConfigurator extends AbstractRemoteConfigLocator implements Analys
         project.tasks.check.dependsOn findbugsRootTask
     }
 
+    @CompileStatic
     private static String generateTaskName(final String taskName = FINDBUGS, final String sourceSetName) {
         GUtil.toLowerCamelCase(String.format('%s %s', taskName, sourceSetName))
     }
 
+    @CompileStatic
     private static Task getOrCreateTask(final Project project, final String taskName, final Closure closure) {
         Task findbugsTask
         if (project.tasks.findByName(taskName)) {

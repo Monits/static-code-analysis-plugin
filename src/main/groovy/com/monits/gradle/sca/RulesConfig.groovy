@@ -13,11 +13,13 @@
  */
 package com.monits.gradle.sca
 
+import groovy.transform.CompileStatic
 import org.gradle.api.Named
 
 /**
  * Rules configurations for Static Code Analysis.
 */
+@CompileStatic
 class RulesConfig implements Named {
     String name
 

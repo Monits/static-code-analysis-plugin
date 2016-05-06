@@ -32,7 +32,7 @@ class ResolveAndroidLintTask extends AndroidLintTask {
 
         // Manually copy all artifacts to the corresponding location
         project.configurations.androidLint.files.each {
-            File target = project.file(f.absolutePath + File.separator + it.name)
+            File target = project.file(androidLintHome.absolutePath + File.separator + it.name)
             InputStream input = it.newDataInputStream()
             OutputStream output = target.newDataOutputStream()
 

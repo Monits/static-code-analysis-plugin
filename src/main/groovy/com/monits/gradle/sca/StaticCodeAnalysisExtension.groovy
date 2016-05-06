@@ -13,11 +13,13 @@
  */
 package com.monits.gradle.sca
 
+import groovy.transform.CompileStatic
 import org.gradle.api.NamedDomainObjectContainer
 
 /**
  * Extension to configure the Static code Analysis Plugin.
 */
+@CompileStatic
 class StaticCodeAnalysisExtension {
     boolean ignoreErrors
 

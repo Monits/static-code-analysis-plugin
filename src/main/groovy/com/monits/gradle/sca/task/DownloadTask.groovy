@@ -65,7 +65,7 @@ class DownloadTask extends DefaultTask {
 
             // Gradle 2.13 includes ant 1.9.6 which supports gzip
             if (GradleVersion.current() > GradleVersion.version('2.13')) {
-                options[tryGzipEncoding] = true
+                options['tryGzipEncoding'] = true
             }
 
             ant.get(options)

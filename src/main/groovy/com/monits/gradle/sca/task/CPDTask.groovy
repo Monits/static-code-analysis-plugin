@@ -13,6 +13,8 @@
  */
 package com.monits.gradle.sca.task
 
+import groovy.transform.CompileStatic
+import groovy.transform.TypeCheckingMode
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.artifacts.Configuration
@@ -29,10 +31,11 @@ import org.gradle.util.VersionNumber
 /**
  * CPD task.
 */
+@CompileStatic
 @ParallelizableTask
 class CPDTask extends DefaultTask implements VerificationTask {
 
-    private static final CPD = 'cpd'
+    private static final String CPD = 'cpd'
 
     boolean ignoreFailures
 
@@ -45,6 +48,7 @@ class CPDTask extends DefaultTask implements VerificationTask {
     @OutputFile
     File outputFile
 
+    @CompileStatic(TypeCheckingMode.SKIP)
     @TaskAction
     void run() {
         inputFiles.stopExecutionIfEmpty()
@@ -79,7 +83,7 @@ class CPDTask extends DefaultTask implements VerificationTask {
         So naturally, if the second line of the outputFile is '<pmd-cpd/>', it
         means that cpd didn't find errors.
      */
-    private boolean cpdFileHasErrors(final File output) {
+    private static boolean cpdFileHasErrors(final File output) {
         BufferedReader br = new BufferedReader(new FileReader(output))
         String line
         br.readLine()
@@ -123,7 +127,7 @@ class CPDTask extends DefaultTask implements VerificationTask {
     }
 
     // FIXME : This is copy pasted from PmdPlugin... it shouldn't
-    protected String calculateDefaultDependencyNotation(VersionNumber toolVersion) {
+    protected static String calculateDefaultDependencyNotation(final VersionNumber toolVersion) {
         if (toolVersion < VersionNumber.version(5)) {
             return "pmd:pmd:$toolVersion"
         } else if (toolVersion < VersionNumber.parse('5.2.0')) {

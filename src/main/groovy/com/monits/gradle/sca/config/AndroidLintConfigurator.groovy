@@ -16,12 +16,14 @@ package com.monits.gradle.sca.config
 import com.monits.gradle.sca.StaticCodeAnalysisExtension
 import com.monits.gradle.sca.task.CleanupAndroidLintTask
 import com.monits.gradle.sca.task.ResolveAndroidLintTask
+import groovy.transform.CompileStatic
 import org.gradle.api.Project
 import org.gradle.api.Task
 
 /**
  * A configurator for Android Lint tasks.
 */
+@CompileStatic
 class AndroidLintConfigurator implements AnalysisConfigurator {
     @Override
     void applyConfig(Project project, StaticCodeAnalysisExtension extension) {

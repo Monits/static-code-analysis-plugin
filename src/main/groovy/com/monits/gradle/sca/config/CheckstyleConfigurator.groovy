@@ -16,6 +16,7 @@ package com.monits.gradle.sca.config
 import com.monits.gradle.sca.RulesConfig
 import com.monits.gradle.sca.StaticCodeAnalysisExtension
 import com.monits.gradle.sca.ToolVersions
+import groovy.transform.CompileStatic
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -113,6 +114,7 @@ class CheckstyleConfigurator extends AbstractRemoteConfigLocator implements Anal
         project.tasks.check.dependsOn checkstyleRootTask
     }
 
+    @CompileStatic
     private static Task getOrCreateTask(final Project project, final String taskName, final Closure closure) {
         Task pmdTask
         if (project.tasks.findByName(taskName)) {
@@ -124,6 +126,7 @@ class CheckstyleConfigurator extends AbstractRemoteConfigLocator implements Anal
         pmdTask.configure closure
     }
 
+    @CompileStatic
     private static String generateTaskName(final String taskName = CHECKSTYLE, final String sourceSetName) {
         GUtil.toLowerCamelCase(String.format('%s %s', taskName, sourceSetName))
     }

@@ -19,6 +19,8 @@ import com.monits.gradle.sca.config.CheckstyleConfigurator
 import com.monits.gradle.sca.config.CpdConfigurator
 import com.monits.gradle.sca.config.FindbugsConfigurator
 import com.monits.gradle.sca.config.PmdConfigurator
+import groovy.transform.CompileStatic
+import groovy.transform.TypeCheckingMode
 import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -29,6 +31,7 @@ import org.gradle.api.plugins.JavaBasePlugin
 /**
  * Static code analysis plugin for Android and Java projects
 */
+@CompileStatic
 class StaticCodeAnalysisPlugin implements Plugin<Project> {
     private final static String EXTENSION_NAME = 'staticCodeAnalysis'
     private final static String CHECKSTYLE_DEFAULT_RULES = 'http://static.monits.com/checkstyle.xml'
@@ -42,6 +45,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     private StaticCodeAnalysisExtension extension
     private Project project
 
+    @CompileStatic(TypeCheckingMode.SKIP)
     @SuppressWarnings('UnnecessaryGetter')
     @Override
     void apply(Project project) {
@@ -81,6 +85,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         }
     }
 
+    @CompileStatic(TypeCheckingMode.SKIP)
     private void defineConfigurations() {
         project.configurations {
             archives {
@@ -103,6 +108,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         }
     }
 
+    @CompileStatic(TypeCheckingMode.SKIP)
     private void defineFindbugsAnnotationDependencies() {
         //FIXME: This is here so that projects that use Findbugs can compile... but it ignores DSL completely
         project.repositories {
@@ -121,6 +127,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         }
     }
 
+    @CompileStatic(TypeCheckingMode.SKIP)
     private void configureExtensionRule() {
         extension.conventionMapping.with {
             ignoreErrors = { true }
@@ -158,6 +165,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
      *
      * @param config The config whose dependencies are to be added to scaconfig
      */
+    @CompileStatic(TypeCheckingMode.SKIP)
     private void addDepsButModulesToScaconfig(config) {
         config.allDependencies.each {
             if (it in ProjectDependency && it.group == project.rootProject.name) {
@@ -193,7 +201,9 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         try {
             // Will most likely throw a ClassNotFoundException
             Class<?> pluginClass = Class.forName(pluginClassName)
-            withPlugin(pluginClass, configureAction)
+            if (Plugin.isAssignableFrom(pluginClass)) {
+                withPlugin(pluginClass as Class<? extends Plugin>, configureAction)
+            }
         } catch (ClassNotFoundException e) {
             // do nothing
         }

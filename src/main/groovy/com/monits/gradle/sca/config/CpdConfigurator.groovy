@@ -16,6 +16,7 @@ package com.monits.gradle.sca.config
 import com.monits.gradle.sca.StaticCodeAnalysisExtension
 import com.monits.gradle.sca.ToolVersions
 import com.monits.gradle.sca.task.CPDTask
+import groovy.transform.CompileStatic
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.FileTree
@@ -51,6 +52,7 @@ class CpdConfigurator implements AnalysisConfigurator {
         project.tasks.check.dependsOn cpdTask
     }
 
+    @CompileStatic
     @Override
     void applyAndroidConfig(final Project project, final StaticCodeAnalysisExtension extension) {
         applyConfig(project, extension) // no difference at all

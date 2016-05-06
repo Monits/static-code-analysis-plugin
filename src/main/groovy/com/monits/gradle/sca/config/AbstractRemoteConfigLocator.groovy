@@ -14,12 +14,14 @@
 package com.monits.gradle.sca.config
 
 import com.monits.gradle.sca.task.DownloadTask
+import groovy.transform.CompileStatic
 import org.gradle.api.Project
 import org.gradle.api.tasks.Copy
 
 /**
  * Abstract class that can efficiently creates download tasks for remote config.
  */
+@CompileStatic
 abstract class AbstractRemoteConfigLocator {
     private static final Map<String, String> DOWNLOAD_TASKS = [:]
 
@@ -60,7 +62,7 @@ abstract class AbstractRemoteConfigLocator {
                 it.directory = project.file(getDestinationDirectory(project))
                 it.downloadedFile = destFile
                 it.resourceUri = configLocation
-            }
+            } as DownloadTask
 
             DOWNLOAD_TASKS[configLocation] = download.path
         }
@@ -73,7 +75,7 @@ abstract class AbstractRemoteConfigLocator {
             return null
         }
 
-        project.rootProject.tasks.findByPath(DOWNLOAD_TASKS[configLocation])
+        project.rootProject.tasks.findByPath(DOWNLOAD_TASKS[configLocation]) as DownloadTask
     }
 
     protected static boolean isRemoteLocation(final String path) {

@@ -13,11 +13,13 @@
  */
 package com.monits.gradle.sca
 
+import groovy.transform.CompileStatic
 import org.gradle.util.GradleVersion
 
 /**
  * Utility class to manage versions of tools being used by the plugin.
 */
+@CompileStatic
 final class ToolVersions {
     private final static String LATEST_PMD_TOOL_VERSION = '5.4.1'
     private final static String BACKWARDS_PMD_TOOL_VERSION = '5.1.3'
@@ -32,7 +34,7 @@ final class ToolVersions {
     private final static String FB_CONTRIB_VERSION = '6.6.1'
 
     private ToolVersions() {
-        throw new AssertionError("ToolVersions can't be instantiated")
+        throw new AssertionError("ToolVersions can't be instantiated" as Object)
     }
 
     static String getPmdVersion() {
