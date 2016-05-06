@@ -83,7 +83,9 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
 
             Task pmdTask = getOrCreateTask(project, generateTaskName(sourceSetName)) {
                 // most defaults are good enough
-                ruleSets = config.getPmdRules()
+
+                // PMD doesn't play ball with relative paths nor file:// URIs
+                ruleSets = config.getPmdRules().collect { it =~ /https?:\/\// ? it : project.file(it).absolutePath }
 
                 reports {
                     xml.enabled = true

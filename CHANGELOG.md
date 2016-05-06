@@ -16,6 +16,7 @@
  * All tasks defined under the plugin are now parallelizable
  * The plugin is now fully compatible with plain Java projects
  * Fix NPE when trying to not use a findbugs filter
+ * PMD rules can now be configured as relative file paths
 
 # v1.6
 * **1.6.5**

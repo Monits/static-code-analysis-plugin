@@ -101,7 +101,7 @@ class PmdIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
             staticCodeAnalysis {
                 sourceSetConfig {
                     test {
-                        pmdRules = [file('test-pmd.xml').absolutePath]
+                        pmdRules = ['test-pmd.xml']
                     }
                 }
             }
@@ -120,7 +120,7 @@ class PmdIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         goodCode()
         // Class with CommentDefaultAccessModifier violation
         file('src/main/java/com/monits/BadPmd.java') <<
-            "package com.monits; public class BadPmd { boolean isFoo(Object arg) { return true; } }"
+            'package com.monits; public class BadPmd { boolean isFoo(Object arg) { return true; } }'
 
         when:
         BuildResult result = gradleRunner()
