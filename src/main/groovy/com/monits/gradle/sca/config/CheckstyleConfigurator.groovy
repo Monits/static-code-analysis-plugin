@@ -98,7 +98,7 @@ class CheckstyleConfigurator extends AbstractRemoteConfigLocator implements Anal
                     xml.destination = reports.xml.destination.absolutePath - "${sourceSetName}.xml" +
                             "checkstyle-${sourceSetName}.xml"
 
-                    if (hasProperty('html')) {
+                    if (it.hasProperty('html')) {
                         html.enabled = false // added in gradle 2.10, but unwanted
                     }
                 }
