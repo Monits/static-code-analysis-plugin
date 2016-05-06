@@ -1,5 +1,6 @@
 # Static Code Analysis
 
+[![Build Status](https://travis-ci.org/Monits/static-code-analysis-plugin.svg?branch=development)](https://travis-ci.org/Monits/static-code-analysis-plugin)
 [![Download](https://api.bintray.com/packages/monits/monits-android/static-code-analysis-plugin/images/download.svg) ](https://bintray.com/monits/monits-android/static-code-analysis-plugin/_latestVersion)
 
 Static Code Analysis wraps around Checkstyle, Findbugs, PMD and CPD, offering new features
@@ -33,7 +34,7 @@ Then add the plugin as dependency
 
 ```
 dependencies {
-    classpath 'com.monits:static-code-analysis-plugin:1.+'
+    classpath 'com.monits:static-code-analysis-plugin:2.+'
 }
 ```
 
@@ -65,9 +66,19 @@ staticCodeAnalysis {
 
     ignoreErrors = true
 
+    // defaut rules
     findbugsExclude = "$project.rootProject.projectDir/config/findbugs/excludeFilter.xml"
     checkstyleRules = "http://static.monits.com/checkstyle.xml"
     pmdRules = [ "http://static.monits.com/pmd.xml", "http://static.monits.com/pmd-android.xml" ]
+
+    sourceSetConfig {
+        test { // or the name of any other sourceset
+            // use a more relaxed ruleset
+            checkstyleRules = 'config/checkstyle/test-checkstyle.xml'
+            findbugsExclude = 'config/findbugs/test-findbugs.xml'
+            pmdRules = [ 'config/pmd/test-pmd.xml', "http://static.monits.com/pmd-android.xml" ]
+        }
+    }
 }
 ```
 
@@ -80,8 +91,10 @@ collection of ``String``.
 As of version 1.3, ``ignoreErrors`` decides whether the build is stopped if errors are reported. Its default
 value is ``true`` meaning that it will continue the build regardless of reported errors.
 
+Rules used by PMD, Findbugs and Checkstyle can be overriden per-sourceset under the ``sourceSetConfig`` block.
+
 To include custom lint rules, you can simply include the jars as dependencies under `androidLint`.
-For instance, you could include [Moints' Androd Linters](https://github.com/monits/android-linters) by adding:
+For instance, you could include [Monits' Android Linters](https://github.com/monits/android-linters) by adding:
 
 ```
 dependencies {

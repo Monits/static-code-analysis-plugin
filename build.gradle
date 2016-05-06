@@ -10,10 +10,16 @@ buildscript {
     }
 }
 
+repositories {
+    jcenter()
+}
+
 apply plugin: 'groovy'
-apply plugin: 'maven'
-apply plugin: 'com.github.hierynomus.license'
-apply plugin: 'com.jfrog.bintray'
+apply from: 'gradle/idea.gradle'
+apply from: 'gradle/license.gradle'
+apply from: 'gradle/publish.gradle'
+apply from: 'gradle/integTest.gradle'
+apply from: 'gradle/staticCodeAnalysis.gradle'
 
 dependencies {
     compile gradleApi()
@@ -22,122 +28,12 @@ dependencies {
 
 group = 'com.monits'
 
-version = "1.6.0-RC"
-
-
-if (version.endsWith('-SNAPSHOT')) {
-    ext.nexusRepo = 'http://nexus.monits.com/content/repositories/oss-snapshots'
-} else {
-    ext.nexusRepo = 'http://nexus.monits.com/content/repositories/oss-releases'
-}
-
-ext.nexusUsername = has("nexusUsername") ? nexusUsername : ""
-ext.nexusPassword = has("nexusPassword") ? nexusPassword : ""
+version = "2.0.0-SNAPSHOT"
 
 // Java versions
 project.sourceCompatibility = 1.7
 project.targetCompatibility = 1.7
 
-// Generate sources
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
-task javadocJar(type: Jar, dependsOn: groovydoc) {
-    classifier = 'javadoc'
-    from groovydoc.destinationDir
-}
-
-artifacts {
-    archives sourcesJar
-    archives javadocJar
-}
-
-// To upload artifact to Nexus
-uploadArchives {
-    configuration = configurations.archives
-    repositories {
-        mavenDeployer {
-            repository(url: project.ext.nexusRepo) {
-                authentication(userName: project.ext.nexusUsername, password: project.ext.nexusPassword)
-            }
-
-            pom.project {
-                name 'Static code analysis'
-                packaging 'aar'
-                description 'Extension gradle plugin for static code analysis'
-
-                licenses {
-                    license {
-                        name 'The Apache Software License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                        distribution 'repo'
-                    }
-                }
-
-                developers {
-                    developer {
-                        id 'jsotuyod'
-                        name 'Juan Martin Sotuyo Dodero'
-                        email 'jmsotuyo@monits.com'
-                    }
-                    developer {
-                        id 'MartuPuri'
-                        name 'Martin Purita'
-                        email 'mpurita@monits.com'
-                    }
-                    developer {
-                        id 'lbritez'
-                        name 'Leandro Britez'
-                        email 'lbritez@monits.com'
-                    }
-                    developer {
-                        id 'jcnoriega'
-                        name 'José Noriega'
-                        email 'jcnoriega@monits.com'
-                    }
-                }
-            }
-        }
-    }
-}
-
-license {
-    header rootProject.file('license/licenseHeader')
-    ignoreFailures true // Set to avoid to show the report of missing license and allow replace them
-    strictCheck true // Set to get files with missing or incorrect licenses
-    include "**/*.groovy"
-    ext.year = Calendar.getInstance().get(Calendar.YEAR)
-}
-
-/*
-    We noticed that LicenseFormat was not within check's dependency tree, so
-    we make it depend on license
- */
-tasks.license.dependsOn tasks.licenseFormat
-
-ext.bintrayUsername = has("bintrayUsername") ? bintrayUsername : ""
-ext.bintrayApiKey = has("bintrayApiKey") ? bintrayApiKey : ""
-
-bintray {
-
-    user = project.ext.bintrayUsername
-    key = project.ext.bintrayApiKey
-    publish = true
-    pkg {
-        repo = 'monits-android'
-        name = 'static-code-analysis-plugin'
-        userOrg = 'monits'
-        licenses = ['Apache-2.0']
-        issueTrackerUrl = 'https://github.com/Monits/static-code-analysis-plugin/issues'
-        vcsUrl = 'https://github.com/Monits/static-code-analysis-plugin.git'
-        version {
-            name = project.version
-            desc = 'StaticCodeAnalysis plugin'
-            released = new Date()
-            vcsTag = project.version
-        }
-    }
-    configurations = ['archives']
+wrapper {
+    gradleVersion = '2.13'
 }

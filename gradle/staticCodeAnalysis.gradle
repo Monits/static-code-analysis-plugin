@@ -1,0 +1,13 @@
+apply plugin: 'codenarc'
+
+codenarc {
+    toolVersion = '0.25.2'
+    ignoreFailures = false
+
+    reportFormat = 'xml'
+}
+
+// Crete a wrapper task for all codenarc analysis
+project.task('codenarc') {
+    dependsOn codenarcMain, codenarcIntegTest
+}

@@ -1,0 +1,10 @@
+apply plugin: 'idea'
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+
+        jdkName = '1.7'
+    }
+}

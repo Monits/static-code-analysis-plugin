@@ -1,0 +1,16 @@
+sudo: required
+dist: precise
+group: edge
+
+language: android
+
+jdk: oraclejdk7
+
+android:
+    components:
+        - tools
+        - build-tools-23.0.2
+        - android-23
+
+script:
+    - ./gradlew build

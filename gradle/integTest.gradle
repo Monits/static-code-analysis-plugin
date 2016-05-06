@@ -1,0 +1,64 @@
+// integration testing
+sourceSets {
+    integTest {
+        groovy.srcDir file('src/integTest/groovy')
+        resources.srcDir file('src/integTest/resources')
+
+        compileClasspath += sourceSets.main.output + configurations.testRuntime
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+configurations {
+    integTestCompile.extendsFrom testCompile
+    integTestRuntime.extendsFrom testRuntime
+}
+
+dependencies {
+    integTestCompile gradleTestKit()
+    integTestCompile('org.spockframework:spock-core:1.0-groovy-2.4') {
+        exclude module: 'groovy-all'
+    }
+}
+
+task integTest(type: Test) {
+    testClassesDir = sourceSets.integTest.output.classesDir
+    classpath = sourceSets.integTest.runtimeClasspath
+
+    // output test failure causes for easier Travis integration
+    testLogging {
+        events "PASSED", "FAILED"
+        exceptionFormat "full"
+    }
+}
+
+check.dependsOn integTest
+
+// Write the plugin's classpath to a file to share with the tests
+task createClasspathManifest {
+    def outputDir = file("$buildDir/$name")
+
+    inputs.files sourceSets.main.runtimeClasspath
+    outputs.dir outputDir
+
+    doLast {
+        outputDir.mkdirs()
+        file("$outputDir/plugin-classpath.txt").text = sourceSets.main.runtimeClasspath.join("\n")
+    }
+}
+
+// Add the classpath file to the test runtime classpath
+dependencies {
+    testRuntime files(createClasspathManifest)
+}
+
+plugins.withType(org.gradle.plugins.ide.idea.IdeaPlugin) { // lazy as plugin not applied yet
+    idea {
+        module {
+            testSourceDirs += sourceSets.integTest.groovy.srcDirs
+            testSourceDirs += sourceSets.integTest.resources.srcDirs
+            scopes.TEST.plus.add(configurations.integTestCompile)
+            scopes.TEST.plus.add(configurations.integTestRuntime)
+        }
+    }
+}
