@@ -50,6 +50,9 @@ class CheckstyleIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         reportFile().exists()
         reportFile().assertContents(containsString("<checkstyle version=\"$checkstyleVersion\""))
 
+        // No HTML report should exist
+        reportFile().parentFile.list { dir, name -> name.endsWith('.html') }.length == 0
+
         where:
         version << ['2.3', '2.4', '2.7', '2.10', GradleVersion.current().version]
         checkstyleVersion = GradleVersion.version(version) < ToolVersions.GRADLE_VERSION_CHECKSTYLE ?

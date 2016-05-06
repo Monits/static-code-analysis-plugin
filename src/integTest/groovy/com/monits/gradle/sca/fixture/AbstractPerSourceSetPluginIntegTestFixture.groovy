@@ -17,6 +17,7 @@ import org.gradle.testkit.runner.BuildResult
 
 import static org.apache.commons.lang.StringUtils.capitalize
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
+import static org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
 
 /**
  * Base specification to test a single analysis report.
@@ -25,6 +26,7 @@ abstract class AbstractPerSourceSetPluginIntegTestFixture extends AbstractPlugin
 
     static final MAIN_SOURCESET = 'main'
     static final TEST_SOURCESET = 'test'
+    static final ANDROID_TEST_SOURCESET = 'androidTest'
 
     @SuppressWarnings('MethodName')
     void 'multimodule android project runs all tasks'() {
@@ -44,10 +46,18 @@ abstract class AbstractPerSourceSetPluginIntegTestFixture extends AbstractPlugin
         result.task(LIBB_PATH + taskName() + capitalize(MAIN_SOURCESET)).outcome == SUCCESS
         result.task(LIBB_PATH + taskName() + capitalize(TEST_SOURCESET)).outcome == SUCCESS
 
+        // On empty sourcesets, the task should be UP-TO-DATE
+        result.task(LIBA_PATH + taskName() + capitalize(ANDROID_TEST_SOURCESET)).outcome == UP_TO_DATE
+        result.task(LIBB_PATH + taskName() + capitalize(ANDROID_TEST_SOURCESET)).outcome == UP_TO_DATE
+
         // The reports must exist
         file(LIBA_DIRNAME + reportFileName(MAIN_SOURCESET)).exists()
         file(LIBA_DIRNAME + reportFileName(TEST_SOURCESET)).exists()
         file(LIBB_DIRNAME + reportFileName(MAIN_SOURCESET)).exists()
         file(LIBB_DIRNAME + reportFileName(TEST_SOURCESET)).exists()
+
+        // On empty sourcesets, no report file is generated
+        !file(LIBA_DIRNAME + reportFileName(ANDROID_TEST_SOURCESET)).exists()
+        !file(LIBB_DIRNAME + reportFileName(ANDROID_TEST_SOURCESET)).exists()
     }
 }
