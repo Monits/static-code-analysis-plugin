@@ -94,7 +94,7 @@ value is ``true`` meaning that it will continue the build regardless of reported
 Rules used by PMD, Findbugs and Checkstyle can be overriden per-sourceset under the ``sourceSetConfig`` block.
 
 To include custom lint rules, you can simply include the jars as dependencies under `androidLint`.
-For instance, you could include [Moints' Androd Linters](https://github.com/monits/android-linters) by adding:
+For instance, you could include [Monits' Android Linters](https://github.com/monits/android-linters) by adding:
 
 ```
 dependencies {
