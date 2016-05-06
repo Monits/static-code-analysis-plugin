@@ -34,7 +34,7 @@ Then add the plugin as dependency
 
 ```
 dependencies {
-    classpath 'com.monits:static-code-analysis-plugin:1.+'
+    classpath 'com.monits:static-code-analysis-plugin:2.+'
 }
 ```
 
