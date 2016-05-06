@@ -104,7 +104,6 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
         project.tasks.check.dependsOn pmdRootTask
     }
 
-    @CompileStatic
     private static Task getOrCreateTask(final Project project, final String taskName, final Closure closure) {
         Task pmdTask
         if (project.tasks.findByName(taskName)) {

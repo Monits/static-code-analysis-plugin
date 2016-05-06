@@ -20,6 +20,7 @@ import spock.lang.Unroll
 
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import static org.hamcrest.CoreMatchers.containsString
+import static org.hamcrest.core.IsNot.not
 import static org.junit.Assert.assertThat
 
 /**
@@ -91,6 +92,50 @@ class PmdIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
 
         // Make sure pmd report exists
         reportFile().exists()
+    }
+
+    @SuppressWarnings('MethodName')
+    void 'dsl allows to override rules per sourceset'() {
+        given:
+        writeBuildFile() << '''
+            staticCodeAnalysis {
+                sourceSetConfig {
+                    test {
+                        pmdRules = [file('test-pmd.xml').absolutePath]
+                    }
+                }
+            }
+        '''
+        file('test-pmd.xml') <<
+            '''<?xml version="1.0"?>
+            <ruleset name="Monits Java ruleset"
+                    xmlns="http://pmd.sf.net/ruleset/1.0.0"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://pmd.sf.net/ruleset/1.0.0 http://pmd.sf.net/ruleset_xml_schema.xsd"
+                    xsi:noNamespaceSchemaLocation="http://pmd.sf.net/ruleset_xml_schema.xsd">
+
+                <rule ref="rulesets/java/comments.xml/CommentDefaultAccessModifier" />
+            </ruleset>
+        '''
+        goodCode()
+        // Class with CommentDefaultAccessModifier violation
+        file('src/main/java/com/monits/BadPmd.java') <<
+            "package com.monits; public class BadPmd { boolean isFoo(Object arg) { return true; } }"
+
+        when:
+        BuildResult result = gradleRunner()
+                .build()
+
+        then:
+        result.task(taskName()).outcome == SUCCESS
+
+        // Make sure checkstyle reports exist
+        reportFile().exists()
+        reportFile('test').exists()
+
+        // But results should differ in spite of being very similar code
+        reportFile().assertContents(containsString('<violation '))
+        reportFile('test').assertContents(not(containsString('<violation ')))
     }
 
     @Override
