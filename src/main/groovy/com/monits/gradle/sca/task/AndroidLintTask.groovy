@@ -17,8 +17,6 @@ import groovy.io.FileType
 import groovy.transform.CompileStatic
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
-import org.gradle.api.tasks.InputDirectory
-import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 
 /**
@@ -36,8 +34,6 @@ abstract class AndroidLintTask extends DefaultTask {
      *
      * @return A File pointint to the active android lint home.
      */
-    @OutputDirectory
-    @InputDirectory
     File getAndroidLintHome() {
         // Home candidates and order according to http://tools.android.com/tips/lint-custom-rules
         String home = System.getProperty(ANDROID_SDK_HOME)
