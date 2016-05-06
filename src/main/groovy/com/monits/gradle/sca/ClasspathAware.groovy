@@ -13,7 +13,6 @@
  */
 package com.monits.gradle.sca
 
-import com.monits.gradle.sca.task.ConfigureAndroidClasspathTask
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.ConfigurableFileTree
@@ -34,24 +33,27 @@ trait ClasspathAware {
         '**/BuildConfig$*.class', // BuildConfig.java inner classes
     ].asImmutable()
 
+    private static final String MOCKABLE_ANDROID_JAR_TASK = 'mockableAndroidJar'
+
     void setupAndroidClasspathAwareTask(final Task taskToConfigure, final Project project) {
         /*
          * For best results, this task needs ALL classes, including Android's SDK,
          * but we need that configure before execution to be considered in up-to-date check.
          * We do it in a separate task, executing AFTER all other needed tasks are done
          */
-        ConfigureAndroidClasspathTask cpTask = project.task(
-                'configureClasspathFor' + taskToConfigure.name.capitalize(),
-                type:ConfigureAndroidClasspathTask,) { ConfigureAndroidClasspathTask self ->
+        Task cpTask = project.task(
+                'configureClasspathFor' + taskToConfigure.name.capitalize()) { Task self ->
             // The mockable android jar allows us to know Android's classes in our analysis
-            Task t = project.tasks.findByName('mockableAndroidJar')
+            Task t = project.tasks.findByName(MOCKABLE_ANDROID_JAR_TASK)
             if (t != null) {
                 self.dependsOn t
             }
 
             // we need all other task to be done first
             self.dependsOn taskToConfigure.dependsOn.findAll { it != self } // avoid cycles
-            self.taskName = taskToConfigure.name
+        } << {
+            configAndroidClasspath(taskToConfigure, project,
+                    project.tasks.findByName(MOCKABLE_ANDROID_JAR_TASK))
         }
 
         taskToConfigure.dependsOn cpTask
