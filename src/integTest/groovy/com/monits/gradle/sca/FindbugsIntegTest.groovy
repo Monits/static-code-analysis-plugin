@@ -64,6 +64,12 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
     void 'findbugs downloads remote suppression config'() {
         given:
         writeBuildFile()
+        // setup a remote config
+        buildScriptFile() << '''
+            staticCodeAnalysis {
+                findbugsExclude = 'http://static.monits.com/findbugs-exclusions-android.xml'
+            }
+        '''
         goodCode()
 
         when:
@@ -85,6 +91,12 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
     void 'running offline fails download'() {
         given:
         writeBuildFile()
+        // setup a remote config
+        buildScriptFile() << '''
+            staticCodeAnalysis {
+                findbugsExclude = 'http://static.monits.com/findbugs-exclusions-android.xml'
+            }
+        '''
         goodCode()
 
         when:
@@ -101,6 +113,12 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
     void 'running offline with a cached file passes but warns'() {
         given:
         writeBuildFile()
+        // setup a remote config
+        buildScriptFile() << '''
+            staticCodeAnalysis {
+                findbugsExclude = 'http://static.monits.com/findbugs-exclusions-android.xml'
+            }
+        '''
         writeEmptySuppressionFilter('main')
         writeEmptySuppressionFilter('test')
         goodCode()
