@@ -28,7 +28,7 @@ dependencies {
 
 group = 'com.monits'
 
-version = "2.0.0-SNAPSHOT"
+version = "2.0.0-beta1"
 
 // Java versions
 project.sourceCompatibility = 1.7
