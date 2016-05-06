@@ -42,8 +42,7 @@ class CheckstyleConfigurator extends AbstractRemoteConfigLocator implements Anal
         setupPlugin(project, extension)
 
         setupTasksPerSourceSet(project, extension, project.android.sourceSets) { task, sourceSet ->
-            source 'src'
-            include '**/*.java'
+            source sourceSet.java.srcDirs
             exclude '**/gen/**'
             classpath = project.configurations[sourceSet.packageConfigurationName]
         }
