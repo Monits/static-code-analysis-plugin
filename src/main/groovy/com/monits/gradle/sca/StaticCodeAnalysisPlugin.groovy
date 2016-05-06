@@ -24,6 +24,7 @@ import groovy.transform.TypeCheckingMode
 import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.plugins.JavaBasePlugin
@@ -166,7 +167,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
      * @param config The config whose dependencies are to be added to scaconfig
      */
     @CompileStatic(TypeCheckingMode.SKIP)
-    private void addDepsButModulesToScaconfig(config) {
+    private void addDepsButModulesToScaconfig(final Configuration config) {
         config.allDependencies.each {
             if (it in ProjectDependency && it.group == project.rootProject.name) {
                 addDepsButModulesToScaconfig(

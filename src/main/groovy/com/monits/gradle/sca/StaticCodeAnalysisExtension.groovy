@@ -33,4 +33,10 @@ class StaticCodeAnalysisExtension {
     String findbugsExclude
 
     NamedDomainObjectContainer<RulesConfig> sourceSetConfig
+
+    // Needed so we can write sourceSetConfig { test { .... } }
+    @SuppressWarnings(['GroovyUnusedDeclaration', 'ConfusingMethodName'])
+    NamedDomainObjectContainer<RulesConfig> sourceSetConfig(final Closure<?> config) {
+        sourceSetConfig.configure config
+    }
 }
