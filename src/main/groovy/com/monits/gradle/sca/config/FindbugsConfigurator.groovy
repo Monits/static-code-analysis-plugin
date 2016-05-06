@@ -90,7 +90,6 @@ class FindbugsConfigurator extends AbstractRemoteConfigLocator implements Analys
             String sourceSetName = sourceSets.namer.determineName(sourceSet)
             RulesConfig config = extension.sourceSetConfig.maybeCreate(sourceSetName)
 
-            // TODO : Avoid multiple downloads of same file under different names
             boolean remoteLocation = isRemoteLocation(config.getFindbugsExclude())
             File filterSource
             String downloadTaskName = generateTaskName('downloadFindbugsExcludeFilter', sourceSetName)

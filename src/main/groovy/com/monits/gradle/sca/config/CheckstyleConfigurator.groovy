@@ -76,7 +76,6 @@ class CheckstyleConfigurator extends AbstractRemoteConfigLocator implements Anal
             String sourceSetName = sourceSets.namer.determineName(sourceSet)
             RulesConfig config = extension.sourceSetConfig.maybeCreate(sourceSetName)
 
-            // TODO : Avoid multiple downloads of same file under different names
             boolean remoteLocation = isRemoteLocation(config.getCheckstyleRules())
             File configSource
             String downloadTaskName = generateTaskName('downloadCheckstyleXml', sourceSetName)
