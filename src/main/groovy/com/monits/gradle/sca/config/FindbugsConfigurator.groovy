@@ -91,14 +91,20 @@ class FindbugsConfigurator extends AbstractRemoteConfigLocator implements Analys
             String sourceSetName = sourceSets.namer.determineName(sourceSet)
             RulesConfig config = extension.sourceSetConfig.maybeCreate(sourceSetName)
 
-            boolean remoteLocation = isRemoteLocation(config.getFindbugsExclude())
             File filterSource
-            String downloadTaskName = generateTaskName('downloadFindbugsExcludeFilter', sourceSetName)
-            if (remoteLocation) {
-                filterSource = makeDownloadFileTask(project, config.getFindbugsExclude(),
-                        String.format('excludeFilter-%s.xml', sourceSetName), downloadTaskName)
-            } else {
-                filterSource = new File(config.getFindbugsExclude())
+            boolean remoteLocation
+            String downloadTaskName
+
+            // findbugs exclude is optional
+            if (config.getFindbugsExclude()) {
+                remoteLocation = isRemoteLocation(config.getFindbugsExclude())
+                downloadTaskName = generateTaskName('downloadFindbugsExcludeFilter', sourceSetName)
+                if (remoteLocation) {
+                    filterSource = makeDownloadFileTask(project, config.getFindbugsExclude(),
+                            String.format('excludeFilter-%s.xml', sourceSetName), downloadTaskName)
+                } else {
+                    filterSource = new File(config.getFindbugsExclude())
+                }
             }
 
             Task findbugsTask = getOrCreateTask(project, generateTaskName(sourceSetName)) {
@@ -107,7 +113,9 @@ class FindbugsConfigurator extends AbstractRemoteConfigLocator implements Analys
                     dependsOn project.tasks.findByName(downloadTaskName)
                 }
 
-                excludeFilter = filterSource
+                if (filterSource) {
+                    excludeFilter = filterSource
+                }
 
                 reports {
                     xml {

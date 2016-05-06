@@ -146,7 +146,7 @@ class CheckstyleIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         reportFile().exists()
         reportFile('test').exists()
 
-        // But results hsould differ in spite of being very similar code
+        // But results should differ in spite of being very similar code
         reportFile().assertContents(containsString('<error '))
         reportFile('test').assertContents(not(containsString('<error ')))
     }

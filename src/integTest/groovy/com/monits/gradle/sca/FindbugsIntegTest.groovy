@@ -22,9 +22,8 @@ import spock.lang.Unroll
 import static org.gradle.testkit.runner.TaskOutcome.FAILED
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import static org.hamcrest.CoreMatchers.containsString
-import static org.hamcrest.CoreMatchers.not
+import static org.hamcrest.core.IsNot.not
 import static org.junit.Assert.assertThat
-
 /**
  * Integration test of Findbugs tasks.
  */
@@ -242,6 +241,45 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
 
         // make sure nothing is reported
         finbugsReport.assertContents(containsString('<Errors errors="0" missingClasses="0">'))
+    }
+
+    @SuppressWarnings('MethodName')
+    void 'dsl allows to override rules per sourceset'() {
+        given:
+        writeBuildFile() << '''
+            staticCodeAnalysis {
+                sourceSetConfig {
+                    test {
+                        findbugsExclude = 'test-findbugsExclude.xml'
+                    }
+                }
+            }
+        '''
+        file('test-findbugsExclude.xml') << '''
+            <FindBugsFilter>
+                <Match>
+                    <Or>
+                        <Bug pattern="UNKNOWN_NULLNESS_OF_PARAMETER" />
+                    </Or>
+                </Match>
+            </FindBugsFilter>
+        '''
+        goodCode()
+
+        when:
+        BuildResult result = gradleRunner()
+                .build()
+
+        then:
+        result.task(taskName()).outcome == SUCCESS
+
+        // Make sure checkstyle reports exist
+        reportFile().exists()
+        reportFile('test').exists()
+
+        // But results should differ in spite of being very similar code
+        reportFile().assertContents(containsString('<BugInstance type="UNKNOWN_NULLNESS_OF_PARAMETER"'))
+        reportFile('test').assertContents(not(containsString('<BugInstance type="UNKNOWN_NULLNESS_OF_PARAMETER"')))
     }
 
     @Override

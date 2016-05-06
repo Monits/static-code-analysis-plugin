@@ -143,13 +143,19 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
 
                 CHECKSTYLE_BACKWARDS_RULES
             }
-            findbugsExclude = { FINDBUGS_DEFAULT_SUPPRESSION_FILTER }
             pmdRules = {
                 if (ToolVersions.isLatestPmdVersion()) {
                     return [PMD_DEFAULT_RULES, PMD_DEFAULT_ANDROID_RULES]
                 }
 
                 [PMD_BACKWARDS_RULES, PMD_DEFAULT_ANDROID_RULES]
+            }
+        }
+
+        // default suppression filter for findbugs for Android
+        withAndroidPlugins {
+            extension.conventionMapping.with {
+                findbugsExclude = { FINDBUGS_DEFAULT_SUPPRESSION_FILTER }
             }
         }
 
@@ -178,27 +184,31 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         }
     }
 
-    private withAndroidPlugins(Class<AnalysisConfigurator> configClass) {
+    private withAndroidPlugins(final Class<AnalysisConfigurator> configClass) {
         AnalysisConfigurator configurator = configClass.newInstance()
         Action<? extends Plugin> configureAction = { configurator.applyAndroidConfig(project, extension) }
 
-        withOptionalPlugin('com.android.build.gradle.AppPlugin', configureAction)
-        withOptionalPlugin('com.android.build.gradle.LibraryPlugin', configureAction)
+        withAndroidPlugins configureAction
     }
 
-    private withPlugin(Class<? extends Plugin> pluginClass, Class<AnalysisConfigurator> configClass) {
+    private withPlugin(final Class<? extends Plugin> pluginClass, final Class<AnalysisConfigurator> configClass) {
         AnalysisConfigurator  configurator = configClass.newInstance()
         Action<? extends Plugin> configureAction = { configurator.applyConfig(project, extension) }
 
         withPlugin(pluginClass, configureAction)
     }
 
-    private withPlugin(Class<? extends Plugin> pluginClass, Action<? extends Plugin> configureAction) {
+    private withPlugin(final Class<? extends Plugin> pluginClass, final Action<? extends Plugin> configureAction) {
         project.plugins.withType(pluginClass, configureAction)
     }
 
+    private withAndroidPlugins(final Action<? extends Plugin> configureAction) {
+        withOptionalPlugin('com.android.build.gradle.AppPlugin', configureAction)
+        withOptionalPlugin('com.android.build.gradle.LibraryPlugin', configureAction)
+    }
+
     @SuppressWarnings(['ClassForName', 'EmptyCatchBlock'])
-    private withOptionalPlugin(String pluginClassName, Action<? extends Plugin> configureAction) {
+    private withOptionalPlugin(final String pluginClassName, final Action<? extends Plugin> configureAction) {
         try {
             // Will most likely throw a ClassNotFoundException
             Class<?> pluginClass = Class.forName(pluginClassName)
