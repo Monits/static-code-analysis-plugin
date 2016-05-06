@@ -1,6 +1,6 @@
 ## History
 
-# v2.0 - unreleased
+# v2.0
 * **2.0.0**
 
  New features:
