@@ -179,6 +179,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
                 addDepsButModulesToScaconfig(
                         project.rootProject.findProject(':' + it.name).configurations[it.configuration])
             } else {
+                // TODO : This includes @aar packages that aren't understood by our tools. Filter them?
                 project.dependencies.scaconfig it
             }
         }

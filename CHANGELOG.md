@@ -1,6 +1,14 @@
 ## History
 
 # v2.0
+* **2.0.1** - Unreleased
+
+ Improvements:
+ * Finbugs classpath and aalyzed classes has been restricted. We get the same results, but with faster analysis.
+
+ Bug fixes:
+ * Findbugs reports only show issues in clases belonging  to the corresponding sourceset.
+
 * **2.0.0**
 
  New features:

@@ -51,7 +51,7 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
             boolean supportsClasspath = GRADLE_VERSION_PMD_CLASSPATH_SUPPORT <= GradleVersion.current()
 
             if (supportsClasspath) {
-                setupAndroidClasspathAwareTask(pmdTask, project)
+                setupAndroidClasspathAwareTask(pmdTask, project, null)
             }
         }
     }
