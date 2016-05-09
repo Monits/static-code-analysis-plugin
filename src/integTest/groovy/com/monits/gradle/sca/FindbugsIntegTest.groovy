@@ -24,6 +24,7 @@ import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import static org.hamcrest.CoreMatchers.containsString
 import static org.hamcrest.core.IsNot.not
 import static org.junit.Assert.assertThat
+
 /**
  * Integration test of Findbugs tasks.
  */
@@ -138,7 +139,7 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
     void 'Findbugs-related annotations are available'() {
         given:
         writeBuildFile()
-        writeEmptySuppressionFilter()
+        useEmptySuppressionFilter()
         file('src/main/java/com/monits/ClassA.java') << '''
             package com.monits;
 
@@ -170,7 +171,7 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         given:
         writeAndroidBuildFile()
         writeAndroidManifest()
-        writeEmptySuppressionFilter()
+        useEmptySuppressionFilter()
         file('src/main/res/values/strings.xml') <<
             '''<?xml version="1.0" encoding="utf-8"?>
                 <resources>
@@ -207,7 +208,7 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         given:
         writeAndroidBuildFile(androidVersion)
         writeAndroidManifest()
-        writeEmptySuppressionFilter()
+        useEmptySuppressionFilter()
         file('src/main/java/com/monits/ClassA.java') << '''
             package com.monits;
 
@@ -293,11 +294,41 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
 
         // Make sure checkstyle reports exist
         reportFile().exists()
-        reportFile('test').exists()
+        reportFile(TEST_SOURCESET).exists()
 
         // But results should differ in spite of being very similar code
         reportFile().assertContents(containsString('<BugInstance type="UNKNOWN_NULLNESS_OF_PARAMETER"'))
-        reportFile('test').assertContents(not(containsString('<BugInstance type="UNKNOWN_NULLNESS_OF_PARAMETER"')))
+        reportFile(TEST_SOURCESET)
+                .assertContents(not(containsString('<BugInstance type="UNKNOWN_NULLNESS_OF_PARAMETER"')))
+    }
+
+    @SuppressWarnings('MethodName')
+    void 'reports include just classes from their sourcesets'() {
+        given:
+        writeAndroidBuildFile()
+        writeAndroidManifest()
+        useEmptySuppressionFilter()
+        goodCode()
+
+        when:
+        BuildResult result = gradleRunner()
+                .build()
+
+        then:
+        result.task(taskName()).outcome == SUCCESS
+
+        // The report must exist, analyzed classes must match sourcesets, and not complain of missing classes
+        reportFile().exists()
+        reportFile()
+            .assertContents(containsString('<FileStats path="com/monits/Class1.java" '))
+            .assertContents(not(containsString('<FileStats path="com/monits/Class1Test.java" ')))
+            .assertContents(containsString('<Errors errors="0" missingClasses="0">'))
+
+        reportFile(TEST_SOURCESET).exists()
+        reportFile(TEST_SOURCESET)
+            .assertContents(not(containsString('<FileStats path="com/monits/Class1.java" ')))
+            .assertContents(containsString('<FileStats path="com/monits/Class1Test.java" '))
+            .assertContents(containsString('<Errors errors="0" missingClasses="0">'))
     }
 
     @Override
