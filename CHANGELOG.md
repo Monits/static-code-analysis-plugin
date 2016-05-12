@@ -8,6 +8,7 @@
 
  Bug fixes:
  * Findbugs reports only show issues in clases belonging  to the corresponding sourceset.
+ * Extra Android lint rules are properly configured on old ([1.0, 1.3)) versions of the Android Gradle plugin
 
 * **2.0.0**
 
