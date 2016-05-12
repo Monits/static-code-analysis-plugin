@@ -55,6 +55,31 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
     }
 
     @SuppressWarnings('MethodName')
+    @Unroll('AndroidLint should be resolved before linting for plugin version #androidVersion')
+    void 'androidLint is resolved'() {
+        given:
+        writeAndroidBuildFile(androidVersion)
+        writeAndroidManifest()
+        goodCode()
+
+        when:
+        BuildResult result = gradleRunner()
+                .withGradleVersion(gradleVersion)
+                // plugin version 1.1.x failed to compile tests if assemble was not called beforehand
+                .withArguments('assemble', 'check', '--stacktrace')
+                .build()
+
+        then:
+        result.task(taskName()).outcome == SUCCESS
+        result.task(':resolveAndroidLint').outcome == SUCCESS
+        result.task(':cleanupAndroidLint').outcome == SUCCESS
+
+        where:
+        androidVersion << ['1.1.3', '1.2.3', '1.3.1', '1.5.0', '2.0.0', '2.1.0']
+        gradleVersion = androidVersion < '1.5.0' ? '2.9' : GradleVersion.current().version
+    }
+
+    @SuppressWarnings('MethodName')
     @Unroll('AndroidLint re-run is up-to-date when using plugin version #androidVersion')
     void 'rerun is up-to-date'() {
         given:
