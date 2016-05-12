@@ -14,6 +14,10 @@ repositories {
     jcenter()
 }
 
+group = 'com.monits'
+
+version = "2.1.0-SNAPSHOT"
+
 apply plugin: 'groovy'
 apply from: 'gradle/idea.gradle'
 apply from: 'gradle/license.gradle'
@@ -25,10 +29,6 @@ dependencies {
     compile gradleApi()
     compile localGroovy()
 }
-
-group = 'com.monits'
-
-version = "2.1.0-SNAPSHOT"
 
 // Java versions
 project.sourceCompatibility = 1.7
