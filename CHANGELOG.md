@@ -25,14 +25,14 @@
  * If there is no connectivity, downloading checkstyle / findbugs config will not fail the build if there is a previous downloaded version. A warning will be issued
  * PMD rules can now be configured as relative file paths
  * Default PMD rules are now configured according to the PMD version being used
- * Remote checkstyle / findbugs config download now honors the --offline flag
+ * Remote checkstyle / findbugs config download now honors the `--offline` flag
  * Files are now downloaded only once per run, regardless of number of projects / sourcesets configured
  * Warnings are issued when the version of gradle used is too old to support the latest tools
  * All tasks defined under the plugin are now parallelizable
 
  Bug fixes:
  * Fix classpath population on an clean project
- * Fix classpath population on Android proejcts to include generated classes in classath (though still not analyzed)
+ * Fix classpath population on Android proejcts to include generated classes in classpath (though still not analyzed)
  * Fix path to mockable-androir-xx.jar under Android Gradle plugin 2.+
  * Fix NPE when trying to not use a findbugs filter
 

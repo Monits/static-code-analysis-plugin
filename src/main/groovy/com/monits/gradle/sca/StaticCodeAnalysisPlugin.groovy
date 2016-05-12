@@ -57,12 +57,13 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         defineFindbugsAnnotationDependencies()
         configureExtensionRule()
 
-        // Apply Android Lint configuration
-        withAndroidPlugins AndroidLintConfigurator
-
         project.afterEvaluate {
             addDepsButModulesToScaconfig project.configurations.compile
             addDepsButModulesToScaconfig project.configurations.testCompile
+
+            // Apply Android Lint configuration
+            // must be done in `afterEvaluate` for compatibility with android plugin [1.0, 1.3)
+            withAndroidPlugins AndroidLintConfigurator
 
             if (extension.getFindbugs()) {
                 withAndroidPlugins FindbugsConfigurator
@@ -109,9 +110,10 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         }
     }
 
+    // This should be done when actually configuring Findbugs, but can't be inside an afterEvaluate
+    // See: https://code.google.com/p/android/issues/detail?id=208474
     @CompileStatic(TypeCheckingMode.SKIP)
     private void defineFindbugsAnnotationDependencies() {
-        //FIXME: This is here so that projects that use Findbugs can compile... but it ignores DSL completely
         project.repositories {
             maven {
                 url 'http://nexus.monits.com/content/repositories/oss-snapshots'
@@ -179,6 +181,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
                 addDepsButModulesToScaconfig(
                         project.rootProject.findProject(':' + it.name).configurations[it.configuration])
             } else {
+                // TODO : This includes @aar packages that aren't understood by our tools. Filter them?
                 project.dependencies.scaconfig it
             }
         }

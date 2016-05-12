@@ -69,8 +69,16 @@ abstract class AbstractIntegTestFixture extends Specification {
         1.upto(numberOfClasses) {
             file("src/main/java/com/monits/Class${it}.java") <<
                 "package com.monits; public class Class${it} { public boolean isFoo(Object arg) { return true; } }"
-            file("src/test/java/com/monits/Class${it}Test.java") <<
-                "package com.monits; public class Class${it}Test { public boolean isFoo(Object arg) { return true; } }"
+            file("src/test/java/com/monits/Class${it}Test.java") << """
+                package com.monits;
+
+                import com.monits.Class${it};
+
+                public class Class${it}Test {
+                    public boolean isFoo(Object arg) {
+                        return new Class${it}().isFoo(arg);
+                    }
+                }"""
         }
     }
 
@@ -199,11 +207,10 @@ abstract class AbstractIntegTestFixture extends Specification {
                 'package liba; public class ClassA { public boolean isFoo(Object arg) { return true; } }'
         file(LIBA_DIRNAME + 'src/test/java/liba/ClassATest.java') <<
                 'package liba; public class ClassATest { public boolean isFoo(Object arg) { return true; } }'
-        file(LIBB_DIRNAME + 'src/main/java/libb/ClassB.java') <<
+        file(LIBB_DIRNAME + 'src/main/java/libb/ClassB.jaa') <<
                 'package libb; import liba.ClassA; public class ClassB { public boolean isFoo(Object arg) {' +
                 ' ClassA a = new ClassA(); return a.isFoo(arg); } }'
         file(LIBB_DIRNAME + 'src/test/java/libb/ClassBTest.java') <<
                 'package libb; public class ClassBTest { public boolean isFoo(Object arg) { return true; } }'
     }
 }
-
