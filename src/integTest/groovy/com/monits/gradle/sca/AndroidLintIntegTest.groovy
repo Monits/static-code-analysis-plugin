@@ -15,10 +15,12 @@ package com.monits.gradle.sca
 
 import com.monits.gradle.sca.fixture.AbstractIntegTestFixture
 import org.gradle.testkit.runner.BuildResult
+import org.gradle.testkit.runner.GradleRunner
 import org.gradle.util.GradleVersion
 import spock.lang.Unroll
 
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
+import static org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
 
 /**
  * Integration test of Android Lint tasks.
@@ -52,10 +54,38 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
         version << ['2.3', '2.4', '2.7', '2.10', GradleVersion.current().version]
     }
 
+    @SuppressWarnings('MethodName')
+    @Unroll('AndroidLint re-run is up-to-date when using plugin version #androidVersion')
+    void 'rerun is up-to-date'() {
+        given:
+        writeAndroidBuildFile(androidVersion)
+        writeAndroidManifest()
+        goodCode()
+
+        when:
+        GradleRunner gradleRunner = gradleRunner()
+                .withGradleVersion(gradleVersion)
+                // plugin version 1.1.x failed to compile tests if assemble was not called beforehand
+                .withArguments('assemble', 'check', '--stacktrace')
+        BuildResult firstRun = gradleRunner.build()
+        BuildResult secondRun = gradleRunner.build()
+
+        then:
+        firstRun.task(taskName()).outcome == SUCCESS
+        secondRun.task(taskName()).outcome == UP_TO_DATE
+
+        // Make sure the report exist
+        reportFile(androidVersion >= '2.0.0' ? 'debug' : null).exists()
+
+        where:
+        androidVersion << ['1.1.3', '1.2.3', '1.3.1', '1.5.0', '2.0.0', '2.1.0']
+        gradleVersion = androidVersion < '1.5.0' ? '2.9' : GradleVersion.current().version
+    }
+
     @Override
-    String reportFileName(final String sourceSet) {
+    String reportFileName(final String buildType) {
         // Sourceset names are only taken into account when using Android plugin 2.+
-        'build/outputs/lint-results.xml'
+        "build/outputs/lint-results${buildType ? '-' + buildType : ''}.xml"
     }
 
     @Override
