@@ -1,6 +1,20 @@
 ## History
 
-# v2.0 - unreleased
+# v2.0
+* **2.1.0**
+
+ Improvements:
+ * We manually inject inputs and outputs to Android Lint tasks to allow it to report up-to-date when there are no changes.
+
+* **2.0.1**
+
+ Improvements:
+ * Finbugs classpath and analyzed classes has been restricted. We get the same results, but with faster analysis.
+
+ Bug fixes:
+ * Findbugs reports only show issues in clases belonging to the corresponding sourceset.
+ * Extra Android lint rules are properly configured on old ([1.0, 1.3)) versions of the Android Gradle plugin
+
 * **2.0.0**
 
  New features:
