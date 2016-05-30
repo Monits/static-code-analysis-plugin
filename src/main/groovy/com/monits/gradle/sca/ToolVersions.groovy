@@ -21,7 +21,7 @@ import org.gradle.util.GradleVersion
 */
 @CompileStatic
 final class ToolVersions {
-    private final static String LATEST_PMD_TOOL_VERSION = '5.4.1'
+    private final static String LATEST_PMD_TOOL_VERSION = '5.4.2'
     private final static String BACKWARDS_PMD_TOOL_VERSION = '5.1.3'
     private final static GradleVersion GRADLE_VERSION_PMD = GradleVersion.version('2.4')
 
