@@ -95,6 +95,22 @@ class PmdIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
     }
 
     @SuppressWarnings('MethodName')
+    void 'compile is run before pmd'() {
+        given:
+        writeBuildFile()
+        goodCode()
+
+        when:
+        BuildResult result = gradleRunner()
+            .build()
+
+        then:
+        result.task(taskName()).outcome == SUCCESS
+        result.task(':compileJava').outcome == SUCCESS
+        result.task(':compileTestJava').outcome == SUCCESS
+    }
+
+    @SuppressWarnings('MethodName')
     void 'dsl allows to override rules per sourceset'() {
         given:
         writeBuildFile() << '''

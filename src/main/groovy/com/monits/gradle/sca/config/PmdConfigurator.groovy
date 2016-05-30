@@ -22,6 +22,7 @@ import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.plugins.quality.Pmd
+import org.gradle.api.tasks.SourceSet
 import org.gradle.util.GUtil
 import org.gradle.util.GradleVersion
 
@@ -36,7 +37,14 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
     void applyConfig(final Project project, final StaticCodeAnalysisExtension extension) {
         setupPlugin(project, extension)
 
-        setupTasksPerSourceSet(project, extension, project.sourceSets)
+        setupTasksPerSourceSet(project, extension, project.sourceSets) { Pmd pmdTask, SourceSet sourceSet ->
+            boolean supportsClasspath = GRADLE_VERSION_PMD_CLASSPATH_SUPPORT <= GradleVersion.current()
+
+            if (supportsClasspath) {
+                // This is the default in Gradle 3.+, we backport it
+                pmdTask.classpath = project.files(sourceSet.output, sourceSet.compileClasspath)
+            }
+        }
     }
 
     // DuplicateStringLiteral should be removed once we refactor this
