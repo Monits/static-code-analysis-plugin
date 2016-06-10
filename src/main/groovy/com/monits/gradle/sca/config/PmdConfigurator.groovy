@@ -42,7 +42,7 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
 
             if (supportsClasspath) {
                 // This is the default in Gradle 3.+, we backport it
-                pmdTask.classpath = project.files(sourceSet.output, sourceSet.compileClasspath)
+                pmdTask.classpath = sourceSet.output + sourceSet.compileClasspath
             }
         }
     }
