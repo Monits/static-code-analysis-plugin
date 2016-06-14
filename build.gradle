@@ -16,7 +16,7 @@ repositories {
 
 group = 'com.monits'
 
-version = "2.1.2-HF2"
+version = "2.1.2"
 
 apply plugin: 'groovy'
 apply from: 'gradle/idea.gradle'
