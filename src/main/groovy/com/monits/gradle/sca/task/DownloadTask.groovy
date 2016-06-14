@@ -13,13 +13,13 @@
  */
 package com.monits.gradle.sca.task
 
+import com.monits.gradle.sca.logging.ConsoleRenderer
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.ParallelizableTask
 import org.gradle.api.tasks.TaskAction
-import org.gradle.logging.ConsoleRenderer
 import org.gradle.util.GradleVersion
 
 /**

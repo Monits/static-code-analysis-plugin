@@ -13,6 +13,7 @@
  */
 package com.monits.gradle.sca.task
 
+import com.monits.gradle.sca.logging.ConsoleRenderer
 import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
 import org.gradle.api.DefaultTask
@@ -25,7 +26,6 @@ import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.ParallelizableTask
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.VerificationTask
-import org.gradle.logging.ConsoleRenderer
 import org.gradle.util.VersionNumber
 
 /**
