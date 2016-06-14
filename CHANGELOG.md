@@ -1,6 +1,10 @@
 ## History
 
 # v2.0
+* **2.1.r21**
+ Bug fixes:
+ * Fix compatibility with Gradle 2.14
+
 * **2.1.1**
  Improvements:
  * Upgraded PMD to 5.4.2

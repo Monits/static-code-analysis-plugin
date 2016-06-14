@@ -84,7 +84,7 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         file('config/findbugs/excludeFilter-main.xml').exists()
         file('config/findbugs/excludeFilter-test.xml').exists()
 
-        // Make sure checkstyle report exists
+        // Make sure findbugs report exists
         reportFile().exists()
     }
 
@@ -166,7 +166,6 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
     }
 
     @SuppressWarnings('MethodName')
-    @Unroll('Android classes are available when using android gradle plugin #androidVersion and gradle #gradleVersion')
     void 'Android generated classes are available'() {
         given:
         writeAndroidBuildFile()
@@ -292,7 +291,7 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         then:
         result.task(taskName()).outcome == SUCCESS
 
-        // Make sure checkstyle reports exist
+        // Make sure findbugs reports exist
         reportFile().exists()
         reportFile(TEST_SOURCESET).exists()
 
