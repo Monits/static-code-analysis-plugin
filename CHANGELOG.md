@@ -4,6 +4,7 @@
 * **2.1.3**
  Bug fixes:
  * Improve classpath configuration for PMD on Android tests
+ * CPD can now be run without having PMD running
 
 * **2.1.2**
  Bug fixes:
