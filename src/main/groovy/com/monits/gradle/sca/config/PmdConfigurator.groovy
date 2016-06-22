@@ -23,6 +23,7 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.plugins.quality.Pmd
 import org.gradle.api.tasks.SourceSet
+import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.util.GUtil
 import org.gradle.util.GradleVersion
 
@@ -53,6 +54,13 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
         setupPlugin(project, extension)
 
         setupTasksPerSourceSet(project, extension, project.android.sourceSets) { Pmd pmdTask, sourceSet ->
+            /*
+             * Android doesn't expose name of the task compiling the sourceset, and names vary
+             * widely from version to version of the plugin, plus needs to take flavors into account.
+             * This is inefficient, but safer and simpler.
+            */
+            dependsOn project.tasks.withType(JavaCompile)
+
             source sourceSet.java.srcDirs
             exclude '**/gen/**'
 

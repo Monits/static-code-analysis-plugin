@@ -1,7 +1,11 @@
 ## History
 
 # v2.0
-* **2.1.r21**
+* **2.1.3**
+ Bug fixes:
+ * Improve classpath configuration for PMD on Android tests
+
+* **2.1.2**
  Bug fixes:
  * Fix compatibility with Gradle 2.14
 
