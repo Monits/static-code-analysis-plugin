@@ -35,8 +35,6 @@ class CpdConfigurator implements AnalysisConfigurator {
             return
         }
 
-        project.plugins.apply 'pmd'
-
         Task cpdTask = project.task(CPD, type:CPDTask) {
             ignoreFailures = extension.getIgnoreErrors()
 

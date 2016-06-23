@@ -20,6 +20,7 @@ import spock.lang.Unroll
 
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import static org.hamcrest.CoreMatchers.containsString
+import static org.hamcrest.CoreMatchers.is
 import static org.hamcrest.core.IsNot.not
 import static org.junit.Assert.assertThat
 
@@ -61,20 +62,22 @@ class PmdIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
     }
 
     @SuppressWarnings('MethodName')
-    void 'pmd configures auxclasspath'() {
+    void 'pmd configures auxclasspath for Java'() {
         given:
         writeBuildFile()
         buildScriptFile() << '''
-            dependencies {
-                // Add a dependency so there is something in the classpath
-                testCompile 'junit:junit:4.12'
-            }
-
             afterEvaluate {
-                Task pmdTask = project.tasks.getByPath(':pmdTest');
+                Task pmdTask = project.tasks.getByPath(':pmdMain')
                 pmdTask << {
                     if (!classpath.empty) {
-                        println "Auxclasspath is configured"
+                        println "Auxclasspath is configured for main " + classpath.asPath
+                    }
+                }
+
+                Task pmdTestTask = project.tasks.getByPath(':pmdTest')
+                pmdTestTask << {
+                    if (!classpath.empty) {
+                        println "Auxclasspath is configured for test " + classpath.asPath
                     }
                 }
             }
@@ -88,10 +91,91 @@ class PmdIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
 
         then:
         // The classpath must be configured, and not empty
-        assertThat(result.output, containsString('Auxclasspath is configured'))
+        assertThat('main classes are in classpath',
+            (result.output =~ /Auxclasspath is configured for main .*\/classes\/main/) as boolean, is(true))
+        assertThat('test classes are not in main classpath',
+            (result.output =~ /Auxclasspath is configured for main .*\/classes\/test/) as boolean, is(false))
+        assertThat('junit is not in main classpath',
+            (result.output =~ /Auxclasspath is configured for main .*\/junit\//) as boolean, is(false))
+        assertThat('main classes are in test classpath',
+            (result.output =~ /Auxclasspath is configured for test .*\/classes\/main/) as boolean, is(true))
+        assertThat('test classes are in test classpath',
+            (result.output =~ /Auxclasspath is configured for test .*\/classes\/test/) as boolean, is(true))
+        assertThat('junit is in test classpath',
+            (result.output =~ /Auxclasspath is configured for test .*\/junit\//) as boolean, is(true))
 
         // Make sure pmd report exists
         reportFile().exists()
+        reportFile('test').exists()
+    }
+
+    @SuppressWarnings('MethodName')
+    void 'pmd configures auxclasspath for Android'() {
+        given:
+        writeAndroidBuildFile()
+        writeAndroidManifest()
+        buildScriptFile() << '''
+            afterEvaluate {
+                Task configPmdTask = project.tasks.getByPath(':configureClasspathForPmdMain')
+                configPmdTask << {
+                    Task pmdTask = project.tasks.getByPath(':pmdMain')
+                    if (!pmdTask.classpath.empty) {
+                        println "Auxclasspath is configured for main " + pmdTask.classpath.asPath
+                    }
+                }
+
+                Task configTestPmdTask = project.tasks.getByPath(':configureClasspathForPmdTest')
+                configTestPmdTask << {
+                    Task pmdTask = project.tasks.getByPath(':pmdTest')
+                    if (!pmdTask.classpath.empty) {
+                        println "Auxclasspath is configured for test " + pmdTask.classpath.asPath
+                    }
+                }
+            }
+        '''
+        goodCode()
+
+        when:
+        BuildResult result = gradleRunner()
+            .withGradleVersion('2.8')
+            .build()
+
+        then:
+        // The classpath must be configured, and not empty
+        assertThat('main classes are in classpath',
+            (result.output =~ /Auxclasspath is configured for main .*\/debug\//) as boolean, is(true))
+        // on android we don't discriminate test / compile
+        assertThat('test classes are in main classpath',
+            (result.output =~ /Auxclasspath is configured for main .*\/test\/debug/) as boolean, is(true))
+        // on android we don't discriminate test / compile
+        assertThat('junit is in main classpath',
+            (result.output =~ /Auxclasspath is configured for main .*\/junit\//) as boolean, is(true))
+        assertThat('main classes are in test classpath',
+            (result.output =~ /Auxclasspath is configured for test .*\/debug\//) as boolean, is(true))
+        assertThat('test classes are in test classpath',
+            (result.output =~ /Auxclasspath is configured for test .*\/test\/debug/) as boolean, is(true))
+        assertThat('junit is in test classpath',
+            (result.output =~ /Auxclasspath is configured for test .*\/junit\//) as boolean, is(true))
+
+        // Make sure pmd report exists
+        reportFile().exists()
+        reportFile('test').exists()
+    }
+
+    @SuppressWarnings('MethodName')
+    void 'compile is run before pmd'() {
+        given:
+        writeBuildFile()
+        goodCode()
+
+        when:
+        BuildResult result = gradleRunner()
+            .build()
+
+        then:
+        result.task(taskName()).outcome == SUCCESS
+        result.task(':compileJava').outcome == SUCCESS
+        result.task(':compileTestJava').outcome == SUCCESS
     }
 
     @SuppressWarnings('MethodName')

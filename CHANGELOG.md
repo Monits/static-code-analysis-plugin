@@ -1,6 +1,26 @@
 ## History
 
 # v2.0
+* **2.1.4**
+ Bug fixes:
+ * Improve classpath configuration for PMD on Android tests
+
+* **2.1.3**
+ Bug fixes:
+ * Improve classpath configuration for PMD on Android tests
+ * CPD can now be run without having PMD running
+
+* **2.1.2**
+ Bug fixes:
+ * Fix compatibility with Gradle 2.14
+
+* **2.1.1**
+ Improvements:
+ * Upgraded PMD to 5.4.2
+ * Upgraded Checkstyle to 6.19
+ * Include compiled .class files to PMD analysis (backported from 3.+) to fix false positives
+    See https://github.com/gradle/gradle/pull/649 and https://sourceforge.net/p/pmd/bugs/1468/
+
 * **2.1.0**
 
  Improvements:

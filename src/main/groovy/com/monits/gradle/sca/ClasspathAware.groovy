@@ -39,6 +39,7 @@ trait ClasspathAware {
 
     private static final String MOCKABLE_ANDROID_JAR_TASK = 'mockableAndroidJar'
     private static final String DEBUG_SOURCESET = 'debug'
+    private static final String TEST_DEBUG_SOURCESET = 'test/' + DEBUG_SOURCESET
 
     @CompileStatic(TypeCheckingMode.SKIP)
     void setupAndroidClasspathAwareTask(final Task taskToConfigure, final Project project,
@@ -98,6 +99,7 @@ trait ClasspathAware {
                 mockableAndroidJar +
                 // TODO : is it okay to always use debug?
                 getNonAnalyzedProjectClasses(project, DEBUG_SOURCESET, sourceSetClasses) +
+                project.files("${project.buildDir}/intermediates/classes/${TEST_DEBUG_SOURCESET}") +
                 classTree
     }
 

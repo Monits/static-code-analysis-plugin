@@ -15,7 +15,7 @@ package com.monits.gradle.sca.fixture
 
 import org.gradle.testkit.runner.BuildResult
 
-import static org.apache.commons.lang.StringUtils.capitalize
+import static org.apache.commons.lang3.StringUtils.capitalize
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import static org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
 

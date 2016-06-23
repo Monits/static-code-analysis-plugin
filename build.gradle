@@ -26,8 +26,8 @@ apply from: 'gradle/integTest.gradle'
 apply from: 'gradle/staticCodeAnalysis.gradle'
 
 dependencies {
-    compile gradleApi()
-    compile localGroovy()
+    compileOnly gradleApi()
+    compileOnly localGroovy()
 }
 
 // Java versions
@@ -35,5 +35,5 @@ project.sourceCompatibility = 1.7
 project.targetCompatibility = 1.7
 
 wrapper {
-    gradleVersion = '2.13'
+    gradleVersion = '2.14'
 }

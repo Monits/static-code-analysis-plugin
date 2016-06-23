@@ -72,11 +72,13 @@ abstract class AbstractIntegTestFixture extends Specification {
             file("src/test/java/com/monits/Class${it}Test.java") << """
                 package com.monits;
 
-                import com.monits.Class${it};
+                import org.junit.Test;
+                import static org.junit.Assert.assertTrue;
 
-                public class Class${it}Test {
-                    public boolean isFoo(Object arg) {
-                        return new Class${it}().isFoo(arg);
+                public class Class${it}Test extends Object {
+                    @Test
+                    public void isFoo() {
+                        assertTrue("It's not a foo", new Class${it}().isFoo(null));
                     }
                 }"""
         }
@@ -102,6 +104,10 @@ abstract class AbstractIntegTestFixture extends Specification {
 
             apply plugin: 'java'
             apply plugin: 'com.monits.staticCodeAnalysis'
+
+            dependencies {
+                testCompile 'junit:junit:4.12'
+            }
 
         """ + staticCodeAnalysysConfig(toolsConfig) as TestFile
     }
@@ -144,6 +150,10 @@ abstract class AbstractIntegTestFixture extends Specification {
 
             apply plugin: 'com.android.library'
             apply plugin: 'com.monits.staticCodeAnalysis'
+
+            dependencies {
+                testCompile 'junit:junit:4.12'
+            }
 
         """ + staticCodeAnalysysConfig(toolsConfig) +
         '''
