@@ -41,7 +41,6 @@ trait ClasspathAware {
     private static final String DEBUG_SOURCESET = 'debug'
     private static final String TEST_DEBUG_SOURCESET = 'test/' + DEBUG_SOURCESET
 
-    @CompileStatic(TypeCheckingMode.SKIP)
     void setupAndroidClasspathAwareTask(final Task taskToConfigure, final Project project,
                                         final Collection<String> sourceSetClasses) {
         /*
