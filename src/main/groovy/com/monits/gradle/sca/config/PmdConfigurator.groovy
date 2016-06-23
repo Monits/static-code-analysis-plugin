@@ -26,6 +26,7 @@ import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.plugins.quality.Pmd
 import org.gradle.api.plugins.quality.PmdExtension
 import org.gradle.api.plugins.quality.PmdReports
+import org.gradle.api.reporting.ReportingExtension
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.compile.JavaCompile
@@ -55,7 +56,6 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
         }
     }
 
-    // DuplicateStringLiteral should be removed once we refactor this
     @CompileStatic(TypeCheckingMode.SKIP)
     @Override
     void applyAndroidConfig(final Project project, final StaticCodeAnalysisExtension extension) {
@@ -114,8 +114,8 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
                 it.reports { PmdReports r ->
                     r.with {
                         xml.enabled = true
-                        xml.setDestination(xml.destination.absolutePath - "${sourceSetName}.xml" +
-                            "pmd-${sourceSetName}.xml")
+                        xml.setDestination(new File(project.extensions.getByType(ReportingExtension).file(PMD),
+                            "pmd-${sourceSetName}.xml"))
                         html.enabled = false
                     }
                 }
