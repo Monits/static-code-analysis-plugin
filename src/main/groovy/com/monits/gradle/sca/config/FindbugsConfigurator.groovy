@@ -18,19 +18,27 @@ import com.monits.gradle.sca.RulesConfig
 import com.monits.gradle.sca.StaticCodeAnalysisExtension
 import com.monits.gradle.sca.ToolVersions
 import groovy.transform.CompileStatic
+import groovy.transform.TypeCheckingMode
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.artifacts.ModuleDependency
+import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.plugins.quality.FindBugs
+import org.gradle.api.plugins.quality.FindBugsExtension
+import org.gradle.api.plugins.quality.FindBugsReports
 import org.gradle.api.reporting.ReportingExtension
+import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.util.GUtil
 
 /**
  * A configurator for Findbugs tasks
 */
+@CompileStatic
 class FindbugsConfigurator extends AbstractRemoteConfigLocator implements AnalysisConfigurator, ClasspathAware {
     private static final String FINDBUGS = 'findbugs'
+    private static final String FINBUGS_PLUGINS_CONFIGURATION = 'findbugsPlugins'
     private static final String ANT_WILDCARD = '**'
 
     final String pluginName = FINDBUGS
@@ -39,9 +47,11 @@ class FindbugsConfigurator extends AbstractRemoteConfigLocator implements Analys
     void applyConfig(final Project project, final StaticCodeAnalysisExtension extension) {
         setupPlugin(project, extension)
 
-        setupTasksPerSourceSet(project, extension, project.sourceSets)
+        SourceSetContainer sourceSets = project.convention.getPlugin(JavaPluginConvention).sourceSets
+        setupTasksPerSourceSet(project, extension, sourceSets)
     }
 
+    @CompileStatic(TypeCheckingMode.SKIP)
     @Override
     void applyAndroidConfig(final Project project, final StaticCodeAnalysisExtension extension) {
         setupPlugin(project, extension)
@@ -79,23 +89,27 @@ class FindbugsConfigurator extends AbstractRemoteConfigLocator implements Analys
     private static void setupPlugin(final Project project, final StaticCodeAnalysisExtension extension) {
         project.plugins.apply FINDBUGS
 
-        project.dependencies {
-            findbugsPlugins('com.monits:findbugs-plugin:' + ToolVersions.monitsFindbugsVersion) {
-                transitive = false
+        project.dependencies.with {
+            add(FINBUGS_PLUGINS_CONFIGURATION,
+                    'com.monits:findbugs-plugin:' + ToolVersions.monitsFindbugsVersion) { ModuleDependency d ->
+                d.transitive = false
             }
-            findbugsPlugins 'com.mebigfatguy.fb-contrib:fb-contrib:' + ToolVersions.fbContribVersion
+
+            add(FINBUGS_PLUGINS_CONFIGURATION, 'com.mebigfatguy.fb-contrib:fb-contrib:' + ToolVersions.fbContribVersion)
         }
 
-        project.findbugs {
-            toolVersion = ToolVersions.findbugsVersion
-            effort = 'max'
-            ignoreFailures = extension.getIgnoreErrors()
+        project.extensions.configure(FindBugsExtension) { FindBugsExtension it ->
+            it.with {
+                toolVersion = ToolVersions.findbugsVersion
+                effort = 'max'
+                ignoreFailures = extension.getIgnoreErrors()
+            }
         }
     }
 
     @SuppressWarnings('UnnecessaryGetter')
     private void setupTasksPerSourceSet(final Project project, final StaticCodeAnalysisExtension extension,
-                                               final NamedDomainObjectContainer<Object> sourceSets,
+                                               final NamedDomainObjectContainer<?> sourceSets,
                                                final Closure<?> configuration = null) {
         // Create a phony findbugs task that just executes all real findbugs tasks
         Task findbugsRootTask = project.tasks.findByName(FINDBUGS) ?: project.task(FINDBUGS)
@@ -119,21 +133,23 @@ class FindbugsConfigurator extends AbstractRemoteConfigLocator implements Analys
                 }
             }
 
-            Task findbugsTask = getOrCreateTask(project, generateTaskName(sourceSetName)) {
-                // most defaults are good enough
-                if (remoteLocation) {
-                    dependsOn project.tasks.findByName(downloadTaskName)
-                }
+            Task findbugsTask = getOrCreateTask(project, generateTaskName(sourceSetName)) { FindBugs it ->
+                it.with {
+                    // most defaults are good enough
+                    if (remoteLocation) {
+                        dependsOn project.tasks.findByName(downloadTaskName)
+                    }
 
-                if (filterSource) {
-                    excludeFilter = filterSource
-                }
+                    if (filterSource) {
+                        excludeFilter = filterSource
+                    }
 
-                reports {
-                    xml {
-                        destination = new File(project.extensions.getByType(ReportingExtension).file(FINDBUGS),
-                                "findbugs-${sourceSetName}.xml")
-                        withMessages = true
+                    reports { FindBugsReports r ->
+                        r.with {
+                            xml.setDestination(new File(project.extensions.getByType(ReportingExtension).file(FINDBUGS),
+                                "findbugs-${sourceSetName}.xml"))
+                            xml.withMessages = true
+                        }
                     }
                 }
             }
@@ -146,15 +162,13 @@ class FindbugsConfigurator extends AbstractRemoteConfigLocator implements Analys
             findbugsRootTask.dependsOn findbugsTask
         }
 
-        project.tasks.check.dependsOn findbugsRootTask
+        project.tasks.findByName('check').dependsOn findbugsRootTask
     }
 
-    @CompileStatic
     private static String generateTaskName(final String taskName = FINDBUGS, final String sourceSetName) {
         GUtil.toLowerCamelCase(String.format('%s %s', taskName, sourceSetName))
     }
 
-    @CompileStatic
     private static Task getOrCreateTask(final Project project, final String taskName, final Closure closure) {
         Task findbugsTask
         if (project.tasks.findByName(taskName)) {
