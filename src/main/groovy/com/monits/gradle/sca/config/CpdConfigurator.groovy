@@ -84,7 +84,7 @@ class CpdConfigurator implements AnalysisConfigurator {
 
     private static void configureDefaultDependencies(final Project project) {
         Configuration config = project.configurations.getByName(CPD)
-        config.defaultDependencies {
+        config.incoming.beforeResolve {
             VersionNumber version = VersionNumber.parse(ToolVersions.pmdVersion)
             String dependency = calculateDefaultDependencyNotation(version)
             config.dependencies.add(project.dependencies.create(dependency))
