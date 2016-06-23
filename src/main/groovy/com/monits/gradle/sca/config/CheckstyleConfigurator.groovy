@@ -109,7 +109,7 @@ class CheckstyleConfigurator extends AbstractRemoteConfigLocator implements Anal
                         r.xml.setDestination(new File(project.extensions.getByType(ReportingExtension).file(CHECKSTYLE),
                             "checkstyle-${sourceSetName}.xml"))
 
-                        if (it.hasProperty('html')) {
+                        if (r.hasProperty('html')) {
                             r.html.enabled = false // added in gradle 2.10, but unwanted
                         }
                     }
