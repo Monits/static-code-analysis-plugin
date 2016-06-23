@@ -18,11 +18,16 @@ import com.monits.gradle.sca.RulesConfig
 import com.monits.gradle.sca.StaticCodeAnalysisExtension
 import com.monits.gradle.sca.ToolVersions
 import groovy.transform.CompileStatic
+import groovy.transform.TypeCheckingMode
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.plugins.quality.Pmd
+import org.gradle.api.plugins.quality.PmdExtension
+import org.gradle.api.plugins.quality.PmdReports
 import org.gradle.api.tasks.SourceSet
+import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.util.GUtil
 import org.gradle.util.GradleVersion
@@ -30,6 +35,7 @@ import org.gradle.util.GradleVersion
 /**
  * A configurator for PMD tasks.
 */
+@CompileStatic
 class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
     private final static GradleVersion GRADLE_VERSION_PMD_CLASSPATH_SUPPORT = GradleVersion.version('2.8')
     private final static String PMD = 'pmd'
@@ -38,7 +44,8 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
     void applyConfig(final Project project, final StaticCodeAnalysisExtension extension) {
         setupPlugin(project, extension)
 
-        setupTasksPerSourceSet(project, extension, project.sourceSets) { Pmd pmdTask, SourceSet sourceSet ->
+        SourceSetContainer sourceSets = project.convention.getPlugin(JavaPluginConvention).sourceSets
+        setupTasksPerSourceSet(project, extension, sourceSets) { Pmd pmdTask, SourceSet sourceSet ->
             boolean supportsClasspath = GRADLE_VERSION_PMD_CLASSPATH_SUPPORT <= GradleVersion.current()
 
             if (supportsClasspath) {
@@ -49,6 +56,7 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
     }
 
     // DuplicateStringLiteral should be removed once we refactor this
+    @CompileStatic(TypeCheckingMode.SKIP)
     @Override
     void applyAndroidConfig(final Project project, final StaticCodeAnalysisExtension extension) {
         setupPlugin(project, extension)
@@ -76,9 +84,9 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
     private static void setupPlugin(final Project project, final StaticCodeAnalysisExtension extension) {
         project.plugins.apply PMD
 
-        project.pmd {
-            toolVersion = ToolVersions.pmdVersion
-            ignoreFailures = extension.getIgnoreErrors()
+        project.extensions.configure(PmdExtension) { PmdExtension e ->
+            e.toolVersion = ToolVersions.pmdVersion
+            e.ignoreFailures = extension.getIgnoreErrors()
         }
 
         if (!ToolVersions.isLatestPmdVersion()) {
@@ -89,7 +97,7 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
 
     @SuppressWarnings('UnnecessaryGetter')
     private static void setupTasksPerSourceSet(final Project project, final StaticCodeAnalysisExtension extension,
-                                               final NamedDomainObjectContainer<Object> sourceSets,
+                                               final NamedDomainObjectContainer<?> sourceSets,
                                                final Closure<?> configuration = null) {
         // Create a phony pmd task that just executes all real pmd tasks
         Task pmdRootTask = project.tasks.findByName(PMD) ?: project.task(PMD)
@@ -97,17 +105,19 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
             String sourceSetName = sourceSets.namer.determineName(sourceSet)
             RulesConfig config = extension.sourceSetConfig.maybeCreate(sourceSetName)
 
-            Task pmdTask = getOrCreateTask(project, generateTaskName(sourceSetName)) {
+            Task pmdTask = getOrCreateTask(project, generateTaskName(sourceSetName)) { Pmd it ->
                 // most defaults are good enough
 
                 // PMD doesn't play ball with relative paths nor file:// URIs
-                ruleSets = config.getPmdRules().collect { it =~ /https?:\/\// ? it : project.file(it).absolutePath }
+                it.ruleSets = config.getPmdRules().collect { it =~ /https?:\/\// ? it : project.file(it).absolutePath }
 
-                reports {
-                    xml.enabled = true
-                    xml.destination = xml.destination.absolutePath - "${sourceSetName}.xml" +
-                            "pmd-${sourceSetName}.xml"
-                    html.enabled = false
+                it.reports { PmdReports r ->
+                    r.with {
+                        xml.enabled = true
+                        xml.setDestination(xml.destination.absolutePath - "${sourceSetName}.xml" +
+                            "pmd-${sourceSetName}.xml")
+                        html.enabled = false
+                    }
                 }
             }
 
@@ -119,7 +129,7 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
             pmdRootTask.dependsOn pmdTask
         }
 
-        project.tasks.check.dependsOn pmdRootTask
+        project.tasks.findByName('check').dependsOn pmdRootTask
     }
 
     private static Task getOrCreateTask(final Project project, final String taskName, final Closure closure) {
@@ -133,7 +143,6 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
         pmdTask.configure closure
     }
 
-    @CompileStatic
     private static String generateTaskName(final String sourceSetName) {
         GUtil.toLowerCamelCase(String.format('%s %s', PMD, sourceSetName))
     }
