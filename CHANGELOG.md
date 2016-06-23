@@ -1,6 +1,10 @@
 ## History
 
 # v2.0
+* **2.1.4**
+ Bug fixes:
+ * Improve classpath configuration for PMD on Android tests
+
 * **2.1.3**
  Bug fixes:
  * Improve classpath configuration for PMD on Android tests

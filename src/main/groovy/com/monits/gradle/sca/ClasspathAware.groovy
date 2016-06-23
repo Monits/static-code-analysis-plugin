@@ -99,7 +99,7 @@ trait ClasspathAware {
                 mockableAndroidJar +
                 // TODO : is it okay to always use debug?
                 getNonAnalyzedProjectClasses(project, DEBUG_SOURCESET, sourceSetClasses) +
-                getProjectClassTree(project, TEST_DEBUG_SOURCESET) +
+                project.files("${project.buildDir}/intermediates/classes/${TEST_DEBUG_SOURCESET}") +
                 classTree
     }
 
