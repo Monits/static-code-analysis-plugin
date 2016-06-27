@@ -5,6 +5,7 @@
 
  Improvements:
  * PMD updated to 5.5.0
+ * Checkstyle updated to 7.0 when using JRE 8+. If using JRE7, 6.19 is used, and an update warning issued.
 
 * **2.1.4**
 
