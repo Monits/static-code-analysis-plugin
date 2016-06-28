@@ -18,6 +18,7 @@ import org.gradle.testkit.runner.BuildResult
 import org.gradle.util.GradleVersion
 import spock.lang.Unroll
 
+import static org.gradle.testkit.runner.TaskOutcome.FAILED
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 
 /**
@@ -62,6 +63,94 @@ class CpdIntegTest extends AbstractPluginIntegTestFixture {
 
         // The report should not exist
         !reportFile().exists()
+    }
+
+    @SuppressWarnings('MethodName')
+    void 'fails when error found and ignoreErrors is false'() {
+        given:
+        setupProjectWithViolations(false)
+
+        when:
+        BuildResult result = gradleRunner().buildAndFail()
+
+        then:
+        result.task(taskName()).outcome == FAILED
+
+        // Make sure the report exist
+        reportFile().exists()
+    }
+
+    @SuppressWarnings('MethodName')
+    void 'does not fail when error found and ignoreErrors is true'() {
+        given:
+        setupProjectWithViolations(true)
+
+        when:
+        BuildResult result = gradleRunner().build()
+
+        then:
+        result.task(taskName()).outcome == SUCCESS
+
+        // Make sure the report exist
+        reportFile().exists()
+    }
+
+    void setupProjectWithViolations(final boolean ignoreErrors) {
+        writeBuildFile() << """
+            staticCodeAnalysis {
+                ignoreErrors = ${ignoreErrors}
+            }
+        """
+        // Write a large chunk of code repeated several times...
+        1.upto(5) {
+            file("src/main/java/com/monits/Class${it}.java") << """
+                package com.monits;
+
+                public class Class${it} {
+                    public boolean isFoo(Object arg) {
+                        return true;
+                    }
+
+                    public boolean isBar(Bar arg) {
+                        return arg == null ? false : arg.someMethod();
+                    }
+
+                    public String greeting() {
+                        return "It's dangerous to go alone! take this.";
+                    }
+
+                    public int surprise() {
+                        return hashCode() * 2 % getClass().getName().length() ^ 0x0f;
+                    }
+
+                    public void doSomethingStupid() {
+                        final String msg;
+                        if (surprise() > getClass().getName().length()) {
+                            msg = this.greeting();
+                        } else if (isBar(null)) {
+                            msg = "Ok, this is awkward...";
+                        } else {
+                            msg = "It's a trap! " + toString();
+                        }
+
+                        System.out.println(msg);
+                    }
+
+                    @Override
+                    public String toString() {
+                        return "ClassTest{" +
+                            getClass().getName() +
+                            "}@" + hashCode();
+                    }
+
+                    public static class Bar {
+                        public boolean someMethod() {
+                            return true;
+                        }
+                    }
+                }
+            """
+        }
     }
 
     @Override

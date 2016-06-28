@@ -186,7 +186,7 @@ abstract class AbstractIntegTestFixture extends Specification {
         file(reportFileName(sourceSet))
     }
 
-    abstract String reportFileName(String sourceSets)
+    abstract String reportFileName(String sourceSet)
 
     abstract String taskName()
 
