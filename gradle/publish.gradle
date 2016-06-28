@@ -78,8 +78,8 @@ uploadArchives {
 }
 
 // Upload to bintray
-ext.bintrayUsername = has("bintrayUsername") ? bintrayUsername : ""
-ext.bintrayApiKey = has("bintrayApiKey") ? bintrayApiKey : ""
+ext.bintrayUsername = hasProperty("bintrayUsername") ? bintrayUsername : ""
+ext.bintrayApiKey = hasProperty("bintrayApiKey") ? bintrayApiKey : ""
 
 bintray {
     user = project.ext.bintrayUsername
