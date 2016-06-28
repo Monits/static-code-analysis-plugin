@@ -19,6 +19,7 @@ import com.monits.gradle.sca.ToolVersions
 import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
 import org.gradle.api.NamedDomainObjectContainer
+import org.gradle.api.Namer
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.plugins.JavaPluginConvention
@@ -84,7 +85,8 @@ class CheckstyleConfigurator extends AbstractRemoteConfigLocator implements Anal
         Task checkstyleRootTask = project.tasks.findByName(CHECKSTYLE) ?: project.task(CHECKSTYLE)
 
         sourceSets.all { sourceSet ->
-            String sourceSetName = sourceSets.namer.determineName(sourceSet)
+            Namer<Object> namer = sourceSets.namer as Namer<Object>
+            String sourceSetName = namer.determineName(sourceSet)
             RulesConfig config = extension.sourceSetConfig.maybeCreate(sourceSetName)
 
             boolean remoteLocation = isRemoteLocation(config.getCheckstyleRules())

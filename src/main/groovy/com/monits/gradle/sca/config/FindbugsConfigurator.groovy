@@ -20,6 +20,7 @@ import com.monits.gradle.sca.ToolVersions
 import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
 import org.gradle.api.NamedDomainObjectContainer
+import org.gradle.api.Namer
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.ModuleDependency
@@ -114,7 +115,8 @@ class FindbugsConfigurator extends AbstractRemoteConfigLocator implements Analys
         // Create a phony findbugs task that just executes all real findbugs tasks
         Task findbugsRootTask = project.tasks.findByName(FINDBUGS) ?: project.task(FINDBUGS)
         sourceSets.all { sourceSet ->
-            String sourceSetName = sourceSets.namer.determineName(sourceSet)
+            Namer<Object> namer = sourceSets.namer as Namer<Object>
+            String sourceSetName = namer.determineName(sourceSet)
             RulesConfig config = extension.sourceSetConfig.maybeCreate(sourceSetName)
 
             File filterSource
