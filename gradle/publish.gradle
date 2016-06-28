@@ -8,8 +8,8 @@ if (version.endsWith('-SNAPSHOT')) {
     ext.nexusRepo = 'http://nexus.monits.com/content/repositories/oss-releases'
 }
 
-ext.nexusUsername = has("nexusUsername") ? nexusUsername : ""
-ext.nexusPassword = has("nexusPassword") ? nexusPassword : ""
+ext.nexusUsername = hasProperty("nexusUsername") ? nexusUsername : ""
+ext.nexusPassword = hasProperty("nexusPassword") ? nexusPassword : ""
 
 // Generate sources
 task sourcesJar(type: Jar, dependsOn: classes) {
