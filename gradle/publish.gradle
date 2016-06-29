@@ -106,7 +106,7 @@ bintray {
 pluginBundle {
     website = 'https://github.com/Monits/static-code-analysis-plugin'
     vcsUrl = 'https://github.com/Monits/static-code-analysis-plugin.git'
-    description = 'Configures PMD, CPD, Checkstyle ad Finbugs out of the box for Android and Java projects beyond defauts to improve performance and extensibility, while allowing to use remote (cacheable) configuration'
+    description = 'Configures PMD, CPD, Checkstyle ad Finbugs out of the box for Android and Java projects beyond defaults to improve performance and extensibility, while allowing to use remote (cacheable) configuration'
     tags = ['code quality', 'static analysis', 'java', 'android', 'findbugs', 'fb-contrib', 'pmd', 'cpd', 'checkstyle', 'linter']
 
     plugins {
