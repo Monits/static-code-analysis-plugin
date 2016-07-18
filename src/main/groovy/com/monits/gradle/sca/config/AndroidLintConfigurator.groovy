@@ -49,7 +49,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
             configureLintInputsAndOutputs(project, t)
         } catch (Throwable e) {
             // Something went wrong!
-            project.logger.warn('Encountered an error trying to set inputs and outputs for Androoid Lint ' +
+            project.logger.warn('Encountered an error trying to set inputs and outputs for Android Lint ' +
                     'tasks, it will be disabled. Please, report this incident in ' +
                     'https://github.com/monits/static-code-analysis-plugin/issues', e)
 
