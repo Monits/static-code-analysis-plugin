@@ -24,34 +24,29 @@ used Gradle version. Just updating Gradle will introduce newer tools.
 
 # Adding it to your project
 
-Add the jcenter repository
+We are on [the Grade Plugin Portal](https://plugins.gradle.org/plugin/com.monits.staticCodeAnalysis), so you can simply do:
 
 ```
-repositories {
-    jcenter()
-}
-```
-Then add the plugin as dependency
-
-```
-dependencies {
-    classpath 'com.monits:static-code-analysis-plugin:2.+'
+plugins {
+  id "com.monits.staticCodeAnalysis" version "2.1.5"
 }
 ```
 
-And apply it
+or, you could also do
 
 ```
-apply plugin: 'com.monits.staticCodeAnalysis'
-```
-
-For older versions you need to use our repository.
-```
-repositories {
+buildscript {
+  repositories {
     maven {
-        url 'http://nexus.monits.com/content/repositories/oss-releases'
+      url "https://plugins.gradle.org/m2/"
     }
+  }
+  dependencies {
+    classpath "com.monits:static-code-analysis-plugin:2.1.5"
+  }
 }
+
+apply plugin: "com.monits.staticCodeAnalysis"
 ```
 
 ##DSL
