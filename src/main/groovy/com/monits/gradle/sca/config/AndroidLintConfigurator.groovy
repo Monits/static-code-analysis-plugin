@@ -21,6 +21,7 @@ import groovy.transform.TypeCheckingMode
 import org.gradle.api.DomainObjectSet
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.util.VersionNumber
 
 /**
  * A configurator for Android Lint tasks.
@@ -28,6 +29,8 @@ import org.gradle.api.Task
 @CompileStatic
 class AndroidLintConfigurator implements AnalysisConfigurator {
     private static final String ANDROID_GRADLE_VERSION_PROPERTY_NAME = 'androidGradlePluginVersion'
+    private static final VersionNumber ANDROID_GRADLE_VERSION_2_0_0 = VersionNumber.parse('2.0.0')
+    private static final String USE_JACK_PROPERTY_NAME = 'useJack'
 
     @Override
     void applyConfig(final Project project, final StaticCodeAnalysisExtension extension) {
@@ -81,7 +84,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
         String defaultReportVariant = null
         variants.whenObjectAdded {
             if (!defaultReportVariant && it.variantData.variantConfiguration.buildType.isDebuggable() &&
-                    !it.variantData.variantConfiguration.useJack) {
+                    !usesJack(it.variantData.variantConfiguration)) {
                 defaultReportVariant = it.name
 
                 addReportAsOutput(lintTask, project, xmlEnabled, xmlOutput, defaultReportVariant, 'xml')
@@ -104,7 +107,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
             }
 
             // This logic is copy-pasted from Android's TaskManager.createLintVitalTask
-            if (reportFatal && !configuration.buildType.isDebuggable() && !configuration.useJack) {
+            if (reportFatal && !configuration.buildType.isDebuggable() && !usesJack(configuration)) {
                 lintTask.outputs.with {
                     if (xmlEnabled) {
                         file("${project.buildDir}/outputs/lint-results-${variantName}-fatal.xml")
@@ -115,6 +118,14 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
                 }
             }
         }
+    }
+
+    @SuppressWarnings('NoDef') // can't specify a type without depending on Android
+    @CompileStatic(TypeCheckingMode.SKIP)
+    private boolean usesJack(final def configuration) {
+        (configuration.hasProperty(USE_JACK_PROPERTY_NAME) && configuration.useJack) ||
+            (configuration.buildType.hasProperty(USE_JACK_PROPERTY_NAME) && configuration.buildType.useJack) ||
+            (configuration.hasProperty('jackOptions') && configuration.jackOptions.enabled)
     }
 
     @CompileStatic(TypeCheckingMode.SKIP)
@@ -133,8 +144,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
             File definiteOutput = output
             if (!output) {
                 // Convention naming changed along the way
-                if (task.hasProperty(ANDROID_GRADLE_VERSION_PROPERTY_NAME) &&
-                        (task.property(ANDROID_GRADLE_VERSION_PROPERTY_NAME) as String) >= '2.0.0') {
+                if (lintReportPerVariant(task)) {
                     definiteOutput = project.file(
                             "${project.buildDir}/outputs/lint-results-${variantName}.${extension}")
                 } else {
@@ -143,5 +153,14 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
             }
             task.outputs.file definiteOutput
         }
+    }
+
+    private boolean lintReportPerVariant(final Task task) {
+        if (!task.hasProperty(ANDROID_GRADLE_VERSION_PROPERTY_NAME)) {
+            return false
+        }
+
+        String versionStr = task.property(ANDROID_GRADLE_VERSION_PROPERTY_NAME) as String
+        VersionNumber.parse(versionStr) >= ANDROID_GRADLE_VERSION_2_0_0
     }
 }
