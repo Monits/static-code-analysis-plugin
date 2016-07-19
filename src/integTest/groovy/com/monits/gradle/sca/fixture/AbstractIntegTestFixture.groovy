@@ -148,7 +148,7 @@ abstract class AbstractIntegTestFixture extends Specification {
                 mavenCentral()
             }
 
-            apply plugin: 'com.android.application'
+            apply plugin: 'com.android.library'
             apply plugin: 'com.monits.staticCodeAnalysis'
 
             dependencies {
@@ -158,8 +158,8 @@ abstract class AbstractIntegTestFixture extends Specification {
         """ + staticCodeAnalysysConfig(toolsConfig) +
         '''
             android {
-                compileSdkVersion 24
-                buildToolsVersion "23.0.3"
+                compileSdkVersion 23
+                buildToolsVersion "23.0.2"
 
                 lintOptions {
                     abortOnError false
