@@ -17,7 +17,7 @@ repositories {
 
 group = 'com.monits'
 
-version = "2.1.5"
+version = "2.1.6-HF1"
 
 apply plugin: 'groovy'
 apply from: 'gradle/license.gradle'
