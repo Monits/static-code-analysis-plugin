@@ -1,20 +1,37 @@
 ## History
 
-# v2.0
+# v2.1
+* **2.1.6**
+
+ Bug fixes:
+ * Add compatibility with Android Gradle 2.2.+. See [#6](https://github.com/Monits/static-code-analysis-plugin/issues/6)
+ * Fix idea project import, dependency scopes are honored
+ * Fix some typos in messages
+
+* **2.1.5**
+
+ Improvements:
+ * PMD updated to 5.5.0
+ * Checkstyle updated to 7.0 when using JRE 8+. If using JRE7, 6.19 is used, and an update warning issued.
+
 * **2.1.4**
+
  Bug fixes:
  * Improve classpath configuration for PMD on Android tests
 
 * **2.1.3**
+
  Bug fixes:
  * Improve classpath configuration for PMD on Android tests
  * CPD can now be run without having PMD running
 
 * **2.1.2**
+
  Bug fixes:
  * Fix compatibility with Gradle 2.14
 
 * **2.1.1**
+
  Improvements:
  * Upgraded PMD to 5.4.2
  * Upgraded Checkstyle to 6.19
@@ -26,6 +43,7 @@
  Improvements:
  * We manually inject inputs and outputs to Android Lint tasks to allow it to report up-to-date when there are no changes.
 
+# v2.0
 * **2.0.1**
 
  Improvements:

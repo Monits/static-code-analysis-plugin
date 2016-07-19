@@ -4,7 +4,9 @@ group: edge
 
 language: android
 
-jdk: oraclejdk7
+jdk:
+ - oraclejdk7
+ - oraclejdk8
 
 android:
     components:

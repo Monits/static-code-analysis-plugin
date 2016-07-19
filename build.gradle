@@ -7,6 +7,7 @@ buildscript {
     dependencies {
         classpath 'gradle.plugin.nl.javadude.gradle.plugins:license-gradle-plugin:0.12.1'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.6'
+        classpath 'com.gradle.publish:plugin-publish-plugin:0.9.4'
     }
 }
 
@@ -19,10 +20,10 @@ group = 'com.monits'
 version = "2.2.0-SNAPSHOT"
 
 apply plugin: 'groovy'
-apply from: 'gradle/idea.gradle'
 apply from: 'gradle/license.gradle'
 apply from: 'gradle/publish.gradle'
 apply from: 'gradle/integTest.gradle'
+apply from: 'gradle/idea.gradle'
 apply from: 'gradle/staticCodeAnalysis.gradle'
 
 dependencies {
@@ -35,5 +36,5 @@ project.sourceCompatibility = 1.7
 project.targetCompatibility = 1.7
 
 wrapper {
-    gradleVersion = '2.14'
+    gradleVersion = '2.14.1'
 }

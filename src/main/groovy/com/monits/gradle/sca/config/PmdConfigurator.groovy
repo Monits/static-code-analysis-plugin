@@ -91,8 +91,7 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
         }
 
         if (!ToolVersions.isLatestPmdVersion()) {
-            project.logger.warn('Using an outdated PMD version. Update the used Gradle ' +
-                    'version to get better analysis results.')
+            project.logger.warn('Using an outdated PMD version. ' + ToolVersions.pmdUpdateInstructions)
         }
     }
 

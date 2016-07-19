@@ -1,5 +1,6 @@
 apply plugin: 'maven'
 apply plugin: 'com.jfrog.bintray'
+apply plugin: 'com.gradle.plugin-publish'
 
 if (version.endsWith('-SNAPSHOT')) {
     ext.nexusRepo = 'http://nexus.monits.com/content/repositories/oss-snapshots'
@@ -7,8 +8,8 @@ if (version.endsWith('-SNAPSHOT')) {
     ext.nexusRepo = 'http://nexus.monits.com/content/repositories/oss-releases'
 }
 
-ext.nexusUsername = has("nexusUsername") ? nexusUsername : ""
-ext.nexusPassword = has("nexusPassword") ? nexusPassword : ""
+ext.nexusUsername = hasProperty("nexusUsername") ? nexusUsername : ""
+ext.nexusPassword = hasProperty("nexusPassword") ? nexusPassword : ""
 
 // Generate sources
 task sourcesJar(type: Jar, dependsOn: classes) {
@@ -77,8 +78,8 @@ uploadArchives {
 }
 
 // Upload to bintray
-ext.bintrayUsername = has("bintrayUsername") ? bintrayUsername : ""
-ext.bintrayApiKey = has("bintrayApiKey") ? bintrayApiKey : ""
+ext.bintrayUsername = hasProperty("bintrayUsername") ? bintrayUsername : ""
+ext.bintrayApiKey = hasProperty("bintrayApiKey") ? bintrayApiKey : ""
 
 bintray {
     user = project.ext.bintrayUsername
@@ -99,4 +100,24 @@ bintray {
         }
     }
     configurations = ['archives']
+}
+
+// Gradle plugin portal
+pluginBundle {
+    website = 'https://github.com/Monits/static-code-analysis-plugin'
+    vcsUrl = 'https://github.com/Monits/static-code-analysis-plugin.git'
+    description = 'Configures PMD, CPD, Checkstyle and Finbugs out of the box for Android and Java projects beyond defaults to improve performance and extensibility, while allowing to use remote (cacheable) configuration'
+    tags = ['code quality', 'static analysis', 'java', 'android', 'findbugs', 'fb-contrib', 'pmd', 'cpd', 'checkstyle', 'linter']
+
+    plugins {
+        scaPlugin {
+            id = 'com.monits.staticCodeAnalysis'
+            displayName = 'Fast and easy Static Code Analysis for Java and Android'
+        }
+    }
+
+    mavenCoordinates {
+        groupId = 'com.monits'
+        artifactId = 'static-code-analysis-plugin'
+    }
 }

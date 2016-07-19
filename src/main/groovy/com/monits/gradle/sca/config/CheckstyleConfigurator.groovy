@@ -72,8 +72,7 @@ class CheckstyleConfigurator extends AbstractRemoteConfigLocator implements Anal
         }
 
         if (!ToolVersions.isLatestCheckstyleVersion()) {
-            project.logger.warn('Using an outdated Checkstyle version. Update the used Gradle ' +
-                    'version to get better analysis results.')
+            project.logger.warn('Using an outdated Checkstyle version. ' + ToolVersions.checkstyleUpdateInstructions)
         }
     }
 

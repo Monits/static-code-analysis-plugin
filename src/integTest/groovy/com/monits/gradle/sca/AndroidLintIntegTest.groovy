@@ -17,7 +17,9 @@ import com.monits.gradle.sca.fixture.AbstractIntegTestFixture
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.util.GradleVersion
+import org.gradle.util.VersionNumber
 import spock.lang.Unroll
+import spock.util.environment.Jvm
 
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import static org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
@@ -100,11 +102,13 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
         secondRun.task(taskName()).outcome == UP_TO_DATE
 
         // Make sure the report exist
-        reportFile(androidVersion >= '2.0.0' ? 'debug' : null).exists()
+        reportFile(VersionNumber.parse(androidVersion) >= VersionNumber.parse('2.0.0') ? 'debug' : null).exists()
 
         where:
-        androidVersion << ['1.1.3', '1.2.3', '1.3.1', '1.5.0', '2.0.0', '2.1.0']
-        gradleVersion = androidVersion < '1.5.0' ? '2.9' : GradleVersion.current().version
+        androidVersion << ['1.1.3', '1.2.3', '1.3.1', '1.5.0', '2.0.0', '2.1.2'] +
+            (Jvm.current.java8Compatible ? ['2.2.0-alpha6'] : [])
+        gradleVersion = VersionNumber.parse(androidVersion) < VersionNumber.parse('1.5.0') ?
+            '2.9' : GradleVersion.current().version
     }
 
     @Override
