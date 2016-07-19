@@ -1,6 +1,13 @@
 ## History
 
-# v2.0
+# v2.1
+* **2.1.6**
+
+ Bug fixes:
+ * Add compatibility with Android Gradle 2.2.+. See [#6](https://github.com/Monits/static-code-analysis-plugin/issues/6)
+ * Fix idea project import, dependency scopes are honored
+ * Fix some typos in messages
+
 * **2.1.5**
 
  Improvements:
@@ -36,6 +43,7 @@
  Improvements:
  * We manually inject inputs and outputs to Android Lint tasks to allow it to report up-to-date when there are no changes.
 
+# v2.0
 * **2.0.1**
 
  Improvements:
