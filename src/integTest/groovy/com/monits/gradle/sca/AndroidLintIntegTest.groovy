@@ -19,10 +19,10 @@ import org.gradle.testkit.runner.GradleRunner
 import org.gradle.util.GradleVersion
 import org.gradle.util.VersionNumber
 import spock.lang.Unroll
+import spock.util.environment.Jvm
 
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import static org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
-
 /**
  * Integration test of Android Lint tasks.
  */
@@ -79,7 +79,8 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
         reportFile(VersionNumber.parse(androidVersion) >= VersionNumber.parse('2.0.0') ? 'debug' : null).exists()
 
         where:
-        androidVersion << ['1.1.3', '1.2.3', '1.3.1', '1.5.0', '2.0.0', '2.1.0', '2.1.2', '2.2.0-alpha5']
+        androidVersion << ['1.1.3', '1.2.3', '1.3.1', '1.5.0', '2.0.0', '2.1.2'] +
+            (Jvm.current.java8Compatible ? ['2.2.0-alpha5'] : [])
         gradleVersion = VersionNumber.parse(androidVersion) < VersionNumber.parse('1.5.0') ?
             '2.9' : GradleVersion.current().version
     }
