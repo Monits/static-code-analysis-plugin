@@ -4,8 +4,8 @@ sourceSets {
         groovy.srcDir file('src/integTest/groovy')
         resources.srcDir file('src/integTest/resources')
 
-        compileClasspath += sourceSets.main.output + configurations.testRuntime
-        runtimeClasspath += output + compileClasspath
+        compileClasspath += main.output
+        runtimeClasspath += main.output
     }
 }
 
@@ -58,8 +58,10 @@ plugins.withType(org.gradle.plugins.ide.idea.IdeaPlugin) { // lazy as plugin not
         module {
             testSourceDirs += sourceSets.integTest.groovy.srcDirs
             testSourceDirs += sourceSets.integTest.resources.srcDirs
-            scopes.TEST.plus.add(configurations.integTestCompile)
-            scopes.TEST.plus.add(configurations.integTestRuntime)
+
+            scopes.TEST.plus += [configurations.integTestCompile, configurations.integTestRuntime]
+            scopes.TEST.minus += [configurations.compileOnly]
+            scopes.PROVIDED.plus += [configurations.compileOnly]
         }
     }
 }
