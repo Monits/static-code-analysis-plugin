@@ -81,7 +81,7 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
 
         where:
         androidVersion << ['1.1.3', '1.2.3', '1.3.1', '1.5.0', '2.0.0', '2.1.2'] +
-            (Jvm.current.java8Compatible ? ['2.2.0-alpha5'] : [])
+            (Jvm.current.java8Compatible ? ['2.2.0-alpha6'] : [])
         gradleVersion = VersionNumber.parse(androidVersion) < VersionNumber.parse('1.5.0') ?
             '2.9' : GradleVersion.current().version
     }
