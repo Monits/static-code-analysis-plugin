@@ -23,6 +23,7 @@ import spock.util.environment.Jvm
 
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import static org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
+
 /**
  * Integration test of Android Lint tasks.
  */
