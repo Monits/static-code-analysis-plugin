@@ -58,9 +58,10 @@ class CPDTask extends DefaultTask implements VerificationTask {
         inputFiles.stopExecutionIfEmpty()
 
         outputFile.parentFile.mkdirs()
+
         ant.taskdef(name:CPD, classname:'net.sourceforge.pmd.cpd.CPDTask', classpath:project.configurations.cpd.asPath)
         ant.cpd(minimumTokenCount:'100', format:'xml', outputFile:outputFile, ignoreIdentifiers:ignoreIdentifiers,
-            language:language, ignoreLiterals:ignoreLiterals) {
+            language:language, ignoreLiterals:ignoreLiterals,) {
             inputFiles.addToAntBuilder(ant, 'fileset', FileCollection.AntType.FileSet)
         }
 

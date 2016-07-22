@@ -218,7 +218,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             if (Plugin.isAssignableFrom(pluginClass)) {
                 withPlugin(pluginClass as Class<? extends Plugin>, configureAction)
             }
-        } catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException ignored) {
             // do nothing
         }
     }
