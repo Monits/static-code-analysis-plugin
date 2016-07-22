@@ -1,5 +1,12 @@
 ## History
 
+# v2.2
+* **2.2.0 - Unreleased**
+
+ Improvements:
+ * CPDTask can now ignore literals, identifiers and configure language.
+    Plugin defaults to java, ignoring literals and identifiers.
+
 # v2.1
 * **2.1.6**
 
@@ -35,7 +42,7 @@
  Improvements:
  * Upgraded PMD to 5.4.2
  * Upgraded Checkstyle to 6.19
- * Include compiled .class files to PMD analysis (backported from 3.+) to fix false positives
+ * Include compiled .class files to PMD analysis (backported from 3.+) to fix false positives.
     See https://github.com/gradle/gradle/pull/649 and https://sourceforge.net/p/pmd/bugs/1468/
 
 * **2.1.0**
