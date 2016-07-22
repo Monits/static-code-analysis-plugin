@@ -19,6 +19,7 @@ import groovy.transform.TypeCheckingMode
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.FileCollection
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.ParallelizableTask
@@ -36,6 +37,15 @@ class CPDTask extends DefaultTask implements VerificationTask {
 
     boolean ignoreFailures
 
+    @Input
+    String language = 'java'
+
+    @Input
+    boolean ignoreIdentifiers
+
+    @Input
+    boolean ignoreLiterals
+
     @InputFiles
     FileCollection inputFiles
 
@@ -49,7 +59,8 @@ class CPDTask extends DefaultTask implements VerificationTask {
 
         outputFile.parentFile.mkdirs()
         ant.taskdef(name:CPD, classname:'net.sourceforge.pmd.cpd.CPDTask', classpath:project.configurations.cpd.asPath)
-        ant.cpd(minimumTokenCount:'100', format:'xml', outputFile:outputFile) {
+        ant.cpd(minimumTokenCount:'100', format:'xml', outputFile:outputFile, ignoreIdentifiers:ignoreIdentifiers,
+            language:language, ignoreLiterals:ignoreLiterals) {
             inputFiles.addToAntBuilder(ant, 'fileset', FileCollection.AntType.FileSet)
         }
 

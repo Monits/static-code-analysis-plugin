@@ -45,6 +45,9 @@ class CpdConfigurator implements AnalysisConfigurator {
         Task cpdTask = project.task(CPD, type:CPDTask) { CPDTask it ->
             it.ignoreFailures = extension.getIgnoreErrors()
 
+            it.ignoreLiterals = true
+            it.ignoreIdentifiers = true
+
             FileTree srcDir = project.fileTree("$project.projectDir/src/")
             srcDir.include '**/*.java'
             srcDir.exclude '**/gen/**'
