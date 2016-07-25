@@ -139,7 +139,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             checkstyle = { true }
             cpd = { true }
             checkstyleRules = {
-                if (ToolVersions.isLatestCheckstyleVersion()) {
+                if (ToolVersions.isLatestCheckstyleVersion(true)) {
                     return CHECKSTYLE_DEFAULT_RULES
                 }
 
