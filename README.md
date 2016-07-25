@@ -62,11 +62,15 @@ staticCodeAnalysis {
 
     ignoreErrors = true
 
-    // defaut rules
+    // default rules
     findbugsExclude = "$project.rootProject.projectDir/config/findbugs/excludeFilter.xml"
     checkstyleRules = "http://static.monits.com/checkstyle.xml"
     pmdRules = [ "http://static.monits.com/pmd.xml", "http://static.monits.com/pmd-android.xml" ]
 
+    // Since 2.2.0
+    androidLintConfig = "http://static.monits.com/android-lint.xml"
+
+    // Since 2.0.0
     sourceSetConfig {
         test { // or the name of any other sourceset
             // use a more relaxed ruleset

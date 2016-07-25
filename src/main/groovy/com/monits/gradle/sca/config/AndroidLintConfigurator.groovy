@@ -27,10 +27,12 @@ import org.gradle.util.VersionNumber
  * A configurator for Android Lint tasks.
 */
 @CompileStatic
-class AndroidLintConfigurator implements AnalysisConfigurator {
+class AndroidLintConfigurator extends AbstractRemoteConfigLocator implements AnalysisConfigurator {
     private static final String ANDROID_GRADLE_VERSION_PROPERTY_NAME = 'androidGradlePluginVersion'
     private static final VersionNumber ANDROID_GRADLE_VERSION_2_0_0 = VersionNumber.parse('2.0.0')
     private static final String USE_JACK_PROPERTY_NAME = 'useJack'
+
+    final String pluginName = 'android'
 
     @Override
     void applyConfig(final Project project, final StaticCodeAnalysisExtension extension) {
@@ -48,6 +50,8 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
         t.dependsOn project.tasks.create('resolveAndroidLint', ResolveAndroidLintTask)
         t.finalizedBy project.tasks.create('cleanupAndroidLint', CleanupAndroidLintTask)
 
+        configureLintRules(project, extension, t)
+
         try {
             configureLintInputsAndOutputs(project, t)
         } catch (Throwable e) {
@@ -63,9 +67,33 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
         }
     }
 
+    @SuppressWarnings('UnnecessaryGetter')
+    @CompileStatic(TypeCheckingMode.SKIP)
+    private void configureLintRules(final Project project, final StaticCodeAnalysisExtension config,
+                                    final Task lintTask) {
+        boolean remoteLocation = isRemoteLocation(config.getAndroidLintConfig())
+        File configSource
+
+        if (remoteLocation) {
+            String downloadTaskName = 'downloadAndroidLintConfig'
+            configSource = makeDownloadFileTask(project, config.getAndroidLintConfig(),
+                String.format('android-lint-%s.xml', project.name), downloadTaskName)
+
+            lintTask.dependsOn project.tasks.findByName(downloadTaskName)
+        } else {
+            configSource = new File(config.getAndroidLintConfig())
+        }
+
+        // Update global config
+        project.android.lintOptions.lintConfig configSource
+
+        // Make sure the task has the updated global config
+        lintTask.lintOptions = project.android.lintOptions
+    }
+
     @SuppressWarnings('NoDef') // can't specify a type without depending on Android
     @CompileStatic(TypeCheckingMode.SKIP)
-    private void configureLintInputsAndOutputs(final Project project, final Task lintTask) {
+    private static void configureLintInputsAndOutputs(final Project project, final Task lintTask) {
         /*
          * Android doesn't define inputs nor outputs for lint tasks, so they will rerun each time.
          * This is an experimental best effort to what I believe it should look like...
@@ -108,6 +136,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
 
             // This logic is copy-pasted from Android's TaskManager.createLintVitalTask
             if (reportFatal && !configuration.buildType.isDebuggable() && !usesJack(configuration)) {
+                //noinspection GroovyMissingReturnStatement
                 lintTask.outputs.with {
                     if (xmlEnabled) {
                         file("${project.buildDir}/outputs/lint-results-${variantName}-fatal.xml")
@@ -122,14 +151,14 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
 
     @SuppressWarnings('NoDef') // can't specify a type without depending on Android
     @CompileStatic(TypeCheckingMode.SKIP)
-    private boolean usesJack(final def configuration) {
+    private static boolean usesJack(final def configuration) {
         (configuration.hasProperty(USE_JACK_PROPERTY_NAME) && configuration.useJack) ||
             (configuration.buildType.hasProperty(USE_JACK_PROPERTY_NAME) && configuration.buildType.useJack) ||
             (configuration.hasProperty('jackOptions') && configuration.jackOptions.enabled)
     }
 
     @CompileStatic(TypeCheckingMode.SKIP)
-    private DomainObjectSet<?> getVariants(final Project project) {
+    private static DomainObjectSet<?> getVariants(final Project project) {
         if (project.android.hasProperty('libraryVariants')) {
             return project.android.libraryVariants
         }
@@ -138,8 +167,8 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
     }
 
     @SuppressWarnings('ParameterCount')
-    private void addReportAsOutput(final Task task, final Project project, final boolean isEnabled,
-                                   final File output, final String variantName, final String extension) {
+    private static void addReportAsOutput(final Task task, final Project project, final boolean isEnabled,
+                                          final File output, final String variantName, final String extension) {
         if (isEnabled) {
             File definiteOutput = output
             if (!output) {
@@ -155,7 +184,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
         }
     }
 
-    private boolean lintReportPerVariant(final Task task) {
+    private static boolean lintReportPerVariant(final Task task) {
         if (!task.hasProperty(ANDROID_GRADLE_VERSION_PROPERTY_NAME)) {
             return false
         }

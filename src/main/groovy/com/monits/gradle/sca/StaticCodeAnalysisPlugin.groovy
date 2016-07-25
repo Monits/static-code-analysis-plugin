@@ -42,6 +42,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     private final static String PMD_BACKWARDS_RULES = 'http://static.monits.com/pmd-5.1.3.xml'
     private final static String FINDBUGS_DEFAULT_SUPPRESSION_FILTER =
             'http://static.monits.com/findbugs-exclusions-android.xml'
+    private final static String ANDROID_DEFAULT_RULES = 'http://static.monits.com/android-lint.xml'
 
     private StaticCodeAnalysisExtension extension
     private Project project
@@ -152,6 +153,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
 
                 [PMD_BACKWARDS_RULES, PMD_DEFAULT_ANDROID_RULES]
             }
+            androidLintConfig = { ANDROID_DEFAULT_RULES }
         }
 
         // default suppression filter for findbugs for Android

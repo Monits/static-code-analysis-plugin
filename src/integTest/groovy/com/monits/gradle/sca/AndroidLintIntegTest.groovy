@@ -14,6 +14,7 @@
 package com.monits.gradle.sca
 
 import com.monits.gradle.sca.fixture.AbstractIntegTestFixture
+import com.monits.gradle.sca.io.TestFile
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.util.GradleVersion
@@ -21,8 +22,11 @@ import org.gradle.util.VersionNumber
 import spock.lang.Unroll
 import spock.util.environment.Jvm
 
+import static org.gradle.testkit.runner.TaskOutcome.FAILED
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import static org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
+import static org.hamcrest.CoreMatchers.containsString
+import static org.junit.Assert.assertThat
 
 /**
  * Integration test of Android Lint tasks.
@@ -33,6 +37,7 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
     void 'androidLint is run'() {
         given:
         writeAndroidBuildFile()
+        useSimpleAndroidLintConfig()
         writeAndroidManifest()
         goodCode()
 
@@ -61,6 +66,7 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
     void 'androidLint is resolved'() {
         given:
         writeAndroidBuildFile(androidVersion)
+        useSimpleAndroidLintConfig()
         writeAndroidManifest()
         goodCode()
 
@@ -86,6 +92,7 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
     void 'rerun is up-to-date'() {
         given:
         writeAndroidBuildFile(androidVersion)
+        useSimpleAndroidLintConfig()
         writeAndroidManifest()
         goodCode()
 
@@ -111,6 +118,67 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
             '2.9' : GradleVersion.current().version
     }
 
+    @SuppressWarnings('MethodName')
+    void 'Android downloads remote config'() {
+        given:
+        writeAndroidBuildFile()
+        writeAndroidManifest()
+        goodCode()
+
+        when:
+        BuildResult result = gradleRunner()
+            .build()
+
+        then:
+        result.task(taskName()).outcome == SUCCESS
+
+        String projectName = testProjectDir.root.name
+
+        // The config must exist
+        file("config/android/android-lint-${projectName}.xml").exists()
+
+        // Make sure android report exists
+        reportFile().exists()
+    }
+
+    @SuppressWarnings('MethodName')
+    void 'running offline fails download'() {
+        given:
+        writeAndroidBuildFile()
+        writeAndroidManifest()
+        goodCode()
+
+        when:
+        BuildResult result = gradleRunner()
+            .withArguments('check', '--stacktrace', '--offline')
+            .buildAndFail()
+
+        then:
+        result.task(':downloadAndroidLintConfig').outcome == FAILED
+        assertThat(result.output, containsString('Running in offline mode, but there is no cached version'))
+    }
+
+    @SuppressWarnings('MethodName')
+    void 'running offline with a cached file passes but warns'() {
+        given:
+        writeAndroidBuildFile()
+        writeAndroidManifest()
+
+        String projectName = testProjectDir.root.name
+        writeSimpleAndroidLintConfig(projectName)
+
+        goodCode()
+
+        when:
+        BuildResult result = gradleRunner()
+            .withArguments('check', '--stacktrace', '--offline')
+            .build()
+
+        then:
+        result.task(':downloadAndroidLintConfig').outcome == SUCCESS
+        assertThat(result.output, containsString('Running in offline mode. Using a possibly outdated version of'))
+    }
+
     @Override
     String reportFileName(final String buildType) {
         // Sourceset names are only taken into account when using Android plugin 2.+
@@ -125,5 +193,25 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
     @Override
     String toolName() {
         'lint'
+    }
+
+    TestFile writeSimpleAndroidLintConfig(final String project = null) {
+        file("config/android/android-lint${project ? "-${project}" : ''}.xml") <<
+            '''<?xml version="1.0" encoding="UTF-8"?>
+            <lint>
+                <issue id="InvalidPackage" severity="warning" />
+            </lint>
+        ''' as TestFile
+    }
+
+    @SuppressWarnings('GStringExpressionWithinString')
+    void useSimpleAndroidLintConfig() {
+        writeSimpleAndroidLintConfig()
+
+        buildScriptFile() << '''
+            staticCodeAnalysis {
+                androidLintConfig = "${project.rootDir}/config/android/android-lint.xml"
+            }
+        '''
     }
 }
