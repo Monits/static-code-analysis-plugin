@@ -8,6 +8,12 @@
     Plugin defaults to java, ignoring literals and identifiers.
 
 # v2.1
+* **2.1.7**
+
+ Bug fixes:
+ * Allow for dependencies and configurations being added late in the configuration process.
+ * Checkstyle 6.19 should still use the latest checkstyle ruleset by default.
+
 * **2.1.6**
 
  Bug fixes:

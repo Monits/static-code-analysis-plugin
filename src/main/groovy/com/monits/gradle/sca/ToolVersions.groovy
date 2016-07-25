@@ -73,8 +73,9 @@ final class ToolVersions {
         LATEST_CHECKSTYLE_VERSION
     }
 
-    static boolean  isLatestCheckstyleVersion() {
-        checkstyleVersion == LATEST_CHECKSTYLE_VERSION
+    static boolean isLatestCheckstyleVersion(final boolean ignoreJre = false) {
+        checkstyleVersion == LATEST_CHECKSTYLE_VERSION ||
+            (ignoreJre && checkstyleVersion == LATEST_CHECKSTYLE_VERSION_JAVA_7)
     }
 
     static String getCheckstyleUpdateInstructions() {

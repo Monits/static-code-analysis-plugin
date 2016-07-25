@@ -139,7 +139,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             checkstyle = { true }
             cpd = { true }
             checkstyleRules = {
-                if (ToolVersions.isLatestCheckstyleVersion()) {
+                if (ToolVersions.isLatestCheckstyleVersion(true)) {
                     return CHECKSTYLE_DEFAULT_RULES
                 }
 
@@ -176,10 +176,15 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
      */
     @CompileStatic(TypeCheckingMode.SKIP)
     private void addDepsButModulesToScaconfig(final Configuration config) {
-        config.allDependencies.each {
+        // support lazy dependency configuration
+        config.allDependencies.all {
             if (it in ProjectDependency && it.group == project.rootProject.name) {
-                addDepsButModulesToScaconfig(
-                        project.rootProject.findProject(':' + it.name).configurations[it.configuration])
+                // support lazy configuration creation
+                project.rootProject.findProject(':' + it.name).configurations.all { c ->
+                    if (c.name == it.configuration) {
+                        addDepsButModulesToScaconfig(c)
+                    }
+                }
             } else {
                 // TODO : This includes @aar packages that aren't understood by our tools. Filter them?
                 project.dependencies.scaconfig it
