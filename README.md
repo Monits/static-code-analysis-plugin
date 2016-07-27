@@ -58,7 +58,7 @@ staticCodeAnalysis {
     findbugs = true
     checkstyle = true
     pmd = true
-    cpd = false
+    cpd = true
 
     ignoreErrors = true
 
