@@ -13,7 +13,7 @@
 * **2.1.8**
 
  Bug fixes:
- * Andrid lint outputs re now properly set regardless of execution order
+ * Android lint outputs are now properly set regardless of execution order
 
  Improvements:
  * Upgraded PMD to 5.5.1
