@@ -50,10 +50,19 @@ class AndroidLintConfigurator extends AbstractRemoteConfigLocator implements Ana
         t.dependsOn project.tasks.create('resolveAndroidLint', ResolveAndroidLintTask)
         t.finalizedBy project.tasks.create('cleanupAndroidLint', CleanupAndroidLintTask)
 
-        configureLintRules(project, extension, t)
+        configureLintTask(project, extension, t)
+    }
+
+    @CompileStatic(TypeCheckingMode.SKIP)
+    private void configureLintTask(final Project project, final StaticCodeAnalysisExtension extension,
+                                    final Task lintTask) {
+        // TODO : This won't fail on warnings, just like Checkstyle. See https://issues.gradle.org/browse/GRADLE-2888
+        project.android.lintOptions.abortOnError = !extension.getIgnoreErrors()
+
+        configureLintRules(project, extension, lintTask)
 
         try {
-            configureLintInputsAndOutputs(project, t)
+            configureLintInputsAndOutputs(project, lintTask)
         } catch (Throwable e) {
             // Something went wrong!
             project.logger.warn('Encountered an error trying to set inputs and outputs for Android Lint ' +

@@ -179,6 +179,38 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
         assertThat(result.output, containsString('Running in offline mode. Using a possibly outdated version of'))
     }
 
+    @SuppressWarnings('MethodName')
+    void 'fails when error found and ignoreErrors is false'() {
+        given:
+        setupProjectWithViolations(false)
+
+        when:
+        BuildResult result = gradleRunner().buildAndFail()
+
+        then:
+        // Make sure task didn't fail
+        result.task(taskName()).outcome == FAILED
+
+        // Make sure the report exist
+        reportFile().exists()
+    }
+
+    @SuppressWarnings('MethodName')
+    void 'does not fail when error found and ignoreErrors is true'() {
+        given:
+        setupProjectWithViolations(true)
+
+        when:
+        BuildResult result = gradleRunner().build()
+
+        then:
+        // Make sure task didn't fail
+        result.task(taskName()).outcome == SUCCESS
+
+        // Make sure the report exist
+        reportFile().exists()
+    }
+
     @Override
     String reportFileName(final String buildType) {
         // Sourceset names are only taken into account when using Android plugin 2.+
@@ -213,5 +245,24 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
                 androidLintConfig = "${project.rootDir}/config/android/android-lint.xml"
             }
         '''
+    }
+
+    void setupProjectWithViolations(final boolean ignoreErrors) {
+        writeAndroidManifest()
+
+        writeAndroidBuildFile() << """
+            staticCodeAnalysis {
+                ignoreErrors = ${ignoreErrors}
+            }
+
+            // Treat everything as an error
+            android {
+                lintOptions {
+                    warningsAsErrors true
+                }
+            }
+        """
+
+        goodCode()
     }
 }

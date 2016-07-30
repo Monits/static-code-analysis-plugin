@@ -6,6 +6,8 @@
  Improvements:
  * CPDTask can now ignore literals, identifiers and configure language.
     Plugin defaults to java, ignoring literals and identifiers.
+ * Android lint rules XML can now be confgured through DSL. Supports remote files.
+ * Android lint honors `ignoreErrors` settings.
 
 # v2.1
 * **2.1.7**

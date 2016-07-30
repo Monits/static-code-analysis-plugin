@@ -160,10 +160,6 @@ abstract class AbstractIntegTestFixture extends Specification {
             android {
                 compileSdkVersion 23
                 buildToolsVersion "23.0.2"
-
-                lintOptions {
-                    abortOnError false
-                }
             }
         ''' as TestFile
     }
