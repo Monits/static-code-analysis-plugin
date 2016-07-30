@@ -10,6 +10,14 @@
  * Android lint honors `ignoreErrors` settings.
 
 # v2.1
+* **2.1.8**
+
+ Bug fixes:
+ * Andrid lint outputs re now properly set regardless of execution order
+
+ Improvements:
+ * Upgraded PMD to 5.5.1
+
 * **2.1.7**
 
  Bug fixes:

@@ -119,7 +119,7 @@ class AndroidLintConfigurator extends AbstractRemoteConfigLocator implements Ana
         DomainObjectSet<?> variants = getVariants(project)
 
         String defaultReportVariant = null
-        variants.whenObjectAdded {
+        variants.all {
             if (!defaultReportVariant && it.variantData.variantConfiguration.buildType.isDebuggable() &&
                     !usesJack(it.variantData.variantConfiguration)) {
                 defaultReportVariant = it.name
@@ -127,9 +127,7 @@ class AndroidLintConfigurator extends AbstractRemoteConfigLocator implements Ana
                 addReportAsOutput(lintTask, project, xmlEnabled, xmlOutput, defaultReportVariant, 'xml')
                 addReportAsOutput(lintTask, project, htmlEnabled, htmlOutput, defaultReportVariant, 'html')
             }
-        }
 
-        variants.all {
             def configuration = it.variantData.variantConfiguration
             String variantName = it.name
             String variantDirName = configuration.dirName
