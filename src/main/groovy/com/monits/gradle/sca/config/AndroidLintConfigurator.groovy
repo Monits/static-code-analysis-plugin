@@ -39,7 +39,6 @@ class AndroidLintConfigurator extends AbstractRemoteConfigLocator implements Ana
         // nothing to do for non-android projects
     }
 
-    @SuppressWarnings('CatchThrowable') // yes, we REALLY want to be that generic
     @Override
     void applyAndroidConfig(final Project project, final StaticCodeAnalysisExtension extension) {
         Task t = project.tasks.findByName('lint')
@@ -53,6 +52,7 @@ class AndroidLintConfigurator extends AbstractRemoteConfigLocator implements Ana
         configureLintTask(project, extension, t)
     }
 
+    @SuppressWarnings(['UnnecessaryGetter', 'CatchThrowable']) // yes, we REALLY want to be that generic
     @CompileStatic(TypeCheckingMode.SKIP)
     private void configureLintTask(final Project project, final StaticCodeAnalysisExtension extension,
                                     final Task lintTask) {
