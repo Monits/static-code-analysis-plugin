@@ -1,6 +1,11 @@
 ## History
 
 # v2.1
+* **2.1.8**
+
+ Bug fixes:
+ * Andrid lint outputs re now properly set regardless of execution order
+
 * **2.1.7**
 
  Bug fixes:
