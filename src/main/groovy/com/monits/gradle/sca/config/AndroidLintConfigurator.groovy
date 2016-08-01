@@ -120,8 +120,6 @@ class AndroidLintConfigurator extends AbstractRemoteConfigLocator implements Ana
         boolean htmlEnabled = project.android.lintOptions.htmlReport
         File htmlOutput = project.android.lintOptions.htmlOutput
 
-        boolean reportFatal = project.android.lintOptions.checkReleaseBuilds
-
         DomainObjectSet<?> variants = getVariants(project)
 
         String defaultReportVariant = null
@@ -144,19 +142,6 @@ class AndroidLintConfigurator extends AbstractRemoteConfigLocator implements Ana
 
                 addReportAsOutput(lintTask, project, xmlEnabled, xmlOutput, defaultReportVariant, 'xml')
                 addReportAsOutput(lintTask, project, htmlEnabled, htmlOutput, defaultReportVariant, 'html')
-            }
-
-            // This logic is copy-pasted from Android's TaskManager.createLintVitalTask
-            if (reportFatal && !configuration.buildType.isDebuggable() && !usesJack(configuration)) {
-                //noinspection GroovyMissingReturnStatement
-                lintTask.outputs.with {
-                    if (xmlEnabled) {
-                        file("${project.buildDir}/outputs/lint-results-${variantName}-fatal.xml")
-                    }
-                    if (htmlEnabled) {
-                        file("${project.buildDir}/outputs/lint-results-${variantName}-fatal.hmtl")
-                    }
-                }
             }
         }
     }
