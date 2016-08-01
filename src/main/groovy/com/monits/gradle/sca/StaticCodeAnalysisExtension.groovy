@@ -27,6 +27,7 @@ class StaticCodeAnalysisExtension {
     boolean pmd
     boolean checkstyle
     boolean cpd
+    boolean androidLint
 
     String checkstyleRules
     List<String> pmdRules

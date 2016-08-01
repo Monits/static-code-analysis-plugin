@@ -59,6 +59,7 @@ staticCodeAnalysis {
     checkstyle = true
     pmd = true
     cpd = true
+    androidLint = true // Since 2.2.0
 
     ignoreErrors = true
 

@@ -23,7 +23,7 @@ import spock.lang.Specification
  * Base specification for integration testing of a gradle plugin.
 */
 abstract class AbstractIntegTestFixture extends Specification {
-    static final String ANDROID_VERSION = 'androidVersion'
+    protected static final String ANDROID_VERSION = 'androidVersion'
     static final String LIBA_DIRNAME = 'liba/'
     static final String LIBB_DIRNAME = 'libb/'
     static final String LIBA_PATH = ':liba'
@@ -120,6 +120,7 @@ abstract class AbstractIntegTestFixture extends Specification {
                 checkstyle = ${toolsConfig.get('checkstyle', false)}
                 findbugs = ${toolsConfig.get('findbugs', false)}
                 pmd = ${toolsConfig.get('pmd', false)}
+                androidLint = ${toolsConfig.get('androidLint', false)}
             }
         """
     }

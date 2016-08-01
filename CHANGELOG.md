@@ -8,6 +8,8 @@
     Plugin defaults to java, ignoring literals and identifiers.
  * Android lint rules XML can now be confgured through DSL. Supports remote files.
  * Android lint honors `ignoreErrors` settings.
+ * Android lint can be disabled / enabled through the DSL. When disabled, the task will simply be SKIPPED.
+    `LintVital*` tasks will still run, since that is part of the build step for release builds, not the check step.
 
 # v2.1
 * **2.1.8**

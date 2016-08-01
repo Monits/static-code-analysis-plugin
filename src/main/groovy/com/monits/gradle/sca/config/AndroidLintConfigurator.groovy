@@ -61,6 +61,12 @@ class AndroidLintConfigurator extends AbstractRemoteConfigLocator implements Ana
 
         configureLintRules(project, extension, lintTask)
 
+        // Tasks should be skipped if disabled by extension
+        lintTask.onlyIf { extension.getAndroidLint() }
+        lintTask.dependsOn.find { it in ResolveAndroidLintTask }.onlyIf { extension.getAndroidLint() }
+        lintTask.finalizedBy.getDependencies(lintTask)
+            .find { it in CleanupAndroidLintTask }.onlyIf { extension.getAndroidLint() }
+
         try {
             configureLintInputsAndOutputs(project, lintTask)
         } catch (Throwable e) {

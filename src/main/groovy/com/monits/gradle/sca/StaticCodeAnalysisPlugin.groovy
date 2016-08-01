@@ -139,6 +139,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             pmd = { true }
             checkstyle = { true }
             cpd = { true }
+            androidLint = { true }
             checkstyleRules = {
                 if (ToolVersions.isLatestCheckstyleVersion(true)) {
                     return CHECKSTYLE_DEFAULT_RULES

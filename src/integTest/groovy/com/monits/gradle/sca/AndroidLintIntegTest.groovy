@@ -23,10 +23,12 @@ import spock.lang.Unroll
 import spock.util.environment.Jvm
 
 import static org.gradle.testkit.runner.TaskOutcome.FAILED
+import static org.gradle.testkit.runner.TaskOutcome.SKIPPED
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import static org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
 import static org.hamcrest.CoreMatchers.containsString
 import static org.junit.Assert.assertThat
+
 /**
  * Integration test of Android Lint tasks.
  */
@@ -113,6 +115,35 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
 
         // Make sure the report exist
         reportFile(VersionNumber.parse(androidVersion) >= VersionNumber.parse('2.0.0') ? 'debug' : null).exists()
+
+        where:
+        androidVersion << ANDROID_PLUGIN_VERSIONS
+        gradleVersion = gradleVersionFor(androidVersion)
+    }
+
+    @SuppressWarnings('MethodName')
+    @Unroll('AndroidLint is skipped when disabled and using plugin version #androidVersion')
+    void 'task is skipped if disabled'() {
+        given:
+        writeAndroidBuildFile([(ANDROID_VERSION):androidVersion])
+        writeAndroidManifest()
+        goodCode()
+
+        when:
+        BuildResult result = gradleRunner()
+            .withGradleVersion(gradleVersion)
+            // plugin version 1.1.x failed to compile tests if assemble was not called beforehand
+            .withArguments('assemble', 'check', '--stacktrace')
+            .build()
+
+        then:
+        // no task should be configured
+        result.task(taskName()).outcome == SKIPPED
+        result.task(':resolveAndroidLint').outcome == SKIPPED
+        result.task(':cleanupAndroidLint').outcome == SKIPPED
+
+        // Make sure the report doesn't exist
+        !reportFile().exists()
 
         where:
         androidVersion << ANDROID_PLUGIN_VERSIONS
