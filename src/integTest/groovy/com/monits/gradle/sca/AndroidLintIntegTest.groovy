@@ -27,11 +27,14 @@ import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import static org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
 import static org.hamcrest.CoreMatchers.containsString
 import static org.junit.Assert.assertThat
-
 /**
  * Integration test of Android Lint tasks.
  */
 class AndroidLintIntegTest extends AbstractIntegTestFixture {
+
+    static final List<String> ANDROID_PLUGIN_VERSIONS = (['1.1.3', '1.2.3', '1.3.1', '1.5.0', '2.0.0', '2.1.2'] +
+        (Jvm.current.java8Compatible ? ['2.2.0-alpha6'] : [])).asImmutable()
+
     @SuppressWarnings('MethodName')
     @Unroll('AndroidLint should run when using gradle #version')
     void 'androidLint is run'() {
@@ -83,8 +86,8 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
         result.task(':cleanupAndroidLint').outcome == SUCCESS
 
         where:
-        androidVersion << ['1.1.3', '1.2.3', '1.3.1', '1.5.0', '2.0.0', '2.1.0']
-        gradleVersion = androidVersion < '1.5.0' ? '2.9' : GradleVersion.current().version
+        androidVersion << ANDROID_PLUGIN_VERSIONS
+        gradleVersion = gradleVersionFor(androidVersion)
     }
 
     @SuppressWarnings('MethodName')
@@ -112,10 +115,8 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
         reportFile(VersionNumber.parse(androidVersion) >= VersionNumber.parse('2.0.0') ? 'debug' : null).exists()
 
         where:
-        androidVersion << ['1.1.3', '1.2.3', '1.3.1', '1.5.0', '2.0.0', '2.1.2'] +
-            (Jvm.current.java8Compatible ? ['2.2.0-alpha6'] : [])
-        gradleVersion = VersionNumber.parse(androidVersion) < VersionNumber.parse('1.5.0') ?
-            '2.9' : GradleVersion.current().version
+        androidVersion << ANDROID_PLUGIN_VERSIONS
+        gradleVersion = gradleVersionFor(androidVersion)
     }
 
     @SuppressWarnings('MethodName')
@@ -224,7 +225,12 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
 
     @Override
     String toolName() {
-        'lint'
+        'androidLint'
+    }
+
+    String gradleVersionFor(final String androidVersion) {
+        VersionNumber.parse(androidVersion) < VersionNumber.parse('1.5.0') ?
+            '2.9' : GradleVersion.current().version
     }
 
     TestFile writeSimpleAndroidLintConfig(final String project = null) {
