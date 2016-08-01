@@ -120,14 +120,6 @@ class AndroidLintConfigurator extends AbstractRemoteConfigLocator implements Ana
 
         String defaultReportVariant = null
         variants.all {
-            if (!defaultReportVariant && it.variantData.variantConfiguration.buildType.isDebuggable() &&
-                    !usesJack(it.variantData.variantConfiguration)) {
-                defaultReportVariant = it.name
-
-                addReportAsOutput(lintTask, project, xmlEnabled, xmlOutput, defaultReportVariant, 'xml')
-                addReportAsOutput(lintTask, project, htmlEnabled, htmlOutput, defaultReportVariant, 'html')
-            }
-
             def configuration = it.variantData.variantConfiguration
             String variantName = it.name
             String variantDirName = configuration.dirName
@@ -139,6 +131,13 @@ class AndroidLintConfigurator extends AbstractRemoteConfigLocator implements Ana
                 dir("${project.buildDir}/intermediates/res/merged/${variantDirName}/")
                 dir("${project.buildDir}/intermediates/shaders/${variantDirName}/")
                 dir("${project.buildDir}/intermediates/rs/${variantDirName}/")
+            }
+
+            if (!defaultReportVariant && configuration.buildType.isDebuggable() && !usesJack(configuration)) {
+                defaultReportVariant = variantName
+
+                addReportAsOutput(lintTask, project, xmlEnabled, xmlOutput, defaultReportVariant, 'xml')
+                addReportAsOutput(lintTask, project, htmlEnabled, htmlOutput, defaultReportVariant, 'html')
             }
 
             // This logic is copy-pasted from Android's TaskManager.createLintVitalTask
