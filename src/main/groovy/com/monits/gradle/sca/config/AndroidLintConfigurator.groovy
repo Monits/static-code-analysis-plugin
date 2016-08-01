@@ -31,6 +31,7 @@ class AndroidLintConfigurator extends AbstractRemoteConfigLocator implements Ana
     private static final String ANDROID_GRADLE_VERSION_PROPERTY_NAME = 'androidGradlePluginVersion'
     private static final VersionNumber ANDROID_GRADLE_VERSION_2_0_0 = VersionNumber.parse('2.0.0')
     private static final String USE_JACK_PROPERTY_NAME = 'useJack'
+    private static final String JACK_OPTIONS_PROPERTY_NAME = 'jackOptions'
 
     final String pluginName = 'android'
 
@@ -149,9 +150,32 @@ class AndroidLintConfigurator extends AbstractRemoteConfigLocator implements Ana
     @SuppressWarnings('NoDef') // can't specify a type without depending on Android
     @CompileStatic(TypeCheckingMode.SKIP)
     private static boolean usesJack(final def configuration) {
-        (configuration.hasProperty(USE_JACK_PROPERTY_NAME) && configuration.useJack) ||
-            (configuration.buildType.hasProperty(USE_JACK_PROPERTY_NAME) && configuration.buildType.useJack) ||
-            (configuration.hasProperty('jackOptions') && configuration.jackOptions.enabled)
+        // Any flavors?
+        if (configuration.hasFlavors()) {
+            for (def pf : configuration.productFlavors) {
+                if (pf.hasProperty(JACK_OPTIONS_PROPERTY_NAME) && pf.jackOptions.enabled != null) {
+                    return pf.jackOptions.enabled
+                }
+            }
+        }
+
+        // default config?
+        if (configuration.defaultConfig.hasProperty(JACK_OPTIONS_PROPERTY_NAME) &&
+                configuration.defaultConfig.jackOptions.enabled != null) {
+            return configuration.defaultConfig.jackOptions.enabled
+        }
+
+        // Fallback for older versions, use old property
+        if (configuration.hasProperty(USE_JACK_PROPERTY_NAME) && configuration.useJack != null) {
+            return configuration.useJack
+        }
+
+        if (configuration.buildType.hasProperty(USE_JACK_PROPERTY_NAME) && configuration.buildType.useJack != null) {
+            return configuration.buildType.useJack
+        }
+
+        // default is false, plugin is too old to know anything about jack
+        false
     }
 
     @CompileStatic(TypeCheckingMode.SKIP)
