@@ -109,10 +109,10 @@ abstract class AbstractIntegTestFixture extends Specification {
                 testCompile 'junit:junit:4.12'
             }
 
-        """ + staticCodeAnalysysConfig(toolsConfig) as TestFile
+        """ + staticCodeAnalysisConfig(toolsConfig) as TestFile
     }
 
-    String staticCodeAnalysysConfig(toolsConfig) {
+    String staticCodeAnalysisConfig(toolsConfig) {
         """
             // disable all other checks
             staticCodeAnalysis {
@@ -155,7 +155,7 @@ abstract class AbstractIntegTestFixture extends Specification {
                 testCompile 'junit:junit:4.12'
             }
 
-        """ + staticCodeAnalysysConfig(toolsConfig) +
+        """ + staticCodeAnalysisConfig(toolsConfig) +
         '''
             android {
                 compileSdkVersion 23
