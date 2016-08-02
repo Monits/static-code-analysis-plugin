@@ -14,6 +14,7 @@
  * Android lint can be disabled / enabled through the DSL. When disabled, the task will simply be SKIPPED.
     `LintVital*` tasks will still run, since that is part of the build step for release builds, not the check step.
  * Android will not warn for usage of deprecated `useJack` option anymore.
+ * Upgraded Checkstyle to 7.1
 
 # v2.1
 * **2.1.8**
