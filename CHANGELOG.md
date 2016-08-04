@@ -15,6 +15,7 @@
     `LintVital*` tasks will still run, since that is part of the build step for release builds, not the check step.
  * Android will not warn for usage of deprecated `useJack` option anymore.
  * Upgraded Checkstyle to 7.1
+ * PMD can now cache remote config files, and use them when offline.
 
 # v2.1
 * **2.1.8**

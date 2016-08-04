@@ -14,10 +14,12 @@
 package com.monits.gradle.sca
 
 import com.monits.gradle.sca.fixture.AbstractPerSourceSetPluginIntegTestFixture
+import com.monits.gradle.sca.io.TestFile
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.util.GradleVersion
 import spock.lang.Unroll
 
+import static org.gradle.testkit.runner.TaskOutcome.FAILED
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import static org.hamcrest.CoreMatchers.containsString
 import static org.hamcrest.CoreMatchers.is
@@ -222,6 +224,68 @@ class PmdIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         reportFile('test').assertContents(not(containsString('<violation ')))
     }
 
+    @SuppressWarnings('MethodName')
+    void 'pmd download remote config'() {
+        given:
+        writeBuildFile()
+        goodCode()
+
+        when:
+        BuildResult result = gradleRunner()
+            .build()
+
+        then:
+        result.task(taskName()).outcome == SUCCESS
+
+        // The config must exist
+        file('config/pmd/pmd-main-pmd.xml').exists()
+        file('config/pmd/pmd-main-pmd-android.xml').exists()
+        file('config/pmd/pmd-test-pmd.xml').exists()
+        file('config/pmd/pmd-test-pmd-android.xml').exists()
+
+        // Make sure checkstyle report exists
+        reportFile().exists()
+    }
+
+    @SuppressWarnings('MethodName')
+    void 'running offline fails download'() {
+        given:
+        writeBuildFile()
+        goodCode()
+
+        when:
+        BuildResult result = gradleRunner()
+            .withArguments('check', '--stacktrace', '--offline')
+            .buildAndFail()
+
+        then:
+        result.task(':downloadPmdXmlMainPmd').outcome == FAILED
+        assertThat(result.output, containsString('Running in offline mode, but there is no cached version'))
+    }
+
+    @SuppressWarnings('MethodName')
+    void 'running offline with a cached file passes but warns'() {
+        given:
+        writeBuildFile()
+        writeAlmostEmptyPmdConfig('main-pmd')
+        writeAlmostEmptyPmdConfig('main-pmd-android')
+        writeAlmostEmptyPmdConfig('test-pmd')
+        writeAlmostEmptyPmdConfig('test-pmd-android')
+        goodCode()
+
+        when:
+        BuildResult result = gradleRunner()
+            .withArguments('check', '--stacktrace', '--offline')
+            .build()
+
+        then:
+        result.task(':downloadPmdXmlMainPmd').outcome == SUCCESS
+        result.task(':downloadPmdXmlMainPmdAndroid').outcome == SUCCESS
+        result.task(':downloadPmdXmlTestPmd').outcome == SUCCESS
+        result.task(':downloadPmdXmlTestPmdAndroid').outcome == SUCCESS
+        assertThat(result.output, containsString('Running in offline mode. Using a possibly outdated version of'))
+    }
+
     @Override
     String reportFileName(final String sourceSet) {
         "build/reports/pmd/pmd${sourceSet ? "-${sourceSet}" : '-main'}.xml"
@@ -235,5 +299,20 @@ class PmdIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
     @Override
     String toolName() {
         'pmd'
+    }
+
+    TestFile writeAlmostEmptyPmdConfig(final String fileClassifier = null) {
+        file("config/pmd/pmd${fileClassifier ? "-${fileClassifier}" : ''}.xml") <<
+            '''<?xml version="1.0" encoding="UTF-8"?>
+            <ruleset name="Monits Test ruleset"
+                xmlns="http://pmd.sf.net/ruleset/1.0.0"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xsi:schemaLocation="http://pmd.sf.net/ruleset/1.0.0 http://pmd.sf.net/ruleset_xml_schema.xsd"
+                xsi:noNamespaceSchemaLocation="http://pmd.sf.net/ruleset_xml_schema.xsd">
+
+                <rule ref="rulesets/java/basic.xml" />
+                <rule ref="rulesets/java/android.xml" />
+            </ruleset>
+        ''' as TestFile
     }
 }
