@@ -60,6 +60,9 @@ class AndroidLintConfigurator extends AbstractRemoteConfigLocator implements Ana
         // TODO : This won't fail on warnings, just like Checkstyle. See https://issues.gradle.org/browse/GRADLE-2888
         project.android.lintOptions.abortOnError = !extension.getIgnoreErrors()
 
+        // Change output location for consistency with other plugins
+        project.android.lintOptions.xmlOutput = project.file("${project.buildDir}/reports/android/lint-results.xml")
+
         configureLintRules(project, extension, lintTask)
 
         // Tasks should be skipped if disabled by extension

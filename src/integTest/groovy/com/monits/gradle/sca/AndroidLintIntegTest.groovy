@@ -245,8 +245,8 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
 
     @Override
     String reportFileName(final String buildType) {
-        // Sourceset names are only taken into account when using Android plugin 2.+
-        "build/outputs/lint-results${buildType ? '-' + buildType : ''}.xml"
+        // Sourceset names are not taken into account
+        'build/reports/android/lint-results.xml'
     }
 
     @Override
