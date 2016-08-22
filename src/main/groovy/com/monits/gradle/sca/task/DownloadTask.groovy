@@ -31,9 +31,6 @@ class DownloadTask extends DefaultTask {
     @Input
     String resourceUri
 
-    @Input
-    File directory
-
     @OutputFile
     File downloadedFile
 
@@ -45,7 +42,7 @@ class DownloadTask extends DefaultTask {
     @SuppressWarnings('UnnecessaryGetter')
     @TaskAction
     void run() {
-        directory.mkdirs()
+        downloadedFile.parentFile.mkdirs()
 
         try {
             // Honor --offline
@@ -61,7 +58,7 @@ class DownloadTask extends DefaultTask {
             }
 
             Map<String, Serializable> options =
-                    [src:resourceUri, dest:downloadedFile.absolutePath, usetimestamp:true]
+                    [src:resourceUri, dest:downloadedFile.absolutePath]
 
             // Gradle 2.13 includes ant 1.9.6 which supports gzip
             if (GradleVersion.current() > GradleVersion.version('2.13')) {

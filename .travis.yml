@@ -5,14 +5,20 @@ group: edge
 language: android
 
 jdk:
- - oraclejdk7
- - oraclejdk8
+  - oraclejdk7
+  - oraclejdk8
 
 android:
-    components:
-        - tools
-        - build-tools-23.0.2
-        - android-23
+  components:
+    - tools
+    - build-tools-23.0.2
+    - android-23
+
+branches:
+  only:
+    - development
+    - staging
+    - /^support-.*$/
 
 script:
     - ./gradlew build

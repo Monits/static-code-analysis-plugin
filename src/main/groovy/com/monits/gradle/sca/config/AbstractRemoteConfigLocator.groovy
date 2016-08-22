@@ -50,7 +50,7 @@ abstract class AbstractRemoteConfigLocator {
             } else {
                 // Already downloading, just wait for it to finish and copy it
                 project.task(taskName, type:Copy) { Copy it ->
-                    it.from download.directory
+                    it.from download.downloadedFile.parentFile
                     it.into getDestinationDirectory(project)
                     it.include download.downloadedFile.name
                     it.rename download.downloadedFile.name, localFileName
@@ -59,7 +59,6 @@ abstract class AbstractRemoteConfigLocator {
             }
         } else {
             download = project.task(taskName, type:DownloadTask) { DownloadTask it ->
-                it.directory = project.file(getDestinationDirectory(project))
                 it.downloadedFile = destFile
                 it.resourceUri = configLocation
             } as DownloadTask

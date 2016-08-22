@@ -345,12 +345,13 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         'findbugs'
     }
 
+    @SuppressWarnings('GStringExpressionWithinString')
     void useEmptySuppressionFilter() {
         writeEmptySuppressionFilter()
 
         buildScriptFile() << '''
             staticCodeAnalysis {
-                findbugsExclude = 'config/findbugs/excludeFilter.xml'
+                findbugsExclude = "${project.rootDir}/config/findbugs/excludeFilter.xml"
             }
         '''
     }

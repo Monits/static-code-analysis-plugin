@@ -18,27 +18,42 @@ import com.monits.gradle.sca.RulesConfig
 import com.monits.gradle.sca.StaticCodeAnalysisExtension
 import com.monits.gradle.sca.ToolVersions
 import groovy.transform.CompileStatic
+import groovy.transform.TypeCheckingMode
+import org.gradle.api.InvalidUserDataException
 import org.gradle.api.NamedDomainObjectContainer
+import org.gradle.api.Namer
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.plugins.quality.Pmd
+import org.gradle.api.plugins.quality.PmdExtension
+import org.gradle.api.plugins.quality.PmdReports
+import org.gradle.api.reporting.ReportingExtension
 import org.gradle.api.tasks.SourceSet
+import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.util.GUtil
 import org.gradle.util.GradleVersion
 
+import java.util.regex.Matcher
+
 /**
  * A configurator for PMD tasks.
 */
-class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
+@CompileStatic
+class PmdConfigurator extends AbstractRemoteConfigLocator implements AnalysisConfigurator, ClasspathAware {
     private final static GradleVersion GRADLE_VERSION_PMD_CLASSPATH_SUPPORT = GradleVersion.version('2.8')
     private final static String PMD = 'pmd'
+
+    final String pluginName = PMD
 
     @Override
     void applyConfig(final Project project, final StaticCodeAnalysisExtension extension) {
         setupPlugin(project, extension)
 
-        setupTasksPerSourceSet(project, extension, project.sourceSets) { Pmd pmdTask, SourceSet sourceSet ->
+        SourceSetContainer sourceSets = project.convention.getPlugin(JavaPluginConvention).sourceSets
+        //noinspection GroovyMissingReturnStatement
+        setupTasksPerSourceSet(project, extension, sourceSets) { Pmd pmdTask, SourceSet sourceSet ->
             boolean supportsClasspath = GRADLE_VERSION_PMD_CLASSPATH_SUPPORT <= GradleVersion.current()
 
             if (supportsClasspath) {
@@ -48,11 +63,12 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
         }
     }
 
-    // DuplicateStringLiteral should be removed once we refactor this
+    @CompileStatic(TypeCheckingMode.SKIP)
     @Override
     void applyAndroidConfig(final Project project, final StaticCodeAnalysisExtension extension) {
         setupPlugin(project, extension)
 
+        //noinspection GroovyAssignabilityCheck
         setupTasksPerSourceSet(project, extension, project.android.sourceSets) { Pmd pmdTask, sourceSet ->
             /*
              * Android doesn't expose name of the task compiling the sourceset, and names vary
@@ -76,9 +92,9 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
     private static void setupPlugin(final Project project, final StaticCodeAnalysisExtension extension) {
         project.plugins.apply PMD
 
-        project.pmd {
-            toolVersion = ToolVersions.pmdVersion
-            ignoreFailures = extension.getIgnoreErrors()
+        project.extensions.configure(PmdExtension) { PmdExtension e ->
+            e.toolVersion = ToolVersions.pmdVersion
+            e.ignoreFailures = extension.getIgnoreErrors()
         }
 
         if (!ToolVersions.isLatestPmdVersion()) {
@@ -86,27 +102,70 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
         }
     }
 
-    @SuppressWarnings('UnnecessaryGetter')
-    private static void setupTasksPerSourceSet(final Project project, final StaticCodeAnalysisExtension extension,
-                                               final NamedDomainObjectContainer<Object> sourceSets,
+    @SuppressWarnings(['UnnecessaryGetter', 'DuplicateStringLiteral'])
+    private void setupTasksPerSourceSet(final Project project, final StaticCodeAnalysisExtension extension,
+                                               final NamedDomainObjectContainer<?> sourceSets,
                                                final Closure<?> configuration = null) {
         // Create a phony pmd task that just executes all real pmd tasks
         Task pmdRootTask = project.tasks.findByName(PMD) ?: project.task(PMD)
         sourceSets.all { sourceSet ->
-            String sourceSetName = sourceSets.namer.determineName(sourceSet)
+            Namer<Object> namer = sourceSets.namer as Namer<Object>
+            String sourceSetName = namer.determineName(sourceSet)
             RulesConfig config = extension.sourceSetConfig.maybeCreate(sourceSetName)
 
-            Task pmdTask = getOrCreateTask(project, generateTaskName(sourceSetName)) {
-                // most defaults are good enough
+            List<Task> downloadTasks = []
+            List<String> rulesets = []
+
+            for (String ruleset : config.getPmdRules()) {
+                boolean remoteLocation = isRemoteLocation(ruleset)
+                File configSource
+                if (remoteLocation) {
+                    Matcher filenameMatcher = ruleset =~ /\/([^\/]*)\.[^.]*$/
+                    filenameMatcher.find()
+                    String filename = filenameMatcher.group(1).replaceAll '[^a-zA-Z0-9]', ' '
+                    String downloadTaskName
+
+                    /*
+                     * Names may have collisions if the same file is downloaded from different domains..
+                     * add suffixes as needed
+                     */
+                    int attempts = 0
+                    String suffix = ''
+                    while (configSource == null) {
+                        try {
+                            downloadTaskName = generateTaskName('downloadPmdXml', sourceSetName, filename) + suffix
+                            configSource = makeDownloadFileTask(project, ruleset,
+                                String.format('pmd-%s-%s.xml', sourceSetName, filename.replaceAll(/ /, '-') + suffix),
+                                downloadTaskName)
+                        } catch (InvalidUserDataException ignored) {
+                            attempts++
+                            suffix = attempts
+                        }
+                    }
+                    downloadTasks.add(project.tasks.findByName(downloadTaskName))
+                } else {
+                    configSource = project.file(ruleset)
+                }
 
                 // PMD doesn't play ball with relative paths nor file:// URIs
-                ruleSets = config.getPmdRules().collect { it =~ /https?:\/\// ? it : project.file(it).absolutePath }
+                rulesets.add(configSource.absolutePath)
+            }
 
-                reports {
-                    xml.enabled = true
-                    xml.destination = xml.destination.absolutePath - "${sourceSetName}.xml" +
-                            "pmd-${sourceSetName}.xml"
-                    html.enabled = false
+            Task pmdTask = getOrCreateTask(project, generateTaskName(sourceSetName)) { Pmd it ->
+                // most defaults are good enough
+                if (!downloadTasks.empty) {
+                    it.dependsOn downloadTasks
+                }
+
+                it.ruleSets = rulesets
+
+                it.reports { PmdReports r ->
+                    r.with {
+                        xml.enabled = true
+                        xml.setDestination(new File(project.extensions.getByType(ReportingExtension).file(PMD),
+                            "pmd-${sourceSetName}.xml"))
+                        html.enabled = false
+                    }
                 }
             }
 
@@ -118,7 +177,7 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
             pmdRootTask.dependsOn pmdTask
         }
 
-        project.tasks.check.dependsOn pmdRootTask
+        project.tasks.findByName('check').dependsOn pmdRootTask
     }
 
     private static Task getOrCreateTask(final Project project, final String taskName, final Closure closure) {
@@ -132,8 +191,8 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
         pmdTask.configure closure
     }
 
-    @CompileStatic
-    private static String generateTaskName(final String sourceSetName) {
-        GUtil.toLowerCamelCase(String.format('%s %s', PMD, sourceSetName))
+    private static String generateTaskName(final String taskName = PMD, final String sourceSetName,
+                                           final String classifier = '') {
+        GUtil.toLowerCamelCase(String.format('%s %s %s', taskName, sourceSetName, classifier))
     }
 }

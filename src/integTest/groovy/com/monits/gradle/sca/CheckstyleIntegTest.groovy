@@ -192,12 +192,13 @@ class CheckstyleIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         ''' as TestFile
     }
 
+    @SuppressWarnings('GStringExpressionWithinString')
     void useAlmostEmptyCheckstyleConfig() {
         writeAlmostEmptyCheckstyleConfig()
 
         buildScriptFile() << '''
             staticCodeAnalysis {
-                checkstyleRules = 'config/checkstyle/checkstyle.xml'
+                checkstyleRules = "${project.rootDir}/config/checkstyle/checkstyle.xml"
             }
         '''
     }

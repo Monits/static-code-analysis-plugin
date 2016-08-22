@@ -41,9 +41,10 @@ trait ClasspathAware {
     private static final String DEBUG_SOURCESET = 'debug'
     private static final String TEST_DEBUG_SOURCESET = 'test/' + DEBUG_SOURCESET
 
-    @CompileStatic(TypeCheckingMode.SKIP)
     void setupAndroidClasspathAwareTask(final Task taskToConfigure, final Project project,
                                         final Collection<String> sourceSetClasses) {
+        ClasspathAware cpa = this
+
         /*
          * For best results, this task needs ALL classes, including Android's SDK,
          * but we need that configure before execution to be considered in up-to-date check.
@@ -60,7 +61,7 @@ trait ClasspathAware {
             // we need all other task to be done first
             self.dependsOn taskToConfigure.dependsOn.findAll { it != self } // avoid cycles
         } << {
-            configAndroidClasspath(taskToConfigure, project,
+            cpa.configAndroidClasspath(taskToConfigure, project,
                     project.tasks.findByName(MOCKABLE_ANDROID_JAR_TASK), sourceSetClasses)
         }
 

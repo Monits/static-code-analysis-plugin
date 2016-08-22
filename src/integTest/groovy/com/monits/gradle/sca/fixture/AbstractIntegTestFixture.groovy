@@ -23,7 +23,7 @@ import spock.lang.Specification
  * Base specification for integration testing of a gradle plugin.
 */
 abstract class AbstractIntegTestFixture extends Specification {
-    static final String ANDROID_VERSION = 'androidVersion'
+    protected static final String ANDROID_VERSION = 'androidVersion'
     static final String LIBA_DIRNAME = 'liba/'
     static final String LIBB_DIRNAME = 'libb/'
     static final String LIBA_PATH = ':liba'
@@ -109,10 +109,10 @@ abstract class AbstractIntegTestFixture extends Specification {
                 testCompile 'junit:junit:4.12'
             }
 
-        """ + staticCodeAnalysysConfig(toolsConfig) as TestFile
+        """ + staticCodeAnalysisConfig(toolsConfig) as TestFile
     }
 
-    String staticCodeAnalysysConfig(toolsConfig) {
+    String staticCodeAnalysisConfig(toolsConfig) {
         """
             // disable all other checks
             staticCodeAnalysis {
@@ -120,6 +120,7 @@ abstract class AbstractIntegTestFixture extends Specification {
                 checkstyle = ${toolsConfig.get('checkstyle', false)}
                 findbugs = ${toolsConfig.get('findbugs', false)}
                 pmd = ${toolsConfig.get('pmd', false)}
+                androidLint = ${toolsConfig.get('androidLint', false)}
             }
         """
     }
@@ -155,15 +156,11 @@ abstract class AbstractIntegTestFixture extends Specification {
                 testCompile 'junit:junit:4.12'
             }
 
-        """ + staticCodeAnalysysConfig(toolsConfig) +
+        """ + staticCodeAnalysisConfig(toolsConfig) +
         '''
             android {
                 compileSdkVersion 23
                 buildToolsVersion "23.0.2"
-
-                lintOptions {
-                    abortOnError false
-                }
             }
         ''' as TestFile
     }
@@ -186,7 +183,7 @@ abstract class AbstractIntegTestFixture extends Specification {
         file(reportFileName(sourceSet))
     }
 
-    abstract String reportFileName(String sourceSets)
+    abstract String reportFileName(String sourceSet)
 
     abstract String taskName()
 

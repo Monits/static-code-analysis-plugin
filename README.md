@@ -28,7 +28,7 @@ We are on [the Grade Plugin Portal](https://plugins.gradle.org/plugin/com.monits
 
 ```
 plugins {
-  id "com.monits.staticCodeAnalysis" version "2.1.6"
+  id "com.monits.staticCodeAnalysis" version "2.1.7"
 }
 ```
 
@@ -42,7 +42,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "com.monits:static-code-analysis-plugin:2.1.6"
+    classpath "com.monits:static-code-analysis-plugin:2.1.7"
   }
 }
 
@@ -58,15 +58,20 @@ staticCodeAnalysis {
     findbugs = true
     checkstyle = true
     pmd = true
-    cpd = false
+    cpd = true
+    androidLint = true // Since 2.2.0
 
     ignoreErrors = true
 
-    // defaut rules
+    // default rules
     findbugsExclude = "$project.rootProject.projectDir/config/findbugs/excludeFilter.xml"
     checkstyleRules = "http://static.monits.com/checkstyle.xml"
     pmdRules = [ "http://static.monits.com/pmd.xml", "http://static.monits.com/pmd-android.xml" ]
 
+    // Since 2.2.0
+    androidLintConfig = "http://static.monits.com/android-lint.xml"
+
+    // Since 2.0.0
     sourceSetConfig {
         test { // or the name of any other sourceset
             // use a more relaxed ruleset

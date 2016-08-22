@@ -19,11 +19,14 @@ import com.monits.gradle.sca.task.CPDTask
 import groovy.transform.CompileStatic
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.FileTree
+import org.gradle.util.VersionNumber
 
 /**
  * A configurator for CPD tasks.
  */
+@CompileStatic
 class CpdConfigurator implements AnalysisConfigurator {
     private static final String CPD = 'cpd'
 
@@ -35,24 +38,68 @@ class CpdConfigurator implements AnalysisConfigurator {
             return
         }
 
-        Task cpdTask = project.task(CPD, type:CPDTask) {
-            ignoreFailures = extension.getIgnoreErrors()
+        // Setup configuration
+        addConfigurations(project)
+        configureDefaultDependencies(project)
+
+        Task cpdTask = project.task(CPD, type:CPDTask) { CPDTask it ->
+            it.ignoreFailures = extension.getIgnoreErrors()
+
+            it.ignoreLiterals = true
+            it.ignoreIdentifiers = true
 
             FileTree srcDir = project.fileTree("$project.projectDir/src/")
             srcDir.include '**/*.java'
             srcDir.exclude '**/gen/**'
 
-            toolVersion = ToolVersions.pmdVersion
-            inputFiles = srcDir
-            outputFile = new File("$project.buildDir/reports/pmd/cpd.xml")
+            it.inputFiles = srcDir
+            it.outputFile = new File("$project.buildDir/reports/pmd/cpd.xml")
         }
 
-        project.tasks.check.dependsOn cpdTask
+        project.tasks['check'].dependsOn cpdTask
     }
 
-    @CompileStatic
     @Override
     void applyAndroidConfig(final Project project, final StaticCodeAnalysisExtension extension) {
         applyConfig(project, extension) // no difference at all
+    }
+
+    // FIXME : This is copy pasted from AbstractCodeQualityPlugin... it shouldn't
+    @SuppressWarnings('DuplicateStringLiteral')
+    private static void addConfigurations(final Project project) {
+        project.configurations.create(CPD).with { Configuration c ->
+            c.with {
+                visible = false
+                transitive = true
+                description = 'The cpd libraries to be used for this project.'
+                // Don't need these things, they're provided by the runtime
+                exclude group:'ant', module:'ant'
+                exclude group:'org.apache.ant', module:'ant'
+                exclude group:'org.apache.ant', module:'ant-launcher'
+                exclude group:'org.slf4j', module:'slf4j-api'
+                exclude group:'org.slf4j', module:'jcl-over-slf4j'
+                exclude group:'org.slf4j', module:'log4j-over-slf4j'
+                exclude group:'commons-logging', module:'commons-logging'
+                exclude group:'log4j', module:'log4j'
+            }
+        }
+    }
+
+    private static void configureDefaultDependencies(final Project project) {
+        Configuration config = project.configurations.getByName(CPD)
+        config.incoming.beforeResolve {
+            VersionNumber version = VersionNumber.parse(ToolVersions.pmdVersion)
+            String dependency = calculateDefaultDependencyNotation(version)
+            config.dependencies.add(project.dependencies.create(dependency))
+        }
+    }
+
+    private static String calculateDefaultDependencyNotation(final VersionNumber toolVersion) {
+        if (toolVersion < VersionNumber.version(5)) {
+            return "pmd:pmd:$toolVersion"
+        } else if (toolVersion < VersionNumber.parse('5.2.0')) {
+            return "net.sourceforge.pmd:pmd:$toolVersion"
+        }
+        "net.sourceforge.pmd:pmd-java:$toolVersion"
     }
 }

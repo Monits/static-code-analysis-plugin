@@ -27,10 +27,12 @@ class StaticCodeAnalysisExtension {
     boolean pmd
     boolean checkstyle
     boolean cpd
+    boolean androidLint
 
     String checkstyleRules
     List<String> pmdRules
     String findbugsExclude
+    String androidLintConfig
 
     NamedDomainObjectContainer<RulesConfig> sourceSetConfig
 
