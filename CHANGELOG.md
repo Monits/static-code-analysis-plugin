@@ -16,6 +16,7 @@
     `LintVital*` tasks will still run, since that is part of the build step for release builds, not the check step.
  * Android will not warn for usage of deprecated `useJack` option anymore.
  * Upgraded Checkstyle to 7.1
+ * Upgraded fb-contrib to 6.6.2
  * PMD can now cache remote config files, and use them when offline.
  * Android lint XML report is now written under `$buildDir/reports/android/android-lint.xml`
     for consistency with other tools. This name is the same regardless of the used plugin version.
