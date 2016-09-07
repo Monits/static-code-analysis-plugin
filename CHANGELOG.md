@@ -1,6 +1,11 @@
 ## History
 
 # v2.2
+* **2.2.1**
+
+ Bug fixes:
+ * Don't change `provided` configuration if it already exists
+
 * **2.2.0**
 
  Bug fixes:
