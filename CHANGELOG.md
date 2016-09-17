@@ -1,5 +1,11 @@
 ## History
 
+# v2.3
+* **2.3.0 - Unreleased**
+
+ Improvements:
+ * Checkstyle upgraded to 7.1.1
+
 # v2.2
 * **2.2.1**
 
