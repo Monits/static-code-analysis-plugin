@@ -41,11 +41,11 @@ import java.util.regex.Matcher
  * A configurator for PMD tasks.
 */
 @CompileStatic
-class PmdConfigurator extends AbstractRemoteConfigLocator implements AnalysisConfigurator, ClasspathAware {
+class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
     private final static GradleVersion GRADLE_VERSION_PMD_CLASSPATH_SUPPORT = GradleVersion.version('2.8')
     private final static String PMD = 'pmd'
 
-    final String pluginName = PMD
+    private final RemoteConfigLocator configLocator = new RemoteConfigLocator(PMD)
 
     @Override
     void applyConfig(final Project project, final StaticCodeAnalysisExtension extension) {
@@ -117,7 +117,7 @@ class PmdConfigurator extends AbstractRemoteConfigLocator implements AnalysisCon
             List<String> rulesets = []
 
             for (String ruleset : config.getPmdRules()) {
-                boolean remoteLocation = isRemoteLocation(ruleset)
+                boolean remoteLocation = RemoteConfigLocator.isRemoteLocation(ruleset)
                 File configSource
                 if (remoteLocation) {
                     Matcher filenameMatcher = ruleset =~ /\/([^\/]*)\.[^.]*$/
@@ -134,7 +134,7 @@ class PmdConfigurator extends AbstractRemoteConfigLocator implements AnalysisCon
                     while (configSource == null) {
                         try {
                             downloadTaskName = generateTaskName('downloadPmdXml', sourceSetName, filename) + suffix
-                            configSource = makeDownloadFileTask(project, ruleset,
+                            configSource = configLocator.makeDownloadFileTask(project, ruleset,
                                 String.format('pmd-%s-%s.xml', sourceSetName, filename.replaceAll(/ /, '-') + suffix),
                                 downloadTaskName)
                         } catch (InvalidUserDataException ignored) {
