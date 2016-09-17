@@ -94,19 +94,24 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             archives {
                 extendsFrom project.configurations.default
             }
-            provided {
-                description = 'Compile only dependencies'
-                dependencies.all { Dependency dep ->
-                    project.configurations.default.exclude group:dep.group, module:dep.name
-                }
-            }
-            compile.extendsFrom provided
             scaconfig { // Custom configuration for static code analysis
                 description = 'Configuraton used for Static Code Analysis'
             }
             androidLint { // Configuration used for android linters
                 transitive = false
                 description = 'Extra Android lint rules to be used'
+            }
+        }
+
+        if (project.configurations.findByName('provided') == null) {
+            project.configurations {
+                provided {
+                    description = 'Compile only dependencies'
+                    dependencies.all { Dependency dep ->
+                        project.configurations.default.exclude group:dep.group, module:dep.name
+                    }
+                }
+                compile.extendsFrom provided
             }
         }
     }
