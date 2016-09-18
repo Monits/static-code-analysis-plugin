@@ -36,5 +36,5 @@ project.sourceCompatibility = 1.7
 project.targetCompatibility = 1.7
 
 wrapper {
-    gradleVersion = '2.14.1'
+    gradleVersion = '3.0'
 }

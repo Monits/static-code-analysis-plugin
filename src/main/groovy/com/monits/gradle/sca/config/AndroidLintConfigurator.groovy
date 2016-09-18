@@ -80,7 +80,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
                     'https://github.com/monits/static-code-analysis-plugin/issues', e)
 
             // disable up-to-date caching
-            t.outputs.upToDateWhen {
+            lintTask.outputs.upToDateWhen {
                 false
             }
         }
@@ -190,7 +190,12 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
         project.android.applicationVariants
     }
 
+    /*
+     * The signature of TaskInputs.file(Object) changed, we need to skip @CompileStatic for backwards compatibility
+     * with Gradle 2.x. Remove it once we drop support for 2.x.
+     */
     @SuppressWarnings('ParameterCount')
+    @CompileStatic(TypeCheckingMode.SKIP)
     private static void addReportAsOutput(final Task task, final Project project, final boolean isEnabled,
                                           final File output, final String variantName, final String extension) {
         if (isEnabled) {

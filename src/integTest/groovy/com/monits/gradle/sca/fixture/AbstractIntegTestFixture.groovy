@@ -15,6 +15,8 @@ package com.monits.gradle.sca.fixture
 
 import com.monits.gradle.sca.io.TestFile
 import org.gradle.testkit.runner.GradleRunner
+import org.gradle.util.GradleVersion
+import org.gradle.util.VersionNumber
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -23,6 +25,8 @@ import spock.lang.Specification
  * Base specification for integration testing of a gradle plugin.
 */
 abstract class AbstractIntegTestFixture extends Specification {
+    private static final String ANDROID_1_5_0 = '1.5.0'
+    static final String DEFAULT_ANDROID_VERSION = ANDROID_1_5_0
     protected static final String ANDROID_VERSION = 'androidVersion'
     static final String LIBA_DIRNAME = 'liba/'
     static final String LIBB_DIRNAME = 'libb/'
@@ -125,7 +129,7 @@ abstract class AbstractIntegTestFixture extends Specification {
         """
     }
 
-    TestFile writeAndroidBuildFile(final String androidVersion = '1.5.0') {
+    TestFile writeAndroidBuildFile(final String androidVersion = DEFAULT_ANDROID_VERSION) {
         Map<String, Object> configMap = [:]
         configMap.put(toolName(), Boolean.TRUE)
         configMap.put(ANDROID_VERSION, androidVersion)
@@ -136,7 +140,8 @@ abstract class AbstractIntegTestFixture extends Specification {
         buildScriptFile() << """
             buildscript {
                 dependencies {
-                    classpath 'com.android.tools.build:gradle:${toolsConfig.get(ANDROID_VERSION, '1.5.0')}'
+                    classpath 'com.android.tools.build:gradle:' +
+                        '${toolsConfig.get(ANDROID_VERSION, DEFAULT_ANDROID_VERSION)}'
                     classpath files($pluginClasspathString)
                 }
 
@@ -219,5 +224,16 @@ abstract class AbstractIntegTestFixture extends Specification {
                 ' ClassA a = new ClassA(); return a.isFoo(arg); } }'
         file(LIBB_DIRNAME + 'src/test/java/libb/ClassBTest.java') <<
                 'package libb; public class ClassBTest { public boolean isFoo(Object arg) { return true; } }'
+    }
+
+    @SuppressWarnings('DuplicateNumberLiteral')
+    String gradleVersionForAndroid(final String androidVersion) {
+        VersionNumber androidVersionNumber = VersionNumber.parse(androidVersion)
+
+        // Version 2.2 and up are the only ones compatible with gradle 3
+        androidVersionNumber < VersionNumber.parse(ANDROID_1_5_0) ? '2.9' :
+            androidVersionNumber.major < 2 ||
+                (androidVersionNumber.major == 2 && androidVersionNumber.minor < 2) ?
+                    '2.14.1' : GradleVersion.current().version
     }
 }

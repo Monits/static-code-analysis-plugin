@@ -34,14 +34,15 @@ import static org.junit.Assert.assertThat
  */
 class AndroidLintIntegTest extends AbstractIntegTestFixture {
 
-    static final List<String> ANDROID_PLUGIN_VERSIONS = (['1.1.3', '1.2.3', '1.3.1', '1.5.0', '2.0.0', '2.1.2'] +
+    static final List<String> ANDROID_PLUGIN_VERSIONS = (['1.1.3', '1.2.3', '1.3.1', '1.5.0', '2.0.0', '2.1.3'] +
         (Jvm.current.java8Compatible ? ['2.2.0-rc2'] : [])).asImmutable()
 
+    // TODO : Get this to run with gradle 3.0 but only with java8 and Android 2.2.0
     @SuppressWarnings('MethodName')
     @Unroll('AndroidLint should run when using gradle #version')
     void 'androidLint is run'() {
         given:
-        writeAndroidBuildFile()
+        writeAndroidBuildFile(DEFAULT_ANDROID_VERSION)
         useSimpleAndroidLintConfig()
         writeAndroidManifest()
         goodCode()
@@ -63,7 +64,7 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
         reportFile().exists()
 
         where:
-        version << ['2.3', '2.4', '2.7', '2.10', GradleVersion.current().version]
+        version << ['2.3', '2.4', '2.7', '2.10', '2.14.1']
     }
 
     @SuppressWarnings('MethodName')
@@ -89,7 +90,7 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
 
         where:
         androidVersion << ANDROID_PLUGIN_VERSIONS
-        gradleVersion = gradleVersionFor(androidVersion)
+        gradleVersion = gradleVersionForAndroid(androidVersion)
     }
 
     @SuppressWarnings('MethodName')
@@ -118,7 +119,7 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
 
         where:
         androidVersion << ANDROID_PLUGIN_VERSIONS
-        gradleVersion = gradleVersionFor(androidVersion)
+        gradleVersion = gradleVersionForAndroid(androidVersion)
     }
 
     @SuppressWarnings('MethodName')
@@ -147,18 +148,19 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
 
         where:
         androidVersion << ANDROID_PLUGIN_VERSIONS
-        gradleVersion = gradleVersionFor(androidVersion)
+        gradleVersion = gradleVersionForAndroid(androidVersion)
     }
 
     @SuppressWarnings('MethodName')
     void 'Android downloads remote config'() {
         given:
-        writeAndroidBuildFile()
+        writeAndroidBuildFile(DEFAULT_ANDROID_VERSION)
         writeAndroidManifest()
         goodCode()
 
         when:
         BuildResult result = gradleRunner()
+            .withGradleVersion(gradleVersionForAndroid(DEFAULT_ANDROID_VERSION))
             .build()
 
         then:
@@ -176,12 +178,13 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
     @SuppressWarnings('MethodName')
     void 'running offline fails download'() {
         given:
-        writeAndroidBuildFile()
+        writeAndroidBuildFile(DEFAULT_ANDROID_VERSION)
         writeAndroidManifest()
         goodCode()
 
         when:
         BuildResult result = gradleRunner()
+            .withGradleVersion(gradleVersionForAndroid(DEFAULT_ANDROID_VERSION))
             .withArguments('check', '--stacktrace', '--offline')
             .buildAndFail()
 
@@ -193,7 +196,7 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
     @SuppressWarnings('MethodName')
     void 'running offline with a cached file passes but warns'() {
         given:
-        writeAndroidBuildFile()
+        writeAndroidBuildFile(DEFAULT_ANDROID_VERSION)
         writeAndroidManifest()
 
         String projectName = testProjectDir.root.name
@@ -203,6 +206,7 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
 
         when:
         BuildResult result = gradleRunner()
+            .withGradleVersion(gradleVersionForAndroid(DEFAULT_ANDROID_VERSION))
             .withArguments('check', '--stacktrace', '--offline')
             .build()
 
@@ -217,7 +221,9 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
         setupProjectWithViolations(false)
 
         when:
-        BuildResult result = gradleRunner().buildAndFail()
+        BuildResult result = gradleRunner()
+            .withGradleVersion(gradleVersionForAndroid(DEFAULT_ANDROID_VERSION))
+            .buildAndFail()
 
         then:
         // Make sure task didn't fail
@@ -233,7 +239,9 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
         setupProjectWithViolations(true)
 
         when:
-        BuildResult result = gradleRunner().build()
+        BuildResult result = gradleRunner()
+            .withGradleVersion(gradleVersionForAndroid(DEFAULT_ANDROID_VERSION))
+            .build()
 
         then:
         // Make sure task didn't fail
@@ -257,11 +265,6 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
     @Override
     String toolName() {
         'androidLint'
-    }
-
-    String gradleVersionFor(final String androidVersion) {
-        VersionNumber.parse(androidVersion) < VersionNumber.parse('1.5.0') ?
-            '2.9' : GradleVersion.current().version
     }
 
     TestFile writeSimpleAndroidLintConfig(final String project = null) {
