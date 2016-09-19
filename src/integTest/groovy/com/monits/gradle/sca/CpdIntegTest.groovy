@@ -47,7 +47,7 @@ class CpdIntegTest extends AbstractPluginIntegTestFixture {
         reportFile().exists()
 
         where:
-        version << ['2.3', '2.4', '2.8', '2.10', GradleVersion.current().version]
+        version << TESTED_GRADLE_VERSIONS
     }
 
     @SuppressWarnings('MethodName')

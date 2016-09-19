@@ -37,12 +37,11 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
     static final List<String> ANDROID_PLUGIN_VERSIONS = (['1.1.3', '1.2.3', '1.3.1', '1.5.0', '2.0.0', '2.1.3'] +
         (Jvm.current.java8Compatible ? ['2.2.0-rc2'] : [])).asImmutable()
 
-    // TODO : Get this to run with gradle 3.0 but only with java8 and Android 2.2.0
     @SuppressWarnings('MethodName')
     @Unroll('AndroidLint should run when using gradle #version')
     void 'androidLint is run'() {
         given:
-        writeAndroidBuildFile(DEFAULT_ANDROID_VERSION)
+        writeAndroidBuildFile(androidVersion)
         useSimpleAndroidLintConfig()
         writeAndroidManifest()
         goodCode()
@@ -64,7 +63,10 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
         reportFile().exists()
 
         where:
-        version << ['2.3', '2.4', '2.7', '2.10', '2.14.1']
+        version << ['2.3', '2.4', '2.7', '2.10', '2.14.1'] +
+            (Jvm.current.java8Compatible ? ['3.0', '3.1'] : [])
+        androidVersion = GradleVersion.version(version) < GradleVersion.version('3.0') ?
+            DEFAULT_ANDROID_VERSION : '2.2.0-rc2'
     }
 
     @SuppressWarnings('MethodName')

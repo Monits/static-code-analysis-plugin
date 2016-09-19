@@ -25,6 +25,9 @@ import spock.lang.Specification
  * Base specification for integration testing of a gradle plugin.
 */
 abstract class AbstractIntegTestFixture extends Specification {
+    // A sample of gradle versions to be considered in general testing
+    static final TESTED_GRADLE_VERSIONS = ['2.3', '2.4', '2.7', '2.8', '2.10', '2.14.1', '3.0', '3.1']
+
     private static final String ANDROID_1_5_0 = '1.5.0'
     static final String DEFAULT_ANDROID_VERSION = ANDROID_1_5_0
     protected static final String ANDROID_VERSION = 'androidVersion'

@@ -57,7 +57,7 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         reportFile().assertContents(containsString('<Plugin id="jp.co.worksap.oss.findbugs" enabled="true"/>'))
 
         where:
-        version << ['2.3', '2.4', '2.7', '2.10', GradleVersion.current().version]
+        version << TESTED_GRADLE_VERSIONS
         findbugsVersion = ToolVersions.findbugsVersion
     }
 
@@ -236,8 +236,7 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         reportFile().assertContents(containsString('<Errors errors="0" missingClasses="0">'))
 
         where:
-        // mockable android jar is available since 1.1.0
-        androidVersion << ['1.1.3', '1.2.3', '1.3.1', '1.5.0', '2.0.0', '2.1.0']
+        androidVersion << AndroidLintIntegTest.ANDROID_PLUGIN_VERSIONS
         gradleVersion = gradleVersionForAndroid(androidVersion)
     }
 
