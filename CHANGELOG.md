@@ -3,6 +3,9 @@
 # v2.3
 * **2.3.0 - Unreleased**
 
+ Bug fixes:
+ * Fixed a performance regression when using Findbugs under Gradle 3.X
+
  Improvements:
  * Checkstyle upgraded to 7.1.1
 
