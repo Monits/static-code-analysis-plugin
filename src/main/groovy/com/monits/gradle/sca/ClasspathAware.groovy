@@ -169,7 +169,7 @@ trait ClasspathAware {
             sourceSetOutputPath = camelToWords(sourceSetName)*.toLowerCase()
                 .findAll { String it -> it != MAIN_SOURCESET }.join(File.separator)
 
-            if (sourceSetName.isEmpty()) {
+            if (sourceSetOutputPath.empty) {
                 sourceSetOutputPath = DEBUG_SOURCESET
             }
         }
