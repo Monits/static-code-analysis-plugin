@@ -76,7 +76,11 @@ class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
                     [ANT_WILDCARD + pathWithoutExtension + '.class', ANT_WILDCARD + pathWithoutExtension + '$*.class']
                 }
 
-            classes = getProjectClassTree(project, sourceSet.name).include(sourceSetClassesPaths)
+            if (sourceSetClassesPaths.empty) {
+                classes = project.files() // empty file collection
+            } else {
+                classes = getProjectClassTree(project, sourceSet.name).include(sourceSetClassesPaths)
+            }
 
             source sourceSet.java.srcDirs
             exclude '**/gen/**'
