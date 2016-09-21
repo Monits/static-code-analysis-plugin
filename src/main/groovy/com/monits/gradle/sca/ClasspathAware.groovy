@@ -40,6 +40,7 @@ trait ClasspathAware {
     private static final String MOCKABLE_ANDROID_JAR_TASK = 'mockableAndroidJar'
     private static final String DEBUG_SOURCESET = 'debug'
     private static final String MAIN_SOURCESET = 'main'
+    private static final String TEST_SOURCESET = 'test'
     private static final String ANDROID_TEST_SOURCESET = 'androidTest'
 
     void setupAndroidClasspathAwareTask(final Task taskToConfigure, final Project project,
@@ -161,9 +162,10 @@ trait ClasspathAware {
     private static String pathToCompiledClasses(final Project project, final String sourceSetName) {
         String sourceSetOutputPath
 
-        // TODO : 'test' is including both test/release and test/debug
         if (sourceSetName == ANDROID_TEST_SOURCESET) {
             sourceSetOutputPath = 'androidTest/debug'
+        } else if (sourceSetName == TEST_SOURCESET) {
+            sourceSetOutputPath = 'test/debug'
         } else {
             // generate output path for classes. 'main' is filtered, since those map directly to debug / release
             sourceSetOutputPath = camelToWords(sourceSetName)*.toLowerCase()
