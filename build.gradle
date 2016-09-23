@@ -22,6 +22,7 @@ version = "2.3.0-SNAPSHOT"
 apply plugin: 'groovy'
 apply from: 'gradle/license.gradle'
 apply from: 'gradle/publish.gradle'
+apply from: 'gradle/perfTest.gradle'
 apply from: 'gradle/integTest.gradle'
 apply from: 'gradle/idea.gradle'
 apply from: 'gradle/staticCodeAnalysis.gradle'

@@ -8,6 +8,10 @@ jdk:
   - oraclejdk7
   - oraclejdk8
 
+env:
+  - TEST_SUITE=codenarc integTest
+  - TEST_SUITE=perfTest
+
 android:
   components:
     - tools
@@ -21,4 +25,4 @@ branches:
     - /^support-.*$/
 
 script:
-    - ./gradlew build
+    - ./gradlew assemble $TEST_SUITE
