@@ -52,7 +52,7 @@ class PerformanceRunner {
             results.add(TimedRunnable.run { runner.build() })
             cleanRunner.build()
             sleep(SLEEP_AFTER_RUN_MS)
-            println "Iteration ${i+1} / ${MEASURE_ITERATIONS} is done."
+            println "Iteration ${i + 1} / ${MEASURE_ITERATIONS} is done."
         }
     }
 
