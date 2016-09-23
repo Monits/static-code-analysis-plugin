@@ -26,6 +26,9 @@ abstract class AbstractPluginPerfTestFixture extends AbstractPerfTestFixture {
     @Shared
     private PerformanceRunner prevVersionBaselineJavaRunner
 
+    @Shared
+    private PerformanceRunner prevVersionBaselineAndroidRunner
+
     @SuppressWarnings('MethodName')
     @Unroll('Java analysis performance with gradle #version')
     void 'analysis for java project'() {
@@ -34,8 +37,8 @@ abstract class AbstractPluginPerfTestFixture extends AbstractPerfTestFixture {
         goodCode()
 
         // Generate baseline
-        PerformanceRunner baselineJavaRunner = new PerformanceRunner(GradleVersion.version(version))
-        baselineJavaRunner.exercise(gradleRunner().withGradleVersion(version))
+        PerformanceRunner baselineRunner = new PerformanceRunner(GradleVersion.version(version))
+        baselineRunner.exercise(gradleRunner().withGradleVersion(version))
 
         // reset build file to use new development version
         writeBuildFile()
@@ -45,7 +48,7 @@ abstract class AbstractPluginPerfTestFixture extends AbstractPerfTestFixture {
         perfRunner.exercise(gradleRunner().withGradleVersion(version))
 
         then:
-        perfRunner.assertVersionHasNotRegressed(baselineJavaRunner)
+        perfRunner.assertVersionHasNotRegressed(baselineRunner)
         // If possible, check we have not regressed against the previous Gradle version either
         if (prevVersionBaselineJavaRunner) {
             perfRunner.assertVersionHasNotRegressed(prevVersionBaselineJavaRunner)
@@ -53,7 +56,7 @@ abstract class AbstractPluginPerfTestFixture extends AbstractPerfTestFixture {
 
         cleanup:
         // Keep baseline for next iteration
-        prevVersionBaselineJavaRunner = baselineJavaRunner
+        prevVersionBaselineJavaRunner = baselineRunner
 
         where:
         version << TESTED_GRADLE_VERSIONS
@@ -78,6 +81,14 @@ abstract class AbstractPluginPerfTestFixture extends AbstractPerfTestFixture {
 
         then:
         perfRunner.assertVersionHasNotRegressed(baselineRunner)
+        // If possible, check we have not regressed against the previous Gradle version either
+        if (prevVersionBaselineAndroidRunner) {
+            perfRunner.assertVersionHasNotRegressed(prevVersionBaselineAndroidRunner)
+        }
+
+        cleanup:
+        // Keep baseline for next iteration
+        prevVersionBaselineAndroidRunner = baselineRunner
 
         where:
         version << TESTED_GRADLE_VERSIONS
