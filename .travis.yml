@@ -9,7 +9,7 @@ jdk:
   - oraclejdk8
 
 env:
-  - TEST_SUITE=codenarc integTest
+  - TEST_SUITE="codenarc integTest"
   - TEST_SUITE=perfTest
 
 android:
