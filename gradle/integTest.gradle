@@ -25,6 +25,7 @@ dependencies {
 task integTest(type: Test) {
     testClassesDir = sourceSets.integTest.output.classesDir
     classpath = sourceSets.integTest.runtimeClasspath
+    maxParallelForks = Math.max(1f, Runtime.runtime.availableProcessors() / 2)
 
     // output test failure causes for easier Travis integration
     testLogging {
