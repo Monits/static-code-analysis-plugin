@@ -32,7 +32,7 @@ abstract class AbstractPluginPerfTestFixture extends AbstractPerfTestFixture {
     @Shared
     private PerformanceRunner prevVersionBaselineAndroidRunner
 
-    @Category(JavaScenario.class)
+    @Category(JavaScenario)
     @SuppressWarnings('MethodName')
     @Unroll('Java analysis performance with gradle #version')
     void 'analysis for java project'() {
@@ -66,7 +66,7 @@ abstract class AbstractPluginPerfTestFixture extends AbstractPerfTestFixture {
         version << TESTED_GRADLE_VERSIONS
     }
 
-    @Category(AndroidScenario.class)
+    @Category(AndroidScenario)
     @SuppressWarnings('MethodName')
     @Unroll('Android analysis performance with gradle #version')
     void 'analysis for android project'() {
