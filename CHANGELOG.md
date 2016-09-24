@@ -7,7 +7,8 @@
  * Fixed a performance regression when using Findbugs under Gradle 3.X
 
  Improvements:
- * Checkstyle upgraded to 7.1.1
+ * Upgraded Checkstyle to 7.1.1
+ * Upgraded fb-contrib to 6.6.3
 
 # v2.2
 * **2.2.1**
