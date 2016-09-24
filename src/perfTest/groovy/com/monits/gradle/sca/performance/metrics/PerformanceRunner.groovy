@@ -66,7 +66,7 @@ class PerformanceRunner {
 
         // We are on par or faster, check for informational purposes
         if (baseline.results.totalTime.average - results.totalTime.average > baseline.maxExecutionTimeRegression) {
-            println "We are actually faster than old plugin uwing ${baseline.version} under ${version} " +
+            println "We are actually faster than old plugin using ${baseline.version} under ${version} " +
                 "by ${baseline.results.totalTime.average / results.totalTime.average * PERCENT - PERCENT}%"
         } else {
             println "We are on par with old plugin using ${baseline.version} under ${version}"
