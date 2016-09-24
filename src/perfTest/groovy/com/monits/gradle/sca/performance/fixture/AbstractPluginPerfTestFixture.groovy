@@ -13,8 +13,11 @@
  */
 package com.monits.gradle.sca.performance.fixture
 
+import com.monits.gradle.sca.performance.categories.AndroidScenario
+import com.monits.gradle.sca.performance.categories.JavaScenario
 import com.monits.gradle.sca.performance.metrics.PerformanceRunner
 import org.gradle.util.GradleVersion
+import org.junit.experimental.categories.Category
 import spock.lang.Shared
 import spock.lang.Unroll
 
@@ -29,6 +32,7 @@ abstract class AbstractPluginPerfTestFixture extends AbstractPerfTestFixture {
     @Shared
     private PerformanceRunner prevVersionBaselineAndroidRunner
 
+    @Category(JavaScenario.class)
     @SuppressWarnings('MethodName')
     @Unroll('Java analysis performance with gradle #version')
     void 'analysis for java project'() {
@@ -62,6 +66,7 @@ abstract class AbstractPluginPerfTestFixture extends AbstractPerfTestFixture {
         version << TESTED_GRADLE_VERSIONS
     }
 
+    @Category(AndroidScenario.class)
     @SuppressWarnings('MethodName')
     @Unroll('Android analysis performance with gradle #version')
     void 'analysis for android project'() {

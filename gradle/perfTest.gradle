@@ -31,6 +31,12 @@ task perfTest(type: Test) {
         events "PASSED", "FAILED", "STANDARD_OUT"
         exceptionFormat "full"
     }
+
+    if (project.hasProperty('perfTestCategory')) {
+        useJUnit {
+            includeCategories project.perfTestCategory
+        }
+    }
 }
 
 check.dependsOn perfTest

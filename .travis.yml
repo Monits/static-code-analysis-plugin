@@ -10,7 +10,8 @@ jdk:
 
 env:
   - TEST_SUITE="codenarc integTest"
-  - TEST_SUITE=perfTest
+  - TEST_SUITE="perfTest -PperfTestCategory='com.monits.gradle.sca.performance.categories.AndroidScenario'"
+  - TEST_SUITE="perfTest -PperfTestCategory='com.monits.gradle.sca.performance.categories.JavaScenario'"
 
 android:
   components:
