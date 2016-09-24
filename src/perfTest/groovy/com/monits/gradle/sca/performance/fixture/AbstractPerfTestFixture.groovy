@@ -21,13 +21,18 @@ import org.gradle.util.GradleVersion
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.util.environment.Jvm
+
 /**
  * Base specification for integration testing of a gradle plugin.
 */
 @CompileStatic
 abstract class AbstractPerfTestFixture extends Specification {
     // A sample of gradle versions to be considered in general testing - don't test anything below 2.8, it spams stdout
-    static final List<String> TESTED_GRADLE_VERSIONS = ['2.8', '2.14.1', '3.1']
+    static final List<String> TESTED_GRADLE_VERSIONS = ['2.8', '2.14.1', '3.1'].asImmutable()
+    @SuppressWarnings('DuplicateStringLiteral')
+    static final List<String> TESTED_GRADLE_VERSIONS_FOR_ANDROID = (['2.8', '2.14.1'] +
+        (Jvm.current.java8Compatible ? ['3.1.0'] : [])).asImmutable()
     static final String BASELINE_PLUGIN_VERSION = '"com.monits:static-code-analysis-plugin:2.2.1"'
 
     static final int NUMBER_OF_CLASSES_TO_ANALYZE = 100

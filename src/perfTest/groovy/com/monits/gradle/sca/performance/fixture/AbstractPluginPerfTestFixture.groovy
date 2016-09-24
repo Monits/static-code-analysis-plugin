@@ -96,6 +96,6 @@ abstract class AbstractPluginPerfTestFixture extends AbstractPerfTestFixture {
         prevVersionBaselineAndroidRunner = baselineRunner
 
         where:
-        version << TESTED_GRADLE_VERSIONS
+        version << TESTED_GRADLE_VERSIONS_FOR_ANDROID
     }
 }
