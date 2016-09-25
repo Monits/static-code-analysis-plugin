@@ -1,5 +1,16 @@
 ## History
 
+# v2.3
+* **2.3.0**
+
+ Bug fixes:
+ * Fixed a performance regression when using Findbugs under Gradle 3.X
+
+ Improvements:
+ * Upgraded Checkstyle to 7.1.1
+ * Upgraded fb-contrib to 6.6.3
+ * CPD task makes better use of Gradle caching mechanisms, providing greatly increased performance
+
 # v2.2
 * **2.2.1**
 

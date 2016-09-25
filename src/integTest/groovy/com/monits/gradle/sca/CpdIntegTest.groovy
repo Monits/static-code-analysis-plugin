@@ -20,6 +20,7 @@ import spock.lang.Unroll
 
 import static org.gradle.testkit.runner.TaskOutcome.FAILED
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
+import static org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
 
 /**
  * Integration test of CPD tasks.
@@ -47,7 +48,7 @@ class CpdIntegTest extends AbstractPluginIntegTestFixture {
         reportFile().exists()
 
         where:
-        version << ['2.3', '2.4', '2.8', '2.10', GradleVersion.current().version]
+        version << TESTED_GRADLE_VERSIONS
     }
 
     @SuppressWarnings('MethodName')
@@ -59,7 +60,7 @@ class CpdIntegTest extends AbstractPluginIntegTestFixture {
         BuildResult result = gradleRunner().build()
 
         then:
-        result.task(taskName()).outcome == SUCCESS
+        result.task(taskName()).outcome == UP_TO_DATE
 
         // The report should not exist
         !reportFile().exists()

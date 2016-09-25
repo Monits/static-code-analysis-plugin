@@ -17,11 +17,12 @@ repositories {
 
 group = 'com.monits'
 
-version = "2.2.1-HF1"
+version = "2.3.0-SNAPSHOT"
 
 apply plugin: 'groovy'
 apply from: 'gradle/license.gradle'
 apply from: 'gradle/publish.gradle'
+apply from: 'gradle/perfTest.gradle'
 apply from: 'gradle/integTest.gradle'
 apply from: 'gradle/idea.gradle'
 apply from: 'gradle/staticCodeAnalysis.gradle'
@@ -36,5 +37,6 @@ project.sourceCompatibility = 1.7
 project.targetCompatibility = 1.7
 
 wrapper {
-    gradleVersion = '2.14.1'
+    gradleVersion = '3.1'
+    distributionType = Wrapper.DistributionType.ALL
 }

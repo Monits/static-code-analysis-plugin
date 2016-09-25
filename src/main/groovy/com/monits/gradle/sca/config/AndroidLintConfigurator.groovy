@@ -27,13 +27,13 @@ import org.gradle.util.VersionNumber
  * A configurator for Android Lint tasks.
 */
 @CompileStatic
-class AndroidLintConfigurator extends AbstractRemoteConfigLocator implements AnalysisConfigurator {
+class AndroidLintConfigurator implements AnalysisConfigurator {
     private static final String ANDROID_GRADLE_VERSION_PROPERTY_NAME = 'androidGradlePluginVersion'
     private static final VersionNumber ANDROID_GRADLE_VERSION_2_0_0 = VersionNumber.parse('2.0.0')
     private static final String USE_JACK_PROPERTY_NAME = 'useJack'
     private static final String JACK_OPTIONS_PROPERTY_NAME = 'jackOptions'
 
-    final String pluginName = 'android'
+    private final RemoteConfigLocator configLocator = new RemoteConfigLocator('android')
 
     @Override
     void applyConfig(final Project project, final StaticCodeAnalysisExtension extension) {
@@ -80,7 +80,7 @@ class AndroidLintConfigurator extends AbstractRemoteConfigLocator implements Ana
                     'https://github.com/monits/static-code-analysis-plugin/issues', e)
 
             // disable up-to-date caching
-            t.outputs.upToDateWhen {
+            lintTask.outputs.upToDateWhen {
                 false
             }
         }
@@ -90,12 +90,12 @@ class AndroidLintConfigurator extends AbstractRemoteConfigLocator implements Ana
     @CompileStatic(TypeCheckingMode.SKIP)
     private void configureLintRules(final Project project, final StaticCodeAnalysisExtension config,
                                     final Task lintTask) {
-        boolean remoteLocation = isRemoteLocation(config.getAndroidLintConfig())
+        boolean remoteLocation = RemoteConfigLocator.isRemoteLocation(config.getAndroidLintConfig())
         File configSource
 
         if (remoteLocation) {
             String downloadTaskName = 'downloadAndroidLintConfig'
-            configSource = makeDownloadFileTask(project, config.getAndroidLintConfig(),
+            configSource = configLocator.makeDownloadFileTask(project, config.getAndroidLintConfig(),
                 String.format('android-lint-%s.xml', project.name), downloadTaskName)
 
             lintTask.dependsOn project.tasks.findByName(downloadTaskName)
@@ -190,7 +190,12 @@ class AndroidLintConfigurator extends AbstractRemoteConfigLocator implements Ana
         project.android.applicationVariants
     }
 
+    /*
+     * The signature of TaskInputs.file(Object) changed, we need to skip @CompileStatic for backwards compatibility
+     * with Gradle 2.x. Remove it once we drop support for 2.x.
+     */
     @SuppressWarnings('ParameterCount')
+    @CompileStatic(TypeCheckingMode.SKIP)
     private static void addReportAsOutput(final Task task, final Project project, final boolean isEnabled,
                                           final File output, final String variantName, final String extension) {
         if (isEnabled) {

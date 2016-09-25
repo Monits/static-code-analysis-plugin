@@ -67,7 +67,7 @@ class CheckstyleIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         reportFile().parentFile.list { dir, name -> name.endsWith('.html') }.length == 0
 
         where:
-        version << ['2.3', '2.4', '2.7', '2.10', GradleVersion.current().version]
+        version << TESTED_GRADLE_VERSIONS
         checkstyleVersion = GradleVersion.version(version) < ToolVersions.GRADLE_VERSION_CHECKSTYLE ?
                 ToolVersions.BACKWARDS_CHECKSTYLE_VERSION : (JavaVersion.current() < JavaVersion.VERSION_1_8 ?
                 ToolVersions.LATEST_CHECKSTYLE_VERSION_JAVA_7 : ToolVersions.LATEST_CHECKSTYLE_VERSION)

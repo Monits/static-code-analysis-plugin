@@ -58,7 +58,7 @@ class PmdIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         reportFile('test').assertContents(containsString("<pmd version=\"$pmdVersion\""))
 
         where:
-        version << ['2.3', '2.4', '2.8', '2.10', GradleVersion.current().version]
+        version << TESTED_GRADLE_VERSIONS
         pmdVersion = GradleVersion.version(version) < ToolVersions.GRADLE_VERSION_PMD ?
                 ToolVersions.BACKWARDS_PMD_TOOL_VERSION : ToolVersions.LATEST_PMD_TOOL_VERSION
     }
@@ -139,7 +139,7 @@ class PmdIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
 
         when:
         BuildResult result = gradleRunner()
-            .withGradleVersion('2.8')
+            .withGradleVersion('2.8') // property is available since 2.8
             .build()
 
         then:

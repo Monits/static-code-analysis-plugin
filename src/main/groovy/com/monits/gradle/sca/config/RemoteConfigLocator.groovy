@@ -22,10 +22,13 @@ import org.gradle.api.tasks.Copy
  * Abstract class that can efficiently creates download tasks for remote config.
  */
 @CompileStatic
-abstract class AbstractRemoteConfigLocator {
+class RemoteConfigLocator {
     private static final Map<String, String> DOWNLOAD_TASKS = [:]
+    private final String pluginName
 
-    abstract String getPluginName()
+    RemoteConfigLocator(final String pluginName) {
+        this.pluginName = pluginName
+    }
 
     /**
      * Creates a task to download a remote config to a local directory. The task may just make a copy
@@ -37,7 +40,7 @@ abstract class AbstractRemoteConfigLocator {
      * @param taskName The intended name of the download task
      * @return The {@see File} where the local copy of the file will be
      */
-    protected File makeDownloadFileTask(final Project project, final String configLocation,
+    File makeDownloadFileTask(final Project project, final String configLocation,
                                        final String localFileName, final String taskName) {
         File destFile = getDestinationFile(project, localFileName)
 
@@ -77,11 +80,11 @@ abstract class AbstractRemoteConfigLocator {
         project.rootProject.tasks.findByPath(DOWNLOAD_TASKS[configLocation]) as DownloadTask
     }
 
-    protected static boolean isRemoteLocation(final String path) {
+    static boolean isRemoteLocation(final String path) {
         path.startsWith('http://') || path.startsWith('https://')
     }
 
-    protected String getDestinationDirectory(final Project project) {
+    private String getDestinationDirectory(final Project project) {
         "${project.rootDir}/config/${pluginName}/"
     }
 

@@ -1,0 +1,62 @@
+// performance testing
+sourceSets {
+    perfTest {
+        groovy.srcDir file('src/perfTest/groovy')
+        resources.srcDir file('src/perfTest/resources')
+
+        compileClasspath += main.output
+        runtimeClasspath += main.output
+    }
+}
+
+configurations {
+    perfTestCompile.extendsFrom testCompile
+    perfTestRuntime.extendsFrom testRuntime
+}
+
+dependencies {
+    perfTestCompile gradleTestKit()
+    perfTestCompile('org.spockframework:spock-core:1.0-groovy-2.4') {
+        exclude module: 'groovy-all'
+    }
+    perfTestCompile 'joda-time:joda-time:2.9.4'
+}
+
+task perfTest(type: Test) {
+    testClassesDir = sourceSets.perfTest.output.classesDir
+    classpath = sourceSets.perfTest.runtimeClasspath
+
+    // output test failure causes for easier Travis integration
+    testLogging {
+        events "PASSED", "FAILED", "STANDARD_OUT"
+        exceptionFormat "full"
+    }
+
+    if (project.hasProperty('perfTestCategory')) {
+        useJUnit {
+            includeCategories project.perfTestCategory
+        }
+    }
+}
+
+check.dependsOn perfTest
+
+apply from: 'gradle/classpathmanifest.gradle'
+
+// Add the classpath file to the test runtime classpath
+dependencies {
+    testRuntime files(createClasspathManifest)
+}
+
+plugins.withType(org.gradle.plugins.ide.idea.IdeaPlugin) { // lazy as plugin not applied yet
+    idea {
+        module {
+            testSourceDirs += sourceSets.perfTest.groovy.srcDirs
+            testSourceDirs += sourceSets.perfTest.resources.srcDirs
+
+            scopes.TEST.plus += [configurations.perfTestCompile, configurations.perfTestRuntime]
+            scopes.TEST.minus += [configurations.compileOnly]
+            scopes.PROVIDED.plus += [configurations.compileOnly]
+        }
+    }
+}

@@ -25,6 +25,7 @@ dependencies {
 task integTest(type: Test) {
     testClassesDir = sourceSets.integTest.output.classesDir
     classpath = sourceSets.integTest.runtimeClasspath
+    maxParallelForks = Math.max(1f, Runtime.runtime.availableProcessors() / 2)
 
     // output test failure causes for easier Travis integration
     testLogging {
@@ -35,18 +36,7 @@ task integTest(type: Test) {
 
 check.dependsOn integTest
 
-// Write the plugin's classpath to a file to share with the tests
-task createClasspathManifest {
-    def outputDir = file("$buildDir/$name")
-
-    inputs.files sourceSets.main.runtimeClasspath
-    outputs.dir outputDir
-
-    doLast {
-        outputDir.mkdirs()
-        file("$outputDir/plugin-classpath.txt").text = sourceSets.main.runtimeClasspath.join("\n")
-    }
-}
+apply from: 'gradle/classpathmanifest.gradle'
 
 // Add the classpath file to the test runtime classpath
 dependencies {

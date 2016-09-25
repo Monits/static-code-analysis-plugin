@@ -19,10 +19,14 @@ import groovy.transform.TypeCheckingMode
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.FileCollection
+import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.ParallelizableTask
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.VerificationTask
 
@@ -30,6 +34,7 @@ import org.gradle.api.tasks.VerificationTask
  * CPD task.
 */
 @CompileStatic
+@CacheableTask
 @ParallelizableTask
 class CPDTask extends DefaultTask implements VerificationTask {
 
@@ -46,6 +51,8 @@ class CPDTask extends DefaultTask implements VerificationTask {
     @Input
     boolean ignoreLiterals
 
+    @SkipWhenEmpty
+    @PathSensitive(PathSensitivity.RELATIVE)
     @InputFiles
     FileCollection inputFiles
 
@@ -55,8 +62,6 @@ class CPDTask extends DefaultTask implements VerificationTask {
     @CompileStatic(TypeCheckingMode.SKIP)
     @TaskAction
     void run() {
-        inputFiles.stopExecutionIfEmpty()
-
         outputFile.parentFile.mkdirs()
 
         ant.taskdef(name:CPD, classname:'net.sourceforge.pmd.cpd.CPDTask', classpath:project.configurations.cpd.asPath)

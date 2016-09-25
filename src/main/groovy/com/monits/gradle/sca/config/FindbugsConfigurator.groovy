@@ -37,12 +37,12 @@ import org.gradle.util.GUtil
  * A configurator for Findbugs tasks
 */
 @CompileStatic
-class FindbugsConfigurator extends AbstractRemoteConfigLocator implements AnalysisConfigurator, ClasspathAware {
+class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
     private static final String FINDBUGS = 'findbugs'
     private static final String FINBUGS_PLUGINS_CONFIGURATION = 'findbugsPlugins'
     private static final String ANT_WILDCARD = '**'
 
-    final String pluginName = FINDBUGS
+    private final RemoteConfigLocator configLocator = new RemoteConfigLocator(FINDBUGS)
 
     @Override
     void applyConfig(final Project project, final StaticCodeAnalysisExtension extension) {
@@ -76,8 +76,11 @@ class FindbugsConfigurator extends AbstractRemoteConfigLocator implements Analys
                     [ANT_WILDCARD + pathWithoutExtension + '.class', ANT_WILDCARD + pathWithoutExtension + '$*.class']
                 }
 
-            // TODO : This still includes all flavors of the classes
-            classes = getProjectClassTree(project).include(sourceSetClassesPaths)
+            if (sourceSetClassesPaths.empty) {
+                classes = project.files() // empty file collection
+            } else {
+                classes = getProjectClassTree(project, sourceSet.name).include(sourceSetClassesPaths)
+            }
 
             source sourceSet.java.srcDirs
             exclude '**/gen/**'
@@ -125,10 +128,10 @@ class FindbugsConfigurator extends AbstractRemoteConfigLocator implements Analys
 
             // findbugs exclude is optional
             if (config.getFindbugsExclude()) {
-                remoteLocation = isRemoteLocation(config.getFindbugsExclude())
+                remoteLocation = RemoteConfigLocator.isRemoteLocation(config.getFindbugsExclude())
                 downloadTaskName = generateTaskName('downloadFindbugsExcludeFilter', sourceSetName)
                 if (remoteLocation) {
-                    filterSource = makeDownloadFileTask(project, config.getFindbugsExclude(),
+                    filterSource = configLocator.makeDownloadFileTask(project, config.getFindbugsExclude(),
                             String.format('excludeFilter-%s.xml', sourceSetName), downloadTaskName)
                 } else {
                     filterSource = new File(config.getFindbugsExclude())

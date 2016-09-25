@@ -11,22 +11,31 @@
  * ANY KIND, either express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-package com.monits.gradle.sca.fixture
+package com.monits.gradle.sca.performance.fixture
 
-import com.monits.gradle.sca.io.TestFile
+import com.monits.gradle.sca.performance.io.TestFile
+import groovy.transform.CompileStatic
+import groovy.transform.TypeCheckingMode
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.util.GradleVersion
-import org.gradle.util.VersionNumber
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.util.environment.Jvm
 
 /**
  * Base specification for integration testing of a gradle plugin.
 */
-abstract class AbstractIntegTestFixture extends Specification {
-    // A sample of gradle versions to be considered in general testing
-    static final TESTED_GRADLE_VERSIONS = ['2.3', '2.4', '2.7', '2.8', '2.10', '2.14.1', '3.0', '3.1']
+@CompileStatic
+abstract class AbstractPerfTestFixture extends Specification {
+    // A sample of gradle versions to be considered in general testing - don't test anything below 2.8, it spams stdout
+    static final List<String> TESTED_GRADLE_VERSIONS = ['2.8', '2.14.1', '3.1'].asImmutable()
+    @SuppressWarnings(['DuplicateStringLiteral', 'UnnecessaryCast'])
+    static final List<String> TESTED_GRADLE_VERSIONS_FOR_ANDROID = (['2.8', '2.14.1'] +
+        (Jvm.current.java8Compatible ? ['3.1'] : [] as List<String>)).takeRight(2).asImmutable()
+    static final String BASELINE_PLUGIN_VERSION = '"com.monits:static-code-analysis-plugin:2.2.1"'
+
+    static final int NUMBER_OF_CLASSES_TO_ANALYZE = 100
 
     private static final String ANDROID_1_5_0 = '1.5.0'
     static final String DEFAULT_ANDROID_VERSION = ANDROID_1_5_0
@@ -43,6 +52,7 @@ abstract class AbstractIntegTestFixture extends Specification {
 
     String pluginClasspathString
 
+    @CompileStatic(TypeCheckingMode.SKIP)
     @SuppressWarnings('UnnecessaryCollectCall')
     void setup() {
         // We do it this way to support all versions of gradle in our tests, since we care about backwards comaptibility
@@ -67,12 +77,12 @@ abstract class AbstractIntegTestFixture extends Specification {
     }
 
     TestFile file(path) {
-        File f = new File(testProjectDir.root, path)
+        File f = new File(testProjectDir.root.absolutePath + File.separator + path)
         f.parentFile.mkdirs()
         new TestFile(f)
     }
 
-    void goodCode(int numberOfClasses = 1) {
+    void goodCode(final int numberOfClasses = NUMBER_OF_CLASSES_TO_ANALYZE) {
         1.upto(numberOfClasses) {
             file("src/main/java/com/monits/Class${it}.java") <<
                 "package com.monits; public class Class${it} { public boolean isFoo(Object arg) { return true; } }"
@@ -91,22 +101,26 @@ abstract class AbstractIntegTestFixture extends Specification {
         }
     }
 
-    TestFile writeBuildFile() {
-        Map<String, Boolean> configMap = [:]
+    TestFile writeBuildFile(final String pluginVersion = "files($pluginClasspathString)") {
+        Map<String, Object> configMap = [:]
         configMap.put(toolName(), Boolean.TRUE)
-        writeBuildFile(configMap)
+        writeBuildFile(configMap, pluginVersion)
     }
 
-    TestFile writeBuildFile(toolsConfig) {
+    TestFile writeBuildFile(final Map<String, Object> toolsConfig, final String pluginVersion) {
         buildScriptFile() << """
             buildscript {
+                repositories {
+                    jcenter()
+                }
+
                 dependencies {
-                    classpath files($pluginClasspathString)
+                    classpath $pluginVersion
                 }
             }
 
             repositories {
-                mavenCentral()
+                jcenter()
             }
 
             apply plugin: 'java'
@@ -119,7 +133,7 @@ abstract class AbstractIntegTestFixture extends Specification {
         """ + staticCodeAnalysisConfig(toolsConfig) as TestFile
     }
 
-    String staticCodeAnalysisConfig(toolsConfig) {
+    String staticCodeAnalysisConfig(final Map<String, Object> toolsConfig) {
         """
             // disable all other checks
             staticCodeAnalysis {
@@ -132,20 +146,21 @@ abstract class AbstractIntegTestFixture extends Specification {
         """
     }
 
-    TestFile writeAndroidBuildFile(final String androidVersion = DEFAULT_ANDROID_VERSION) {
+    TestFile writeAndroidBuildFile(final String androidVersion,
+                                   final String pluginVersion = "files($pluginClasspathString)") {
         Map<String, Object> configMap = [:]
         configMap.put(toolName(), Boolean.TRUE)
         configMap.put(ANDROID_VERSION, androidVersion)
-        writeAndroidBuildFile(configMap)
+        writeAndroidBuildFile(configMap, pluginVersion)
     }
 
-    TestFile writeAndroidBuildFile(toolsConfig) {
+    TestFile writeAndroidBuildFile(final Map<String, Object> toolsConfig, final String pluginVersion) {
         buildScriptFile() << """
             buildscript {
                 dependencies {
                     classpath 'com.android.tools.build:gradle:' +
                         '${toolsConfig.get(ANDROID_VERSION, DEFAULT_ANDROID_VERSION)}'
-                    classpath files($pluginClasspathString)
+                    classpath $pluginVersion
                 }
 
                 repositories {
@@ -154,7 +169,7 @@ abstract class AbstractIntegTestFixture extends Specification {
             }
 
             repositories {
-                mavenCentral()
+                jcenter()
             }
 
             apply plugin: 'com.android.library'
@@ -173,13 +188,13 @@ abstract class AbstractIntegTestFixture extends Specification {
         ''' as TestFile
     }
 
-    TestFile writeAndroidManifest() {
-        file(ANDROID_MANIFEST_PATH) << '''
+    TestFile writeAndroidManifest(final String packageName) {
+        file(ANDROID_MANIFEST_PATH) << """
             <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-                package="com.monits.staticCodeAnalysis"
+                package="com.monits.staticCodeAnalysis.${packageName}"
                 android:versionCode="1">
             </manifest>
-        ''' as TestFile
+        """ as TestFile
     }
 
     @SuppressWarnings('FactoryMethodName')
@@ -187,25 +202,22 @@ abstract class AbstractIntegTestFixture extends Specification {
         file(BUILD_GRADLE_FILENAME)
     }
 
-    TestFile reportFile(String sourceSet = '') {
-        file(reportFileName(sourceSet))
-    }
-
-    abstract String reportFileName(String sourceSet)
-
     abstract String taskName()
 
     abstract String toolName()
 
-    private void setupAndroidSubProject(final String dir) {
-        writeAndroidBuildFile().renameTo(file(dir + BUILD_GRADLE_FILENAME))
-        writeAndroidManifest().renameTo(file(dir + ANDROID_MANIFEST_PATH))
+    private void setupAndroidSubProject(final String packageName, final String dir, final String androidVersion,
+                                        final String pluginVersion = "files($pluginClasspathString)") {
+        writeAndroidBuildFile(androidVersion, pluginVersion).renameTo(file(dir + BUILD_GRADLE_FILENAME))
+        writeAndroidManifest(packageName).renameTo(file(dir + ANDROID_MANIFEST_PATH))
         file('src').deleteDir()
     }
 
-    void setupMultimoduleAndroidProject() {
-        setupAndroidSubProject(LIBA_DIRNAME)
-        setupAndroidSubProject(LIBB_DIRNAME)
+    void setupMultimoduleAndroidProject(final String androidVersion,
+                                        final String pluginVersion = "files($pluginClasspathString)",
+                                        final int numberOfClasses = NUMBER_OF_CLASSES_TO_ANALYZE) {
+        setupAndroidSubProject('liba', LIBA_DIRNAME, androidVersion, pluginVersion)
+        setupAndroidSubProject('libb', LIBB_DIRNAME, androidVersion, pluginVersion)
 
         file(LIBB_DIRNAME + BUILD_GRADLE_FILENAME) << """
             dependencies {
@@ -218,25 +230,22 @@ abstract class AbstractIntegTestFixture extends Specification {
         """
         file(BUILD_GRADLE_FILENAME).createNewFile() // empty root build.gradle
 
-        file(LIBA_DIRNAME + 'src/main/java/liba/ClassA.java') <<
-                'package liba; public class ClassA { public boolean isFoo(Object arg) { return true; } }'
-        file(LIBA_DIRNAME + 'src/test/java/liba/ClassATest.java') <<
-                'package liba; public class ClassATest { public boolean isFoo(Object arg) { return true; } }'
-        file(LIBB_DIRNAME + 'src/main/java/libb/ClassB.java') <<
-                'package libb; import liba.ClassA; public class ClassB { public boolean isFoo(Object arg) {' +
-                ' ClassA a = new ClassA(); return a.isFoo(arg); } }'
-        file(LIBB_DIRNAME + 'src/test/java/libb/ClassBTest.java') <<
-                'package libb; public class ClassBTest { public boolean isFoo(Object arg) { return true; } }'
+        1.upto(numberOfClasses) {
+            file("${LIBA_DIRNAME}src/main/java/liba/ClassA${it}.java").text =
+                "package liba; public class ClassA${it} { public boolean isFoo(Object arg) { return true; } }"
+            file("${LIBA_DIRNAME}src/test/java/liba/ClassA${it}Test.java").text =
+                "package liba; public class ClassA${it}Test { public boolean isFoo(Object arg) { return true; } }"
+            file("${LIBB_DIRNAME}src/main/java/libb/ClassB${it}.java").text =
+                "package libb; import liba.ClassA${it}; public class ClassB${it} { " +
+                "public boolean isFoo(Object arg) { ClassA${it} a = new ClassA${it}(); return a.isFoo(arg); } }"
+            file("${LIBB_DIRNAME}src/test/java/libb/ClassB${it}Test.java").text =
+                "package libb; public class ClassB${it}Test { public boolean isFoo(Object arg) { return true; } }"
+        }
     }
 
     @SuppressWarnings('DuplicateNumberLiteral')
-    String gradleVersionForAndroid(final String androidVersion) {
-        VersionNumber androidVersionNumber = VersionNumber.parse(androidVersion)
-
-        // Version 2.2 and up are the only ones compatible with gradle 3
-        androidVersionNumber < VersionNumber.parse(ANDROID_1_5_0) ? '2.9' :
-            androidVersionNumber.major < 2 ||
-                (androidVersionNumber.major == 2 && androidVersionNumber.minor < 2) ?
-                    '2.14.1' : GradleVersion.current().version
+    String androidVersionForGradle(final String gradleVersion) {
+        GradleVersion.version(gradleVersion) < GradleVersion.version('3.0') ?
+            DEFAULT_ANDROID_VERSION : '2.2.0'
     }
 }

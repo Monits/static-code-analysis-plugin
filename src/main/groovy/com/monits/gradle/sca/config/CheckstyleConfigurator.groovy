@@ -34,10 +34,10 @@ import org.gradle.util.GUtil
  * A configurator for Checkstyle tasks.
  */
 @CompileStatic
-class CheckstyleConfigurator extends AbstractRemoteConfigLocator implements AnalysisConfigurator {
+class CheckstyleConfigurator implements AnalysisConfigurator {
     private static final String CHECKSTYLE = 'checkstyle'
 
-    final String pluginName = CHECKSTYLE
+    private final RemoteConfigLocator configLocator = new RemoteConfigLocator(CHECKSTYLE)
 
     @Override
     void applyConfig(Project project, StaticCodeAnalysisExtension extension) {
@@ -88,11 +88,11 @@ class CheckstyleConfigurator extends AbstractRemoteConfigLocator implements Anal
             String sourceSetName = namer.determineName(sourceSet)
             RulesConfig config = extension.sourceSetConfig.maybeCreate(sourceSetName)
 
-            boolean remoteLocation = isRemoteLocation(config.getCheckstyleRules())
+            boolean remoteLocation = RemoteConfigLocator.isRemoteLocation(config.getCheckstyleRules())
             File configSource
             String downloadTaskName = generateTaskName('downloadCheckstyleXml', sourceSetName)
             if (remoteLocation) {
-                configSource = makeDownloadFileTask(project, config.getCheckstyleRules(),
+                configSource = configLocator.makeDownloadFileTask(project, config.getCheckstyleRules(),
                         String.format('checkstyle-%s.xml', sourceSetName), downloadTaskName)
             } else {
                 configSource = new File(config.getCheckstyleRules())

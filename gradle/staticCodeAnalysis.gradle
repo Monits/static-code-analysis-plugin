@@ -9,5 +9,5 @@ codenarc {
 
 // Crete a wrapper task for all codenarc analysis
 project.task('codenarc') {
-    dependsOn codenarcMain, codenarcIntegTest
+    dependsOn codenarcMain, codenarcIntegTest, codenarcPerfTest
 }

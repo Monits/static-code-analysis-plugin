@@ -37,6 +37,7 @@ abstract class AbstractPerSourceSetPluginIntegTestFixture extends AbstractPlugin
 
         when:
         BuildResult result = gradleRunner()
+                .withGradleVersion(gradleVersionForAndroid(DEFAULT_ANDROID_VERSION))
                 .withArguments(toolName()) // use the meta-task
                 .build()
 
