@@ -215,7 +215,7 @@ abstract class AbstractPerfTestFixture extends Specification {
 
     void setupMultimoduleAndroidProject(final String androidVersion,
                                         final String pluginVersion = "files($pluginClasspathString)",
-                                        final int numberOfClasses = NUMBER_OF_CLASSES_TO_ANALYZE) {
+                                        final int numberOfClasses = NUMBER_OF_CLASSES_TO_ANALYZE / 2) {
         setupAndroidSubProject('liba', LIBA_DIRNAME, androidVersion, pluginVersion)
         setupAndroidSubProject('libb', LIBB_DIRNAME, androidVersion, pluginVersion)
 
