@@ -10,14 +10,13 @@ jdk:
 
 env:
   - TEST_SUITE="codenarc integTest"
-  - TEST_SUITE="perfTest --tests *.PmdPerfTest.* -PperfTestCategory=com.monits.gradle.sca.performance.categories.AndroidScenario"
+  # analyze each tool independently
+  - TEST_SUITE="perfTest --tests *.PmdPerfTest.*"
+  - TEST_SUITE="perfTest --tests *.CheckstylePerfTest.*"
+  - TEST_SUITE="perfTest --tests *.CpdPerfTest.*"
+  # split findbugs tests as those are slower and timeout
   - TEST_SUITE="perfTest --tests *.FindbugsPerfTest.* -PperfTestCategory=com.monits.gradle.sca.performance.categories.AndroidScenario"
-  - TEST_SUITE="perfTest --tests *.CheckstylePerfTest.* -PperfTestCategory=com.monits.gradle.sca.performance.categories.AndroidScenario"
-  - TEST_SUITE="perfTest --tests *.CpdPerfTest.* -PperfTestCategory=com.monits.gradle.sca.performance.categories.AndroidScenario"
-  - TEST_SUITE="perfTest --tests *.PmdPerfTest.* -PperfTestCategory=com.monits.gradle.sca.performance.categories.JavaScenario"
   - TEST_SUITE="perfTest --tests *.FindbugsPerfTest.* -PperfTestCategory=com.monits.gradle.sca.performance.categories.JavaScenario"
-  - TEST_SUITE="perfTest --tests *.CheckstylePerfTest.* -PperfTestCategory=com.monits.gradle.sca.performance.categories.JavaScenario"
-  - TEST_SUITE="perfTest --tests *.CpdPerfTest.* -PperfTestCategory=com.monits.gradle.sca.performance.categories.JavaScenario"
 
 android:
   components:
