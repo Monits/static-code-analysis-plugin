@@ -28,7 +28,7 @@ We are on [the Grade Plugin Portal](https://plugins.gradle.org/plugin/com.monits
 
 ```
 plugins {
-  id "com.monits.staticCodeAnalysis" version "2.2.0"
+  id 'com.monits.staticCodeAnalysis' version '2.3.0'
 }
 ```
 
@@ -38,16 +38,21 @@ or, you could also do
 buildscript {
   repositories {
     maven {
-      url "https://plugins.gradle.org/m2/"
+      url 'https://plugins.gradle.org/m2/'
     }
   }
   dependencies {
-    classpath "com.monits:static-code-analysis-plugin:2.2.0"
+    classpath 'com.monits:static-code-analysis-plugin:2.3.0'
   }
 }
 
-apply plugin: "com.monits.staticCodeAnalysis"
+apply plugin: 'com.monits.staticCodeAnalysis'
 ```
+
+The plugin is compatible with Gradle 2.3+ and Gradle 3.0+. We are commited to supporting the last 2 major gradle versions.
+
+It support all versions of the Android plugin from 1.1.0 onwards, up to 2.2.0.
+
 
 ##DSL
 Configuring Static Code Analysis is very simple and intuitive thanks to its DSL. You can choose
