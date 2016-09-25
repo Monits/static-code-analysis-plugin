@@ -32,7 +32,7 @@ abstract class AbstractPerfTestFixture extends Specification {
     static final List<String> TESTED_GRADLE_VERSIONS = ['2.8', '2.14.1', '3.1'].asImmutable()
     @SuppressWarnings(['DuplicateStringLiteral', 'UnnecessaryCast'])
     static final List<String> TESTED_GRADLE_VERSIONS_FOR_ANDROID = (['2.8', '2.14.1'] +
-        (Jvm.current.java8Compatible ? ['3.1'] : [] as List<String>)).asImmutable()
+        (Jvm.current.java8Compatible ? ['3.1'] : [] as List<String>)).takeRight(2).asImmutable()
     static final String BASELINE_PLUGIN_VERSION = '"com.monits:static-code-analysis-plugin:2.2.1"'
 
     static final int NUMBER_OF_CLASSES_TO_ANALYZE = 100
@@ -215,7 +215,7 @@ abstract class AbstractPerfTestFixture extends Specification {
 
     void setupMultimoduleAndroidProject(final String androidVersion,
                                         final String pluginVersion = "files($pluginClasspathString)",
-                                        final int numberOfClasses = NUMBER_OF_CLASSES_TO_ANALYZE / 2) {
+                                        final int numberOfClasses = NUMBER_OF_CLASSES_TO_ANALYZE) {
         setupAndroidSubProject('liba', LIBA_DIRNAME, androidVersion, pluginVersion)
         setupAndroidSubProject('libb', LIBB_DIRNAME, androidVersion, pluginVersion)
 
