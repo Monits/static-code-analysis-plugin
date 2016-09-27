@@ -153,6 +153,11 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
     @SuppressWarnings('NoDef') // can't specify a type without depending on Android
     @CompileStatic(TypeCheckingMode.SKIP)
     private static boolean usesJack(final def configuration) {
+        // Newer plugin versions have a merged jack config on the config
+        if (configuration.hasProperty(JACK_OPTIONS_PROPERTY_NAME) && configuration.jackOptions.enabled != null) {
+            return configuration.jackOptions.enabled
+        }
+
         // Any flavors?
         if (configuration.hasFlavors()) {
             for (def pf : configuration.productFlavors) {
