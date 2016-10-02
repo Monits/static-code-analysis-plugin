@@ -6,6 +6,9 @@
  Bug fixes:
  * Android plugin 2.2.0 no longer warns on the usage of `useJack`
 
+ Improvements:
+ * Upgraded Checkstyle to 7.1.2
+
 * **2.3.0**
 
  Bug fixes:
