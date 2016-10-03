@@ -27,7 +27,7 @@ class ResolveAndroidLintTask extends AndroidLintTask {
         // Resolve all artifacts
         project.configurations.androidLint.resolve()
 
-        // Prevent any "undersired" lints from being applied
+        // Prevent any "undesired" lints from being applied
         changeAllFileExtensions(androidLintHome, '.jar', '.bak')
 
         // Manually copy all artifacts to the corresponding location

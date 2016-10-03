@@ -40,9 +40,9 @@ abstract class AndroidLintTask extends DefaultTask {
     abstract void run()
 
     /**
-     * Retrieves a file pointing to the active android lint home, making usre it exits.
+     * Retrieves a file pointing to the active android lint home, making user it exits.
      *
-     * @return A File pointint to the active android lint home.
+     * @return A File pointing to the active android lint home.
      */
     @InputDirectory
     @OutputDirectory
@@ -74,7 +74,7 @@ abstract class AndroidLintTask extends DefaultTask {
     /**
      * Change the file extension of all files in the given folder from one to another
      *
-     * @param dir The diectory in which to  find for files to rename
+     * @param dir The directory in which to  find for files to rename
      * @param from The original extension to be changed
      * @param to The new extension to be used
      */

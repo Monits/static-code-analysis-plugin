@@ -110,6 +110,18 @@ dependencies {
 
 And that's it! As always feel free to contribute in any shape or form, we look forward to your feedback!.
 
+## Suppressing warnings
+
+This is **not** the trick to break the rules but this **is** the way you should face those **few exceptions** to the rules.
+Since every tool has its own mechanism, you should refer to its documentation:
+
+- Android Lint: [Documentation](http://tools.android.com/tips/lint/suppressing-lint-warnings)
+- Checkstyle: [Documentation](http://checkstyle.sourceforge.net/config_annotation.html#SuppressWarnings)
+- CPD: [Documentation](https://pmd.github.io/latest/usage/cpd-usage.html#Suppression) 
+- Findbugs: [Annotations documentation](http://findbugs.sourceforge.net/manual/annotations.html); @SupressFBWarnings [javadoc](http://findbugs.sourceforge.net/api/edu/umd/cs/findbugs/annotations/SuppressFBWarnings.html) 
+- PMD: [Documentation](https://pmd.github.io/latest/usage/suppressing.html)
+
+
 # Copyright and License
 Copyright 2010-2016 Monits S.A.
 
