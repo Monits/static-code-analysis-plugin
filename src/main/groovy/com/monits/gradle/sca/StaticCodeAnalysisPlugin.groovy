@@ -120,11 +120,6 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     // See: https://code.google.com/p/android/issues/detail?id=208474
     @CompileStatic(TypeCheckingMode.SKIP)
     private void defineFindbugsAnnotationDependencies() {
-        project.repositories {
-            maven {
-                url 'http://nexus.monits.com/content/repositories/oss-snapshots'
-            }
-        }
         project.dependencies {
             provided('com.google.code.findbugs:annotations:' + ToolVersions.findbugsVersion) {
                 /*
