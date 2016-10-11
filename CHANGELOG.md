@@ -9,6 +9,7 @@
  Improvements:
  * Upgraded Checkstyle to 7.1.2
  * Upgraded Monits' Findbugs plugin to 0.2.0
+ * Upgraded fb-contrib to 6.8.0
  * No longer need Monits' SNAPSHOTS maven repository, the Monits' Findbugs plugin is in both jcenter and maven central
 
 * **2.3.0**
