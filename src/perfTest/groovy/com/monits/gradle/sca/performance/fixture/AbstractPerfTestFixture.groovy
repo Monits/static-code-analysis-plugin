@@ -246,6 +246,6 @@ abstract class AbstractPerfTestFixture extends Specification {
     @SuppressWarnings('DuplicateNumberLiteral')
     String androidVersionForGradle(final String gradleVersion) {
         GradleVersion.version(gradleVersion) < GradleVersion.version('3.0') ?
-            DEFAULT_ANDROID_VERSION : '2.2.1'
+            DEFAULT_ANDROID_VERSION : '2.2.2'
     }
 }
