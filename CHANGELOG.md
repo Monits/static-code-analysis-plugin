@@ -7,6 +7,7 @@
  * Android plugin 2.2.0 no longer warns on the usage of `useJack`
 
  Improvements:
+ * Android Lint task is now treated as a @CacheableTask under Gradle 3+
  * Upgraded Checkstyle to 7.1.2
  * Upgraded Monits' Findbugs plugin to 0.2.0
  * Upgraded fb-contrib to 6.8.0
