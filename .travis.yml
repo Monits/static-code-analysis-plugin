@@ -4,6 +4,10 @@ group: edge
 
 language: android
 
+cache:
+  directories:
+    - $HOME/.gradle
+
 jdk:
   - oraclejdk7
   - oraclejdk8
