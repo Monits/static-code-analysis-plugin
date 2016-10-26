@@ -51,7 +51,7 @@ apply plugin: 'com.monits.staticCodeAnalysis'
 
 The plugin is compatible with Gradle 2.3+ and Gradle 3.0+. We are commited to supporting the last 2 major gradle versions.
 
-It support all versions of the Android plugin from 1.1.0 onwards, up to 2.2.0.
+It support all versions of the Android plugin from 1.1.0 onwards, up to 2.2.2.
 
 
 ##DSL
@@ -66,7 +66,7 @@ staticCodeAnalysis {
     cpd = true
     androidLint = true // Since 2.2.0
 
-    ignoreErrors = true
+    ignoreErrors = true // Since 1.3.0
 
     // default rules
     findbugsExclude = "$project.rootProject.projectDir/config/findbugs/excludeFilter.xml"
@@ -93,9 +93,6 @@ All configurations values in the example are the default ones, but you must take
 ``findbugsExclude`` and ``checkstyleRules`` are a ``String`` (Note: for remote files, they must
 begin with "http://" or "https://", else it will be considered local) and ``pmdRules`` is a
 collection of ``String``.
-
-As of version 1.3, ``ignoreErrors`` decides whether the build is stopped if errors are reported. Its default
-value is ``true`` meaning that it will continue the build regardless of reported errors.
 
 Rules used by PMD, Findbugs and Checkstyle can be overriden per-sourceset under the ``sourceSetConfig`` block.
 
