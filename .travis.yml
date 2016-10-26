@@ -40,4 +40,4 @@ branches:
     - /^support-.*$/
 
 script:
-    - ./gradlew assemble $TEST_SUITE
+    - ./gradlew assemble $TEST_SUITE --no-daemon
