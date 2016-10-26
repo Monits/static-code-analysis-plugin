@@ -8,6 +8,11 @@ cache:
   directories:
     - $HOME/.gradle
 
+before_cache:
+  # Remove daemon logs, bin databases, and lockfiles
+  - rm -rf $HOME/.gradle/daemon/
+  - rm -rf $HOME/.gradle/caches/modules-2/modules-2.lock
+
 jdk:
   - oraclejdk7
   - oraclejdk8
