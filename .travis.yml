@@ -40,4 +40,5 @@ branches:
     - /^support-.*$/
 
 script:
-    - ./gradlew assemble $TEST_SUITE --no-daemon
+  - ./gradlew assemble $TEST_SUITE
+  - ./gradlew --stop
