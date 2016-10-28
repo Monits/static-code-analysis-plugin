@@ -39,9 +39,11 @@ class PerformanceRunner {
 
         // warm up
         for (int i = 0; i < WARM_UP_ITERATIONS; i++) {
+            if (i > 0) {
+                sleep(SLEEP_AFTER_RUN_MS)
+            }
             runner.build()
             cleanRunner.build()
-            sleep(SLEEP_AFTER_RUN_MS)
         }
 
         println 'Warm up is done'
@@ -49,9 +51,11 @@ class PerformanceRunner {
 
         // measure
         for (int i = 0; i < MEASURE_ITERATIONS; i++) {
+            if (i > 0) {
+                sleep(SLEEP_AFTER_RUN_MS)
+            }
             results.add(TimedRunnable.run { runner.build() })
             cleanRunner.build()
-            sleep(SLEEP_AFTER_RUN_MS)
             println "Iteration ${i + 1} / ${MEASURE_ITERATIONS} is done."
         }
     }
