@@ -105,7 +105,23 @@ dependencies {
 }
 ```
 
-And that's it! As always feel free to contribute in any shape or form, we look forward to your feedback!.
+## Tasks
+
+The plugin will add the following tasks:
+
+* `cpd`
+* `checkstyle`, depends on:
+  * a `checkstyleSourcesetname` task per source-set (`checkstyleMain`, `checkstyleTest`, so on).
+* `findbugs`, depends on:
+  * a `findbugsSourcesetname` task per source-set (`findbugsMain`, `findbugsTest`, so on).
+* `pmd`, depends on:
+  * a `pmdSourcesetname` task per source-set (`pmdMain`, `pmdTest`, so on).
+
+All tasks, are hooked to be run as part of the `check` task of the Java Plugin.
+
+# Contributing
+
+As always feel free to contribute in any shape or form, we look forward to your feedback!.
 
 # Copyright and License
 Copyright 2010-2016 Monits S.A.
