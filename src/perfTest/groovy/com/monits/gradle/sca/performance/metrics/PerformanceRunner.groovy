@@ -65,7 +65,8 @@ class PerformanceRunner {
         assertEveryBuildSucceeds()
 
         if (results.totalTime.average - baseline.results.totalTime.average > maxExecutionTimeRegression) {
-            throw new AssertionError('New version is slower' as Object)
+            throw new AssertionError("New version is slower.\nResults: ${results.totalTime}" +
+                "\nBaseline: ${baseline.results.totalTime}" as Object)
         }
 
         // We are on par or faster, check for informational purposes
