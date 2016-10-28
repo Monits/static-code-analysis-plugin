@@ -57,4 +57,10 @@ class DataSeries extends ArrayList<BigDecimal> {
             ).setScale(2, BigDecimal.ROUND_HALF_UP)
         standardErrorOfMean = standardError / Math.sqrt(size())
     }
+
+    @Override
+    String toString() {
+        "DataSeries{ avg: ${average}, min: ${min}, max: ${max}, stdErr: ${standardError}, " +
+            "meanStdErr: ${standardErrorOfMean}"
+    }
 }
