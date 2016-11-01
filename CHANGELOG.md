@@ -1,7 +1,7 @@
 ## History
 
 # v2.3
-* **2.3.1 - UNRELEASED**
+* **2.3.1**
 
  Bug fixes:
  * Android plugin 2.2.0 no longer warns on the usage of `useJack`
