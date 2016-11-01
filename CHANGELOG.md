@@ -8,7 +8,7 @@
 
  Improvements:
  * Android Lint task is now treated as a @CacheableTask under Gradle 3+
- * Upgraded Checkstyle to 7.1.2
+ * Upgraded Checkstyle to 7.2
  * Upgraded Monits' Findbugs plugin to 0.2.0
  * Upgraded fb-contrib to 6.8.0
  * No longer need Monits' SNAPSHOTS maven repository, the Monits' Findbugs plugin is in both jcenter and maven central
