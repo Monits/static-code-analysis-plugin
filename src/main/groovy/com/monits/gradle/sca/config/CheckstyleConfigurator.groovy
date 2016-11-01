@@ -114,6 +114,12 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
                             r.html.enabled = false // added in gradle 2.10, but unwanted
                         }
                     }
+
+                    // TODO : when https://github.com/gradle/gradle/pull/786 gets merged (Gradle 3.3?)
+                    // this can be enabled for "incremental" analysis.
+                    //configProperties = [
+                    //  'checkstyle.cache.file':project.file("${project.buildDir}/checkstyle-main.cache"),
+                    //]
                 }
             }
 
