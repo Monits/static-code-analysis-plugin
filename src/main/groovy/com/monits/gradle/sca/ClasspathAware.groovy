@@ -62,7 +62,7 @@ trait ClasspathAware {
 
             // we need all other task to be done first
             self.dependsOn taskToConfigure.dependsOn.findAll { it != self } // avoid cycles
-        } << {
+        }.doLast {
             cpa.configAndroidClasspath(taskToConfigure, project,
                     project.tasks.findByName(MOCKABLE_ANDROID_JAR_TASK), sourceSetClasses)
         }

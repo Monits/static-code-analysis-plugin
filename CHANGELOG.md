@@ -5,6 +5,7 @@
 
  Improvements:
  * Upgraded PMD to 5.5.2
+ * Stop using Gradle "<<" tasks operator, that's deprecated and will be removed in Gradle 4
 
 * **2.3.1**
 
