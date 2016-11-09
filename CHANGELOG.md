@@ -1,6 +1,11 @@
 ## History
 
 # v2.3
+* **2.3.2 - Unreleased**
+
+ Improvements:
+ * Upgraded PMD to 5.5.2
+
 * **2.3.1**
 
  Bug fixes:
