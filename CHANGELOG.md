@@ -1,6 +1,11 @@
 ## History
 
 # v2.3
+* **2.3.3**
+
+ Bug fixes:
+ * Reverted to PMD 5.5.1, since 5.5.2 introduced a NPE in CPD. [See related issue](https://sourceforge.net/p/pmd/bugs/1542/)
+
 * **2.3.2**
 
  Improvements:
