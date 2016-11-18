@@ -3,6 +3,11 @@
 # v2.3
 * **2.3.4**
 
+ Improvements:
+ * Checkstyle tasks are configured with a 'checkstyle.cache.file' extension property per sourceset to configure
+    cache file in the config if desired.
+ * Default Checkstyle config for latest Checkstyle makes use of the local analysis cache property.
+
  Bug fixes:
  * Backported Checkstyle classpath fix from Gradle 3.3. [See original issue](https://github.com/gradle/gradle/issues/855)
 
