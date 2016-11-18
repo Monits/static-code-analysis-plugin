@@ -27,6 +27,7 @@ import org.gradle.api.plugins.quality.Checkstyle
 import org.gradle.api.plugins.quality.CheckstyleExtension
 import org.gradle.api.plugins.quality.CheckstyleReports
 import org.gradle.api.reporting.ReportingExtension
+import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.util.GUtil
 
@@ -44,7 +45,11 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
         setupPlugin(project, extension)
 
         SourceSetContainer sourceSets = project.convention.getPlugin(JavaPluginConvention).sourceSets
-        setupTasksPerSourceSet(project, extension, sourceSets)
+        setupTasksPerSourceSet(project, extension, sourceSets) { Checkstyle task, SourceSet sourceSet ->
+            // Backport fix from Gradle 3.3
+            // https://github.com/gradle/gradle/commit/d2479f58330fb2a360f77b719d336205065159b5
+            task.classpath = sourceSet.output + sourceSet.compileClasspath
+        }
     }
 
     @CompileStatic(TypeCheckingMode.SKIP)

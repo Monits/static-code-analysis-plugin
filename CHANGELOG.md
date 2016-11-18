@@ -1,6 +1,11 @@
 ## History
 
 # v2.3
+* **2.3.4**
+
+ Bug fixes:
+ * Backported Checkstyle classpath fix from Gradle 3.3. [See original issue](https://github.com/gradle/gradle/issues/855)
+
 * **2.3.3**
 
  Bug fixes:
