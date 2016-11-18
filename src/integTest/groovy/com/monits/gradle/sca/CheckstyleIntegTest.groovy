@@ -63,6 +63,12 @@ class CheckstyleIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         reportFile().exists()
         reportFile().assertContents(containsString("<checkstyle version=\"$checkstyleVersion\""))
 
+        // Cache files must exist per sourceset
+        if (checkstyleVersion == ToolVersions.LATEST_CHECKSTYLE_VERSION) {
+          file('build/checkstyle-main.cache').exists()
+          file('build/checkstyle-test.cache').exists()
+        }
+
         // No HTML report should exist
         reportFile().parentFile.list { dir, name -> name.endsWith('.html') }.length == 0
 

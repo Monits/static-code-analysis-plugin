@@ -120,11 +120,10 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
                         }
                     }
 
-                    // TODO : when https://github.com/gradle/gradle/pull/786 gets merged (Gradle 3.3?)
-                    // this can be enabled for "incremental" analysis.
-                    //configProperties = [
-                    //  'checkstyle.cache.file':project.file("${project.buildDir}/checkstyle-main.cache"),
-                    //]
+                    // Setup cache file location per-sourceset
+                    configProperties = [
+                      'checkstyle.cache.file':"${project.buildDir}/checkstyle-${sourceSetName}.cache" as Object,
+                    ]
                 }
             }
 

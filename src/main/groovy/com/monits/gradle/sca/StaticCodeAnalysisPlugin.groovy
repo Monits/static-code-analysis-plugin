@@ -35,7 +35,7 @@ import org.gradle.api.plugins.JavaBasePlugin
 @CompileStatic
 class StaticCodeAnalysisPlugin implements Plugin<Project> {
     private final static String EXTENSION_NAME = 'staticCodeAnalysis'
-    private final static String CHECKSTYLE_DEFAULT_RULES = 'http://static.monits.com/checkstyle.xml'
+    private final static String CHECKSTYLE_DEFAULT_RULES = 'http://static.monits.com/checkstyle-cache.xml'
     private final static String CHECKSTYLE_BACKWARDS_RULES = 'http://static.monits.com/checkstyle-6.7.xml'
     private final static String PMD_DEFAULT_RULES = 'http://static.monits.com/pmd.xml'
     private final static String PMD_DEFAULT_ANDROID_RULES = 'http://static.monits.com/pmd-android.xml'
