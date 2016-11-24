@@ -27,7 +27,9 @@ class DataSeries extends ArrayList<BigDecimal> {
     final BigDecimal standardError
     // https://en.wikipedia.org/wiki/Standard_error#Standard_error_of_the_mean
     final BigDecimal standardErrorOfMean
+    final BigDecimal median
 
+    @SuppressWarnings('DuplicateNumberLiteral')
     DataSeries(final Iterable<? extends BigDecimal> values) {
         for (BigDecimal value : values) {
             if (value != null) {
@@ -56,6 +58,12 @@ class DataSeries extends ArrayList<BigDecimal> {
         average = total / size()
         this.min = min
         this.max = max
+
+        List<BigDecimal> sorted = []
+        sorted.addAll(values)
+        sorted.sort()
+        double index = sorted.size() / 2.0
+        median = (sorted.get((int) Math.floor(index)) + sorted.get((int) Math.ceil(index))) / 2
 
         BigDecimal sumSquares = BigDecimal.ZERO
         for (int i = 0; i < size(); i++) {

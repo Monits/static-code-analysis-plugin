@@ -25,8 +25,6 @@ class PerformanceRunner {
     // To give us < 0.3% odds of a falsely identified regression.
     // https://en.wikipedia.org/wiki/Standard_deviation#Rules_for_normally_distributed_data
     private static final BigDecimal NUM_STANDARD_ERRORS_FROM_MEAN = 3.0G
-    // We want to ignore regressions of less than 2% over the baseline.
-    private static final BigDecimal MINIMUM_REGRESSION_PERCENTAGE = 0.02G
 
     private static final int WARM_UP_ITERATIONS = 3
     private static final int MEASURE_ITERATIONS = 10
@@ -77,15 +75,15 @@ class PerformanceRunner {
         baseline.assertEveryBuildSucceeds()
         assertEveryBuildSucceeds()
 
-        if (results.totalTime.average - baseline.results.totalTime.average > maxExecutionTimeRegression) {
+        if (results.totalTime.median - baseline.results.totalTime.median > getMaxExecutionTimeRegression(baseline)) {
             throw new AssertionError("New version is slower.\nResults: ${results.totalTime}" +
                 "\nBaseline: ${baseline.results.totalTime}" as Object)
         }
 
         // We are on par or faster, check for informational purposes
-        if (baseline.results.totalTime.average - results.totalTime.average > baseline.maxExecutionTimeRegression) {
+        if (baseline.results.totalTime.median - results.totalTime.median > getMaxExecutionTimeRegression(baseline)) {
             println "We are actually faster than old plugin using ${baseline.version} under ${version} " +
-                "by ${baseline.results.totalTime.average / results.totalTime.average * PERCENT - PERCENT}%"
+                "by ${baseline.results.totalTime.median / results.totalTime.median * PERCENT - PERCENT}%"
         } else {
             println "We are on par with old plugin using ${baseline.version} under ${version}"
         }
@@ -95,13 +93,8 @@ class PerformanceRunner {
         assert results.failures.empty : 'Some builds have failed.'
     }
 
-    private BigDecimal getMaxExecutionTimeRegression() {
-        BigDecimal allowedPercentageRegression = results.totalTime.average *
-            MINIMUM_REGRESSION_PERCENTAGE
-        BigDecimal allowedStatisticalRegression = results.totalTime.standardErrorOfMean *
+    private BigDecimal getMaxExecutionTimeRegression(final PerformanceRunner baseline) {
+        (results.totalTime.standardErrorOfMean + baseline.results.totalTime.standardErrorOfMean) / 2 *
             NUM_STANDARD_ERRORS_FROM_MEAN
-
-        (allowedStatisticalRegression > allowedPercentageRegression) ?
-            allowedStatisticalRegression : allowedPercentageRegression
     }
 }
