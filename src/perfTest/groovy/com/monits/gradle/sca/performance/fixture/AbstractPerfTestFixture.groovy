@@ -29,7 +29,7 @@ import spock.util.environment.Jvm
 @CompileStatic
 abstract class AbstractPerfTestFixture extends Specification {
     // A sample of gradle versions to be considered in general testing - don't test anything below 2.8, it spams stdout
-    static final List<String> TESTED_GRADLE_VERSIONS = ['2.8', '2.14.1', '3.1'].asImmutable()
+    static final List<String> TESTED_GRADLE_VERSIONS = ['2.8', '2.14.1', GradleVersion.current().version].asImmutable()
     @SuppressWarnings(['DuplicateStringLiteral', 'UnnecessaryCast'])
     static final List<String> TESTED_GRADLE_VERSIONS_FOR_ANDROID = (['2.8', '2.14.1'] +
         (Jvm.current.java8Compatible ? ['3.1'] : [] as List<String>)).takeRight(2).asImmutable()
