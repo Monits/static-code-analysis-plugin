@@ -121,3 +121,8 @@ pluginBundle {
         artifactId = 'static-code-analysis-plugin'
     }
 }
+
+// Helper task to just upload everything everywhere
+task publish() {
+  dependsOn 'uploadArchives', 'bintrayUpload', 'publishPlugins'
+}
