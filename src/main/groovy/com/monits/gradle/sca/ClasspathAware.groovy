@@ -55,8 +55,7 @@ trait ClasspathAware {
         Task cpTask = project.task(
                 'configureClasspathFor' + taskToConfigure.name.capitalize()) { Task self ->
             // The mockable android jar allows us to know Android's classes in our analysis
-            Task t = project.tasks.findByName(MOCKABLE_ANDROID_JAR_TASK)
-            if (t != null) {
+            project.tasks.matching { Task t -> t.name == MOCKABLE_ANDROID_JAR_TASK }.all { Task t ->
                 self.dependsOn t
             }
 
