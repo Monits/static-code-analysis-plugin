@@ -45,15 +45,12 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
 
     @Override
     void applyAndroidConfig(final Project project, final StaticCodeAnalysisExtension extension) {
-        Task t = project.tasks.findByName('lint')
-        if (t == null) {
-            return
+        project.tasks.matching { Task it -> it.name == 'lint' } .all { Task t ->
+            t.dependsOn project.tasks.create('resolveAndroidLint', ResolveAndroidLintTask)
+            t.finalizedBy project.tasks.create('cleanupAndroidLint', CleanupAndroidLintTask)
+
+            configureLintTask(project, extension, t)
         }
-
-        t.dependsOn project.tasks.create('resolveAndroidLint', ResolveAndroidLintTask)
-        t.finalizedBy project.tasks.create('cleanupAndroidLint', CleanupAndroidLintTask)
-
-        configureLintTask(project, extension, t)
     }
 
     @SuppressWarnings(['UnnecessaryGetter', 'CatchThrowable']) // yes, we REALLY want to be that generic
