@@ -14,6 +14,7 @@
  * Backported Checkstyle classpath fix from Gradle 3.3. [See original issue](https://github.com/gradle/gradle/issues/855)
  * Fix [#10](https://github.com/Monits/static-code-analysis-plugin/issues/10) - The plugin can now be applied before the Java / Android
 plugins are applied.
+ * Fix NullPointerException after a module dependency has been removed or deleted.
 
 * **2.3.3**
 
