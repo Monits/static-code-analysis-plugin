@@ -10,5 +10,5 @@ if [[ $1 =~ -dev$ ]]; then
 	version=${1%-dev}-SNAPSHOT
 fi
 
-perl -0777 -pi -e "s/version\s=\s\".*/version = \"$version\"/" build.gradle
+perl -0777 -pi -e "s/version\s=\s\'.*/version = \'$version\'/" build.gradle
 
