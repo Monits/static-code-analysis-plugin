@@ -35,7 +35,7 @@ import static org.junit.Assert.assertThat
 class AndroidLintIntegTest extends AbstractIntegTestFixture {
 
     static final List<String> ANDROID_PLUGIN_VERSIONS = (['1.1.3', '1.2.3', '1.3.1', '1.5.0', '2.0.0', '2.1.3'] +
-        (Jvm.current.java8Compatible ? ['2.2.2'] : [])).asImmutable()
+        (Jvm.current.java8Compatible ? ['2.2.3'] : [])).asImmutable()
 
     @SuppressWarnings('MethodName')
     @Unroll('AndroidLint should run when using gradle #version')
