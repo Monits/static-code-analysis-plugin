@@ -1,6 +1,8 @@
 ## History
 
 # v2.3
+* **2.3.6 - Unreleased**
+
 * **2.3.5**
 
  Improvements:
