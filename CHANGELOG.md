@@ -3,6 +3,9 @@
 # v2.3
 * **2.3.6 - Unreleased**
 
+ Improvements:
+ * Upgraded fb-contrib to 6.8.3
+
 * **2.3.5**
 
  Improvements:
