@@ -35,7 +35,7 @@ import org.gradle.api.plugins.JavaBasePlugin
 @CompileStatic
 class StaticCodeAnalysisPlugin implements Plugin<Project> {
     private final static String EXTENSION_NAME = 'staticCodeAnalysis'
-    private final static String CHECKSTYLE_DEFAULT_RULES = 'http://static.monits.com/checkstyle.xml'
+    private final static String CHECKSTYLE_DEFAULT_RULES = 'http://static.monits.com/checkstyle-cache.xml'
     private final static String CHECKSTYLE_BACKWARDS_RULES = 'http://static.monits.com/checkstyle-6.7.xml'
     private final static String PMD_DEFAULT_RULES = 'http://static.monits.com/pmd.xml'
     private final static String PMD_DEFAULT_ANDROID_RULES = 'http://static.monits.com/pmd-android.xml'
@@ -43,6 +43,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     private final static String FINDBUGS_DEFAULT_SUPPRESSION_FILTER =
             'http://static.monits.com/findbugs-exclusions-android.xml'
     private final static String ANDROID_DEFAULT_RULES = 'http://static.monits.com/android-lint.xml'
+    private final static String PROVIDED = 'provided'
 
     private StaticCodeAnalysisExtension extension
     private Project project
@@ -55,7 +56,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         extension = project.extensions.create(EXTENSION_NAME, StaticCodeAnalysisExtension)
 
         defineConfigurations()
-        defineFindbugsAnnotationDependencies()
+        addFindbugsAnnotationDependencies()
         configureExtensionRule()
 
         project.afterEvaluate {
@@ -90,28 +91,35 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
 
     @CompileStatic(TypeCheckingMode.SKIP)
     private void defineConfigurations() {
-        project.configurations {
-            archives {
-                extendsFrom project.configurations.default
+        // Wait until the default configuration is available
+        project.configurations.matching { Configuration config -> config.name == 'default' }
+            .all { Configuration config ->
+                project.configurations {
+                    archives {
+                        extendsFrom project.configurations.default
+                    }
+                }
+
+                if (project.configurations.findByName(PROVIDED) == null) {
+                    project.configurations {
+                        provided {
+                            description = 'Compile only dependencies'
+                            dependencies.all { Dependency dep ->
+                                project.configurations.default.exclude group:dep.group, module:dep.name
+                            }
+                        }
+                        compile.extendsFrom provided
+                    }
+                }
             }
+
+        project.configurations {
             scaconfig { // Custom configuration for static code analysis
-                description = 'Configuraton used for Static Code Analysis'
+                description = 'Configuration used for Static Code Analysis'
             }
             androidLint { // Configuration used for android linters
                 transitive = false
                 description = 'Extra Android lint rules to be used'
-            }
-        }
-
-        if (project.configurations.findByName('provided') == null) {
-            project.configurations {
-                provided {
-                    description = 'Compile only dependencies'
-                    dependencies.all { Dependency dep ->
-                        project.configurations.default.exclude group:dep.group, module:dep.name
-                    }
-                }
-                compile.extendsFrom provided
             }
         }
     }
@@ -119,21 +127,20 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     // This should be done when actually configuring Findbugs, but can't be inside an afterEvaluate
     // See: https://code.google.com/p/android/issues/detail?id=208474
     @CompileStatic(TypeCheckingMode.SKIP)
-    private void defineFindbugsAnnotationDependencies() {
-        project.repositories {
-            maven {
-                url 'http://nexus.monits.com/content/repositories/oss-snapshots'
+    private void addFindbugsAnnotationDependencies() {
+        // Wait until the provided configuration is available
+        project.configurations.matching { Configuration config -> config.name == PROVIDED }
+            .all { Configuration config ->
+                project.dependencies {
+                    provided('com.google.code.findbugs:annotations:' + ToolVersions.findbugsVersion) {
+                        /*
+                             * This jar both includes and depends on jcip and jsr-305. One is enough
+                             * See https://github.com/findbugsproject/findbugs/issues/94
+                             */
+                        transitive = false
+                    }
+                }
             }
-        }
-        project.dependencies {
-            provided('com.google.code.findbugs:annotations:' + ToolVersions.findbugsVersion) {
-                /*
-                 * This jar both includes and depends on jcip and jsr-305. One is enough
-                 * See https://github.com/findbugsproject/findbugs/issues/94
-                 */
-                transitive = false
-            }
-        }
     }
 
     @CompileStatic(TypeCheckingMode.SKIP)

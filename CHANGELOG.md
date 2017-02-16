@@ -1,6 +1,50 @@
 ## History
 
 # v2.3
+* **2.3.5**
+
+ Improvements:
+ * Upgraded PMD to 5.5.3
+ * Upgraded Checkstyle to 7.5.1
+
+* **2.3.4**
+
+ Improvements:
+ * Checkstyle tasks are configured with a 'checkstyle.cache.file' extension property per sourceset to configure
+    cache file in the config if desired.
+ * Default Checkstyle config for latest Checkstyle makes use of the local analysis cache property.
+ * Upgraded fb-contrib to 6.8.2
+ * Upgraded Checkstyle to 7.4
+
+ Bug fixes:
+ * Backported Checkstyle classpath fix from Gradle 3.3. [See original issue](https://github.com/gradle/gradle/issues/855)
+ * Fix [#10](https://github.com/Monits/static-code-analysis-plugin/issues/10) - The plugin can now be applied before the Java / Android
+plugins are applied.
+ * Fix NullPointerException after a module dependency has been removed or deleted.
+
+* **2.3.3**
+
+ Bug fixes:
+ * Reverted to PMD 5.5.1, since 5.5.2 introduced a NPE in CPD. [See related issue](https://sourceforge.net/p/pmd/bugs/1542/)
+
+* **2.3.2**
+
+ Improvements:
+ * Upgraded PMD to 5.5.2
+ * Stop using Gradle "<<" tasks operator, that's deprecated and will be removed in Gradle 4
+
+* **2.3.1**
+
+ Bug fixes:
+ * Android plugin 2.2.0 no longer warns on the usage of `useJack`
+
+ Improvements:
+ * Android Lint task is now treated as a @CacheableTask under Gradle 3+
+ * Upgraded Checkstyle to 7.2
+ * Upgraded Monits' Findbugs plugin to 0.2.0
+ * Upgraded fb-contrib to 6.8.0
+ * No longer need Monits' SNAPSHOTS maven repository, the Monits' Findbugs plugin is in both jcenter and maven central
+
 * **2.3.0**
 
  Bug fixes:

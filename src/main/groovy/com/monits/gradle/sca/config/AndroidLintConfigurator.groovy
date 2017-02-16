@@ -21,6 +21,8 @@ import groovy.transform.TypeCheckingMode
 import org.gradle.api.DomainObjectSet
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.specs.Specs
+import org.gradle.util.GradleVersion
 import org.gradle.util.VersionNumber
 
 /**
@@ -29,7 +31,8 @@ import org.gradle.util.VersionNumber
 @CompileStatic
 class AndroidLintConfigurator implements AnalysisConfigurator {
     private static final String ANDROID_GRADLE_VERSION_PROPERTY_NAME = 'androidGradlePluginVersion'
-    private static final VersionNumber ANDROID_GRADLE_VERSION_2_0_0 = VersionNumber.parse('2.0.0')
+    private static final VersionNumber REPORT_PER_VARIANT_ANDROID_GRADLE_VERSION_2_0_0 = VersionNumber.parse('2.0.0')
+    private static final GradleVersion CACHEABLE_TASK_GRADLE_VERSION = GradleVersion.version('3.0')
     private static final String USE_JACK_PROPERTY_NAME = 'useJack'
     private static final String JACK_OPTIONS_PROPERTY_NAME = 'jackOptions'
 
@@ -42,15 +45,12 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
 
     @Override
     void applyAndroidConfig(final Project project, final StaticCodeAnalysisExtension extension) {
-        Task t = project.tasks.findByName('lint')
-        if (t == null) {
-            return
+        project.tasks.matching { Task it -> it.name == 'lint' } .all { Task t ->
+            t.dependsOn project.tasks.create('resolveAndroidLint', ResolveAndroidLintTask)
+            t.finalizedBy project.tasks.create('cleanupAndroidLint', CleanupAndroidLintTask)
+
+            configureLintTask(project, extension, t)
         }
-
-        t.dependsOn project.tasks.create('resolveAndroidLint', ResolveAndroidLintTask)
-        t.finalizedBy project.tasks.create('cleanupAndroidLint', CleanupAndroidLintTask)
-
-        configureLintTask(project, extension, t)
     }
 
     @SuppressWarnings(['UnnecessaryGetter', 'CatchThrowable']) // yes, we REALLY want to be that generic
@@ -73,6 +73,11 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
 
         try {
             configureLintInputsAndOutputs(project, lintTask)
+
+            // Allow to cache task result on Gradle 3+!
+            if (GradleVersion.current() >= CACHEABLE_TASK_GRADLE_VERSION) {
+                lintTask.getOutputs().cacheIf(Specs.SATISFIES_ALL)
+            }
         } catch (Throwable e) {
             // Something went wrong!
             project.logger.warn('Encountered an error trying to set inputs and outputs for Android Lint ' +
@@ -153,6 +158,11 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
     @SuppressWarnings('NoDef') // can't specify a type without depending on Android
     @CompileStatic(TypeCheckingMode.SKIP)
     private static boolean usesJack(final def configuration) {
+        // Newer plugin versions have a merged jack config on the config
+        if (configuration.hasProperty(JACK_OPTIONS_PROPERTY_NAME) && configuration.jackOptions.enabled != null) {
+            return configuration.jackOptions.enabled
+        }
+
         // Any flavors?
         if (configuration.hasFlavors()) {
             for (def pf : configuration.productFlavors) {
@@ -219,6 +229,6 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
         }
 
         String versionStr = task.property(ANDROID_GRADLE_VERSION_PROPERTY_NAME) as String
-        VersionNumber.parse(versionStr) >= ANDROID_GRADLE_VERSION_2_0_0
+        VersionNumber.parse(versionStr) >= REPORT_PER_VARIANT_ANDROID_GRADLE_VERSION_2_0_0
     }
 }
