@@ -35,14 +35,16 @@ import org.gradle.api.plugins.JavaBasePlugin
 @CompileStatic
 class StaticCodeAnalysisPlugin implements Plugin<Project> {
     private final static String EXTENSION_NAME = 'staticCodeAnalysis'
-    private final static String CHECKSTYLE_DEFAULT_RULES = 'http://static.monits.com/checkstyle-cache.xml'
-    private final static String CHECKSTYLE_BACKWARDS_RULES = 'http://static.monits.com/checkstyle-6.7.xml'
-    private final static String PMD_DEFAULT_RULES = 'http://static.monits.com/pmd.xml'
-    private final static String PMD_DEFAULT_ANDROID_RULES = 'http://static.monits.com/pmd-android.xml'
-    private final static String PMD_BACKWARDS_RULES = 'http://static.monits.com/pmd-5.1.3.xml'
+    private final static String DEFAULTS_LOCATION =
+        'https://raw.githubusercontent.com/Monits/static-code-analysis-plugin/staging/defaults/'
+    private final static String CHECKSTYLE_DEFAULT_RULES = DEFAULTS_LOCATION + 'checkstyle/checkstyle-cache.xml'
+    private final static String CHECKSTYLE_BACKWARDS_RULES = DEFAULTS_LOCATION + 'checkstyle/checkstyle-6.7.xml'
+    private final static String PMD_DEFAULT_RULES = DEFAULTS_LOCATION + 'pmd/pmd.xml'
+    private final static String PMD_DEFAULT_ANDROID_RULES = DEFAULTS_LOCATION + 'pmd/pmd-android.xml'
+    private final static String PMD_BACKWARDS_RULES = DEFAULTS_LOCATION + 'pmd/pmd-5.1.3.xml'
     private final static String FINDBUGS_DEFAULT_SUPPRESSION_FILTER =
-            'http://static.monits.com/findbugs-exclusions-android.xml'
-    private final static String ANDROID_DEFAULT_RULES = 'http://static.monits.com/android-lint.xml'
+        DEFAULTS_LOCATION + 'findbugs/findbugs-exclusions-android.xml'
+    private final static String ANDROID_DEFAULT_RULES = DEFAULTS_LOCATION + 'android/android-lint.xml'
     private final static String PROVIDED = 'provided'
 
     private StaticCodeAnalysisExtension extension
