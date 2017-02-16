@@ -1,6 +1,14 @@
 ## History
 
+# v2.4
+* **2.4.0**
+
+ Improvements:
+ * All default configs are now mantained and downloaded from GitHub itself!
+ * Upgraded fb-contrib to 6.8.3
+
 # v2.3
+
 * **2.3.5**
 
  Improvements:
