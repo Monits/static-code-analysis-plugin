@@ -1,0 +1,36 @@
+<FindBugsFilter>
+    <!-- Android uses it's own annotations, not JSR 305 -->
+    <Match>
+        <Or>
+            <Bug pattern="UNKNOWN_NULLNESS_OF_PARAMETER" />
+            <Bug pattern="UNKNOWN_NULLNESS_OF_RETURNED_VALUE" />
+        </Or>
+    </Match>
+    <!-- In tests we may allow ourselves to do things we generally wouldn't.. -->
+    <Match>
+        <Source name="~.*Test(?:Utils)?\.java" />
+        <Or>
+            <Bug pattern="PRMC_POSSIBLY_REDUNDANT_METHOD_CALLS" />
+            <Bug pattern="NAB_NEEDLESS_BOOLEAN_CONSTANT_CONVERSION" />
+            <Bug pattern="MISSING_TO_STRING_OVERRIDE" />
+            <Bug pattern="MISSING_FIELD_IN_TO_STRING" />
+            <Bug pattern="SACM_STATIC_ARRAY_CREATED_IN_METHOD" />
+            <Bug pattern="NP_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD" />
+            <Bug pattern="URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" />
+        </Or>
+    </Match>
+
+    <Match>
+        <Or>
+            <!-- This pattern is simply wrong, and asks people to violate equals simmetry -->
+            <Bug pattern="EQ_DOESNT_OVERRIDE_EQUALS" />
+
+            <!-- This pattern request for StandardCharsets that are available in API level 19 -->
+            <Bug pattern="CSI_CHAR_SET_ISSUES_USE_STANDARD_CHARSET_NAME" />
+            <Bug pattern="CSI_CHAR_SET_ISSUES_USE_STANDARD_CHARSET" />
+
+            <!-- This is supposedly turned off by default, by I'm seeing it here and there... fb-contrib's is better -->
+            <Bug pattern="CD_CIRCULAR_DEPENDENCY" />
+        </Or>
+    </Match>
+</FindBugsFilter>

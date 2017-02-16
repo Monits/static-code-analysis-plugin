@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<lint>
+    <!-- The following are NOT the only checks that Lint runs, just severity overrides -->
+
+    <!-- Correctness -->
+    <issue id="DefaultLocale" severity="warning" />
+    <issue id="DuplicateIncludedIds" severity="warning" />
+    <issue id="GradleDependency" severity="error" />
+    <issue id="InflateParams" severity="warning" />
+    <issue id="InlinedApi" severity="error" />
+    <issue id="InvalidPackage" severity="warning" />
+    <issue id="MissingId" severity="error" />
+    <issue id="NewerVersionAvailable" severity="warning" />
+    <issue id="OldTargetApi" severity="warning" />
+    <issue id="PrivateResource" severity="warning" />
+    <issue id="Registered" severity="error" />
+    <issue id="ScrollViewSize" severity="warning" />
+    <issue id="UnusedAttribute" severity="warning" />
+
+    <!-- Correctness:Messages -->
+    <issue id="Typos" severity="error" />
+    <issue id="PluralsCandidate" severity="warning" />
+    <issue id="StringFormatCount" severity="error" />
+
+    <!-- Security checks -->
+    <issue id="AddJavascriptInterface" severity="error" />
+    <issue id="AllowBackup" severity="warning" />
+    <issue id="EasterEgg" severity="error" />
+    <issue id="ExportedContentProvider" severity="error" />
+    <issue id="ExportedReceiver" severity="error" />
+    <issue id="ExportedService" severity="error" />
+    <issue id="GrantAllUris" severity="error" />
+    <issue id="PackagedPrivateKey" severity="error" />
+    <issue id="PackageManagerGetSignatures" severity="error" />
+    <issue id="SecureRandom" severity="error" />
+    <issue id="TrulyRandom" severity="error" />
+    <issue id="UseCheckPermission" severity="error" />
+    <issue id="UsingHttp" severity="error" />
+
+    <!-- Performance checks -->
+    <issue id="DisableBaselineAlignment" severity="warning" />
+    <issue id="DrawAllocation" severity="error" />
+    <issue id="FieldGetter" severity="error" />
+    <issue id="FloatMath" severity="error" />
+    <issue id="HandlerLeak" severity="error" />
+    <issue id="InefficientWeight" severity="warning" />
+    <issue id="LogConditional" severity="error" />
+    <issue id="MergeRootFrame" severity="error" />
+    <issue id="NestedWeights" severity="error" />
+    <issue id="ObsoleteLayoutParam" severity="warning" />
+    <issue id="Overdraw" severity="warning" />
+    <issue id="Recycle" severity="warning" />
+    <issue id="TooDeepLayout" severity="error" />
+    <issue id="TooManyViews" severity="error" />
+    <issue id="UnusedIds" severity="error" />
+    <issue id="UnusedNamespace" severity="error" />
+    <issue id="UnusedResources" severity="error" />
+    <issue id="UseCompoundDrawables" severity="warning" />
+    <issue id="UselessLeaf" severity="error" />
+    <issue id="UselessParent" severity="warning" />
+    <issue id="UseSparseArrays" severity="error" />
+    <issue id="UseValueOf" severity="error" />
+    <issue id="ViewHolder" severity="error" />
+
+    <!-- Usability:Typography -->
+    <issue id="TypographyEllipsis" severity="error" />
+
+    <!-- Usability:Icons -->
+    <issue id="IconDensities" severity="warning" />
+    <issue id="IconDipSize" severity="error" />
+    <issue id="IconDuplicates" severity="error" />
+    <issue id="IconDuplicatesConfig" severity="error" />
+    <issue id="IconExpectedSize" severity="warning" />
+    <issue id="IconLocation" severity="error" />
+
+    <!-- Usability -->
+    <issue id="AlwaysShowAction" severity="warning" />
+    <issue id="BackButton" severity="error" />
+    <issue id="GoogleAppIndexingApiWarning" severity="warning" />
+    <issue id="NegativeMargin" severity="warning" />
+    <issue id="SelectableText" severity="warning" />
+    <issue id="TextFields" severity="error" />
+    <issue id="ViewConstructor" severity="error" />
+
+    <!-- Accessibility -->
+    <issue id="ClickableViewAccessibility" severity="warning" />
+    <issue id="ContentDescription" severity="warning" />
+
+    <!-- Internationalization -->
+    <issue id="HardcodedText" severity="error" />
+    <issue id="RelativeOverlap" severity="warning" />
+    <issue id="SetTextI18n" severity="warning" />
+
+    <!-- Internationalization:Bidirectional text -->
+    <issue id="ExtraTranslation" severity="error" />
+    <issue id="MissingTranslation" severity="error">
+        <ignore path="**/strings_by_country.xml" />
+    </issue>
+    <issue id="RtlHardcoded" severity="ignore" />
+    <issue id="RtlSymmetry" severity="ignore" />
+</lint>
