@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+    "-//Puppy Crawl//DTD Suppressions 1.1//EN"
+    "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
+<suppressions>
+  <!-- We are a little more flexible on tests... -->
+  <suppress checks="MultipleStringLiterals" files=".*[\\/]src[\\/](test|it)[\\/]"/>
+  <suppress checks="MethodCount" files=".*[\\/]src[\\/](test|it)[\\/]"/>
+  <suppress checks="MagicNumber" files=".*[\\/]src[\\/](test|it)[\\/]"/>
+  <suppress checks="Javadoc" files=".*[\\/]src[\\/](test|it)[\\/]"/>
+
+  <suppress checks="MultipleStringLiterals" files=".*Test.*"/>
+  <suppress checks="MethodCount" files=".*Test.*"/>
+  <suppress checks="MagicNumber" files=".*Test.*"/>
+  <suppress checks="Javadoc" files=".*Test.*"/>
+</suppressions>
