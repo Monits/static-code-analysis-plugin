@@ -7,10 +7,12 @@
   <suppress checks="MultipleStringLiterals" files=".*[\\/]src[\\/](test|it)[\\/]"/>
   <suppress checks="MethodCount" files=".*[\\/]src[\\/](test|it)[\\/]"/>
   <suppress checks="MagicNumber" files=".*[\\/]src[\\/](test|it)[\\/]"/>
-  <suppress checks="Javadoc" files=".*[\\/]src[\\/](test|it)[\\/]"/>
+  <suppress checks="JavadocMethod" files=".*[\\/]src[\\/](test|it)[\\/]"/>
+  <suppress id="ExtraWhitespace" files=".*[\\/]src[\\/](test|it)[\\/]"/>
 
   <suppress checks="MultipleStringLiterals" files=".*Test.*"/>
   <suppress checks="MethodCount" files=".*Test.*"/>
   <suppress checks="MagicNumber" files=".*Test.*"/>
-  <suppress checks="Javadoc" files=".*Test.*"/>
+  <suppress checks="JavadocMethod" files=".*Test.*"/>
+  <suppress id="ExtraWhitespace" files=".*Test.*"/>
 </suppressions>
