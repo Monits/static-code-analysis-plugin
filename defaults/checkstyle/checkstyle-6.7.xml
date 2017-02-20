@@ -135,7 +135,7 @@
     <!-- Allow to disable checks with @SuppressWarnings -->
     <module name="SuppressWarningsFilter" />
     <module name="SuppressionFilter">
-        <property name="file" value="http://static.monits.com/checkstyle-suppressions.xml"/>
+        <property name="file" value="https://raw.githubusercontent.com/Monits/static-code-analysis-plugin/staging/defaults/checkstyle/checkstyle-suppressions.xml"/>
     </module>
     <!-- Check for unique properties in property files -->
     <module name="UniqueProperties"/>
