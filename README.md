@@ -71,11 +71,12 @@ staticCodeAnalysis {
 
     // default rules
     findbugsExclude = "$project.rootProject.projectDir/config/findbugs/excludeFilter.xml"
-    checkstyleRules = "http://static.monits.com/checkstyle.xml"
-    pmdRules = [ "http://static.monits.com/pmd.xml", "http://static.monits.com/pmd-android.xml" ]
+    checkstyleRules = 'https://raw.githubusercontent.com/Monits/static-code-analysis-plugin/staging/defaults/checkstyle/checkstyle-cache.xml'
+    pmdRules = [ 'https://raw.githubusercontent.com/Monits/static-code-analysis-plugin/staging/defaults/pmd/pmd.xml',
+        'https://raw.githubusercontent.com/Monits/static-code-analysis-plugin/staging/defaults/pmd/pmd-android.xml' ]
 
     // Since 2.2.0
-    androidLintConfig = "http://static.monits.com/android-lint.xml"
+    androidLintConfig = 'https://raw.githubusercontent.com/Monits/static-code-analysis-plugin/staging/defaults/android/android-lint.xml'
 
     // Since 2.0.0
     sourceSetConfig {
@@ -83,7 +84,8 @@ staticCodeAnalysis {
             // use a more relaxed ruleset
             checkstyleRules = 'config/checkstyle/test-checkstyle.xml'
             findbugsExclude = 'config/findbugs/test-findbugs.xml'
-            pmdRules = [ 'config/pmd/test-pmd.xml', "http://static.monits.com/pmd-android.xml" ]
+            pmdRules = [ 'config/pmd/test-pmd.xml',
+                'https://raw.githubusercontent.com/Monits/static-code-analysis-plugin/staging/defaults/pmd/pmd-android.xml' ]
         }
     }
 }
@@ -137,7 +139,7 @@ Since every tool has its own mechanism, you should refer to its documentation:
 
 
 # Copyright and License
-Copyright 2010-2016 Monits S.A.
+Copyright 2010-2017 Monits S.A.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 this work except in compliance with the License. You may obtain a copy of the
