@@ -5,6 +5,7 @@
 
  Improvements:
  * Upgraded PMD to 5.5.4
+ * Upgraded Checkstyle to 7.6
 
 * **2.4.0**
 
