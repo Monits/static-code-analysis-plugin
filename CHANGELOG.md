@@ -1,6 +1,11 @@
 ## History
 
 # v2.4
+* **2.4.1**
+
+ Improvements:
+ * Upgraded PMD to 5.5.4
+
 * **2.4.0**
 
  Improvements:
