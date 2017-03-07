@@ -6,7 +6,6 @@
     <!-- Correctness -->
     <issue id="DefaultLocale" severity="warning" />
     <issue id="DuplicateIncludedIds" severity="warning" />
-    <issue id="GradleDependency" severity="error" />
     <issue id="InflateParams" severity="warning" />
     <issue id="InlinedApi" severity="error" />
     <issue id="InvalidPackage" severity="warning" />
@@ -19,8 +18,9 @@
     <issue id="UnusedAttribute" severity="warning" />
     <issue id="GradleDependency" severity="error">
         <!-- Ignore the play services and support libs (no one can really be up to date with those) -->
-        <ignore regexp="*:play-services-*:*"/>
-        <ignore regexp="com.android.support:*:*"/>
+        <ignore regexp="^A newer version of com\.google\.android\.gms:play-services-.*"/>
+        <ignore regexp="^A newer version of com\.android\.support:.*"/>
+        <ignore regexp="^Old buildToolsVersion.*"/>
     </issue>
 
     <!-- Correctness:Messages -->
