@@ -1,9 +1,26 @@
 <FindBugsFilter>
-    <!-- Android uses it's own annotations, not JSR 305 -->
     <Match>
         <Or>
+            <!-- Android uses it's own annotations, not JSR 305 -->
             <Bug pattern="UNKNOWN_NULLNESS_OF_PARAMETER" />
             <Bug pattern="UNKNOWN_NULLNESS_OF_RETURNED_VALUE" />
+
+            <!-- This pattern is simply wrong, and asks people to violate equals simmetry -->
+            <Bug pattern="EQ_DOESNT_OVERRIDE_EQUALS" />
+
+            <!-- This pattern request for StandardCharsets that are available in API level 19 -->
+            <Bug pattern="CSI_CHAR_SET_ISSUES_USE_STANDARD_CHARSET_NAME" />
+            <Bug pattern="CSI_CHAR_SET_ISSUES_USE_STANDARD_CHARSET" />
+
+            <!-- This is supposedly turned off by default, by I'm seeing it here and there... fb-contrib's is better -->
+            <Bug pattern="CD_CIRCULAR_DEPENDENCY" />
+
+            <!-- We will use PMD since its faster -->
+            <Bug pattern="FORBIDDEN_SYSTEM" />
+            <Bug pattern="USBR_UNNECESSARY_STORE_BEFORE_RETURN"/>
+            <Bug pattern="LEST_LOST_EXCEPTION_STACK_TRACE"/>
+            
+            <Bug pattern="SF_SWITCH_NO_DEFAULT" />
         </Or>
     </Match>
     <!-- In tests we may allow ourselves to do things we generally wouldn't.. -->
@@ -21,16 +38,9 @@
     </Match>
 
     <Match>
+        <Source name="~.*Activity.java"/>
         <Or>
-            <!-- This pattern is simply wrong, and asks people to violate equals simmetry -->
-            <Bug pattern="EQ_DOESNT_OVERRIDE_EQUALS" />
-
-            <!-- This pattern request for StandardCharsets that are available in API level 19 -->
-            <Bug pattern="CSI_CHAR_SET_ISSUES_USE_STANDARD_CHARSET_NAME" />
-            <Bug pattern="CSI_CHAR_SET_ISSUES_USE_STANDARD_CHARSET" />
-
-            <!-- This is supposedly turned off by default, by I'm seeing it here and there... fb-contrib's is better -->
-            <Bug pattern="CD_CIRCULAR_DEPENDENCY" />
+            <Bug pattern="MISSING_TO_STRING_OVERRIDE"/>
         </Or>
     </Match>
 </FindBugsFilter>

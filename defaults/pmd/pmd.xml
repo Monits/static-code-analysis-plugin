@@ -23,7 +23,6 @@
     <!-- We prefer checkstyle's FallThrough -->
     <exclude name="MissingBreakInSwitch" />
 
-    <exclude name="TooFewBranchesForASwitchStatement"/>
     <exclude name="SwitchStmtsShouldHaveDefault"/>
     <exclude name="UseVarargs"/>
     <exclude name="AccessorClassGeneration"/>
@@ -48,8 +47,6 @@
   </rule>
   <!-- Logging rules -->
   <rule ref="rulesets/java/logging-java.xml">
-    <!-- Our Findbugs plugin already detects this -->
-    <exclude name="SystemPrintln" />
     <!-- Just no... SLF4J has a nice API that avoids string formating -->
     <exclude name="GuardLogStatementJavaUtil" />
   </rule>

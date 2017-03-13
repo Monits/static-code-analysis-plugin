@@ -5,27 +5,22 @@
 
     <!-- Correctness -->
     <issue id="DefaultLocale" severity="warning" />
-    <issue id="DuplicateIncludedIds" severity="warning" />
-    <issue id="InflateParams" severity="warning" />
+    <issue id="DuplicateIncludedIds" severity="error" />
+    <issue id="GradleDependency" severity="warning" />
+    <issue id="InflateParams" severity="error" />
     <issue id="InlinedApi" severity="error" />
     <issue id="InvalidPackage" severity="warning" />
     <issue id="MissingId" severity="error" />
     <issue id="NewerVersionAvailable" severity="warning" />
     <issue id="OldTargetApi" severity="warning" />
-    <issue id="PrivateResource" severity="warning" />
+    <issue id="PrivateResource" severity="error" />
     <issue id="Registered" severity="error" />
     <issue id="ScrollViewSize" severity="warning" />
     <issue id="UnusedAttribute" severity="warning" />
-    <issue id="GradleDependency" severity="error">
-        <!-- Ignore the play services and support libs (no one can really be up to date with those) -->
-        <ignore regexp="^A newer version of com\.google\.android\.gms:play-services-.*"/>
-        <ignore regexp="^A newer version of com\.android\.support:.*"/>
-        <ignore regexp="^Old buildToolsVersion.*"/>
-    </issue>
 
     <!-- Correctness:Messages -->
     <issue id="Typos" severity="error" />
-    <issue id="PluralsCandidate" severity="warning" />
+    <issue id="PluralsCandidate" severity="error" />
     <issue id="StringFormatCount" severity="error" />
 
     <!-- Security checks -->
@@ -44,23 +39,25 @@
     <issue id="UsingHttp" severity="error" />
 
     <!-- Performance checks -->
-    <issue id="DisableBaselineAlignment" severity="warning" />
+    <issue id="DisableBaselineAlignment" severity="error" />
     <issue id="DrawAllocation" severity="error" />
     <issue id="FieldGetter" severity="error" />
     <issue id="FloatMath" severity="error" />
     <issue id="HandlerLeak" severity="error" />
-    <issue id="InefficientWeight" severity="warning" />
+    <issue id="InefficientWeight" severity="error" />
     <issue id="LogConditional" severity="error" />
     <issue id="MergeRootFrame" severity="error" />
     <issue id="NestedWeights" severity="error" />
-    <issue id="ObsoleteLayoutParam" severity="warning" />
+    <issue id="ObsoleteLayoutParam" severity="error" />
     <issue id="Overdraw" severity="warning" />
-    <issue id="Recycle" severity="warning" />
+    <issue id="Recycle" severity="error" />
     <issue id="TooDeepLayout" severity="error" />
     <issue id="TooManyViews" severity="error" />
     <issue id="UnusedIds" severity="error" />
     <issue id="UnusedNamespace" severity="error" />
-    <issue id="UnusedResources" severity="error" />
+    <issue id="UnusedResources" severity="error">
+        <ignore regexp="The resource R.raw..*_dynamic.* appears to be unused" />
+    </issue>
     <issue id="UseCompoundDrawables" severity="warning" />
     <issue id="UselessLeaf" severity="error" />
     <issue id="UselessParent" severity="warning" />
@@ -72,18 +69,18 @@
     <issue id="TypographyEllipsis" severity="error" />
 
     <!-- Usability:Icons -->
-    <issue id="IconDensities" severity="warning" />
+    <issue id="IconDensities" severity="error" />
     <issue id="IconDipSize" severity="error" />
     <issue id="IconDuplicates" severity="error" />
     <issue id="IconDuplicatesConfig" severity="error" />
-    <issue id="IconExpectedSize" severity="warning" />
+    <issue id="IconExpectedSize" severity="error" />
     <issue id="IconLocation" severity="error" />
 
     <!-- Usability -->
     <issue id="AlwaysShowAction" severity="warning" />
     <issue id="BackButton" severity="error" />
     <issue id="GoogleAppIndexingApiWarning" severity="warning" />
-    <issue id="NegativeMargin" severity="warning" />
+    <issue id="NegativeMargin" severity="error" />
     <issue id="SelectableText" severity="warning" />
     <issue id="TextFields" severity="error" />
     <issue id="ViewConstructor" severity="error" />
@@ -94,8 +91,8 @@
 
     <!-- Internationalization -->
     <issue id="HardcodedText" severity="error" />
-    <issue id="RelativeOverlap" severity="warning" />
-    <issue id="SetTextI18n" severity="warning" />
+    <issue id="RelativeOverlap" severity="error" />
+    <issue id="SetTextI18n" severity="error" />
 
     <!-- Internationalization:Bidirectional text -->
     <issue id="ExtraTranslation" severity="error" />
