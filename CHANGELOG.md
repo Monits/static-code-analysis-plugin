@@ -8,6 +8,9 @@
  * Upgraded Checkstyle to 7.6
  * Upgraded fb-contrib to 6.8.4
 
+ Bug fixes:
+ * Fix [#13](https://github.com/Monits/static-code-analysis-plugin/issues/13) - Running `--offline` does not even try to hit the network anymore
+
 * **2.4.0**
 
  Improvements:
