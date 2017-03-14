@@ -6,6 +6,7 @@
  Improvements:
  * Upgraded PMD to 5.5.4
  * Upgraded Checkstyle to 7.6
+ * Upgraded fb-contrib to 6.8.4
 
 * **2.4.0**
 
