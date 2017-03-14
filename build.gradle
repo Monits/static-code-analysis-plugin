@@ -37,6 +37,6 @@ project.sourceCompatibility = 1.7
 project.targetCompatibility = 1.7
 
 wrapper {
-    gradleVersion = '3.3'
+    gradleVersion = '3.4.1'
     distributionType = Wrapper.DistributionType.ALL
 }

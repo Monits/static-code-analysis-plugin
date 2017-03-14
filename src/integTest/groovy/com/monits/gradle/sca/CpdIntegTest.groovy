@@ -20,7 +20,7 @@ import spock.lang.Unroll
 
 import static org.gradle.testkit.runner.TaskOutcome.FAILED
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
-import static org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
+import static org.gradle.testkit.runner.TaskOutcome.NO_SOURCE
 
 /**
  * Integration test of CPD tasks.
@@ -60,7 +60,7 @@ class CpdIntegTest extends AbstractPluginIntegTestFixture {
         BuildResult result = gradleRunner().build()
 
         then:
-        result.task(taskName()).outcome == UP_TO_DATE
+        result.task(taskName()).outcome == NO_SOURCE
 
         // The report should not exist
         !reportFile().exists()
