@@ -50,9 +50,24 @@ buildscript {
 apply plugin: 'com.monits.staticCodeAnalysis'
 ```
 
+or, directly from jcenter
+
+```
+buildscript {
+  repositories {
+    jcenter()
+  }
+  dependencies {
+    classpath 'com.monits:static-code-analysis-plugin:2.4.1'
+  }
+}
+
+apply plugin: 'com.monits.staticCodeAnalysis'
+```
+
 The plugin is compatible with Gradle 2.3+ and Gradle 3.0+. We are commited to supporting the last 2 major gradle versions.
 
-It support all versions of the Android plugin from 1.1.0 onwards, up to 2.2.2.
+It supports all versions of the Android plugin from 1.1.0 onwards, up to 2.2.2.
 
 
 ##DSL
