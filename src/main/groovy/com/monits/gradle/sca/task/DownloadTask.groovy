@@ -19,6 +19,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.ParallelizableTask
+import org.gradle.api.tasks.StopExecutionException
 import org.gradle.api.tasks.TaskAction
 import org.gradle.util.GradleVersion
 
@@ -51,6 +52,7 @@ class DownloadTask extends DefaultTask {
                 if (downloadedFile.exists()) {
                     logger.warn('Running in offline mode. ' +
                             "Using a possibly outdated version of ${cachedResource}")
+                    throw new StopExecutionException()
                 } else {
                     throw new GradleException('Running in offline mode, ' +
                             "but there is no cached version of ${cachedResource}")
