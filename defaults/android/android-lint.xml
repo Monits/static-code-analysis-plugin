@@ -56,7 +56,7 @@
     <issue id="UnusedIds" severity="error" />
     <issue id="UnusedNamespace" severity="error" />
     <issue id="UnusedResources" severity="error">
-        <ignore regexp="The resource R.raw..*_dynamic.* appears to be unused" />
+        <ignore regexp=".*_dynamic.*" />
     </issue>
     <issue id="UseCompoundDrawables" severity="warning" />
     <issue id="UselessLeaf" severity="error" />
