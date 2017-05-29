@@ -56,7 +56,7 @@ class CpdConfigurator implements AnalysisConfigurator {
             it.outputFile = new File("$project.buildDir/reports/pmd/cpd.xml")
         }
 
-        project.tasks['check'].dependsOn cpdTask
+        project.tasks.findByName('check').dependsOn cpdTask
     }
 
     @Override
