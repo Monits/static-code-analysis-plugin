@@ -1,6 +1,13 @@
 ## History
 
 # v2.4
+* **2.4.2**
+
+ Improvements:
+ * Upgraded PMD to 5.7.0
+ * Upgraded Checkstyle to 7.7
+ * Upgraded fb-contrib to 7.0.1
+
 * **2.4.1**
 
  Improvements:
