@@ -70,14 +70,14 @@ class PmdIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         buildScriptFile() << '''
             afterEvaluate {
                 Task pmdTask = project.tasks.getByPath(':pmdMain')
-                pmdTask << {
+                pmdTask.doLast {
                     if (!classpath.empty) {
                         println "Auxclasspath is configured for main " + classpath.asPath
                     }
                 }
 
                 Task pmdTestTask = project.tasks.getByPath(':pmdTest')
-                pmdTestTask << {
+                pmdTestTask.doLast {
                     if (!classpath.empty) {
                         println "Auxclasspath is configured for test " + classpath.asPath
                     }
@@ -119,7 +119,7 @@ class PmdIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         buildScriptFile() << '''
             afterEvaluate {
                 Task configPmdTask = project.tasks.getByPath(':configureClasspathForPmdMain')
-                configPmdTask << {
+                configPmdTask.doLast {
                     Task pmdTask = project.tasks.getByPath(':pmdMain')
                     if (!pmdTask.classpath.empty) {
                         println "Auxclasspath is configured for main " + pmdTask.classpath.asPath
@@ -127,7 +127,7 @@ class PmdIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
                 }
 
                 Task configTestPmdTask = project.tasks.getByPath(':configureClasspathForPmdTest')
-                configTestPmdTask << {
+                configTestPmdTask.doLast {
                     Task pmdTask = project.tasks.getByPath(':pmdTest')
                     if (!pmdTask.classpath.empty) {
                         println "Auxclasspath is configured for test " + pmdTask.classpath.asPath
