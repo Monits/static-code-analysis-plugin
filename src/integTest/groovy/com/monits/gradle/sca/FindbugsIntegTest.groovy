@@ -262,6 +262,57 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         finbugsReport.assertContents(containsString('<Errors errors="0" missingClasses="0">'))
     }
 
+    @Unroll('Dependency AAR classes are available when using android gradle plugin #androidVersion and gradle #gradleVersion')
+    @SuppressWarnings('MethodName')
+    void 'Dependency AAR classes are available'() {
+        given:
+        writeAndroidBuildFile(androidVersion) << '''
+            dependencies {
+                compile 'io.card:android-sdk:5.5.1'
+            }
+
+            android {
+                compileSdkVersion 25
+                buildToolsVersion "25.0.0"
+
+                defaultConfig {
+                    minSdkVersion 16
+                }
+            }
+        '''
+        writeAndroidManifest()
+        useEmptySuppressionFilter()
+        file('src/main/java/com/monits/ClassA.java') << '''
+            package com.monits;
+
+            import io.card.payment.CardIOActivity;
+
+            public class ClassA {
+                public boolean isFoo() {
+                    return new CardIOActivity().isFinishing();
+                }
+            }
+        '''
+
+        when:
+        BuildResult result = gradleRunner()
+            .withGradleVersion(gradleVersion)
+            .build()
+
+        then:
+        if (GradleVersion.version(gradleVersion) >= GradleVersion.version('2.5')) {
+            result.task(taskName()).outcome == SUCCESS
+        }
+
+        // The report must exist, and not complain on missing classes from liba
+        reportFile().exists()
+        reportFile().assertContents(containsString('<Errors errors="0" missingClasses="0">'))
+
+        where:
+        androidVersion << AndroidLintIntegTest.ANDROID_PLUGIN_VERSIONS
+        gradleVersion = gradleVersionForAndroid(androidVersion)
+    }
+
     @SuppressWarnings('MethodName')
     void 'dsl allows to override rules per sourceset'() {
         given:
