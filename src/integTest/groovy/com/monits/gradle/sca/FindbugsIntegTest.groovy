@@ -265,7 +265,7 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         finbugsReport.assertContents(containsString('<Errors errors="0" missingClasses="0">'))
     }
 
-    @Unroll('Dependency AAR classes are available when using android gradle plugin #androidVersion and gradle #gradleVersion')
+    @Unroll('AAR classes are available when using android gradle plugin #androidVersion and gradle #gradleVersion')
     @SuppressWarnings('MethodName')
     void 'Dependency AAR classes are available'() {
         given:

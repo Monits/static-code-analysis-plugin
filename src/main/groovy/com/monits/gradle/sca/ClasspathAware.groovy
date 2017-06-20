@@ -114,17 +114,15 @@ trait ClasspathAware {
                 exclude:"${project.rootProject.name}/*/unspecified/jars/classes.jar",)
         }
 
-        def cacheDir = AndroidHelper.getBuildCacheDir(project)
+        String cacheDir = AndroidHelper.getBuildCacheDir(project)
         project.files(project.configurations.scaconfig.files.findAll { File it -> it.name.endsWith '.aar' }
             .collect { File it ->
-                def sha1 = MessageDigest.getInstance("SHA1")
-                def inputFile = 'COMMAND=PREPARE_LIBRARY\n' +
+                MessageDigest sha1 = MessageDigest.getInstance('SHA1')
+                String inputFile = 'COMMAND=PREPARE_LIBRARY\n' +
                     "FILE_PATH=${it.absolutePath}\n" +
                     "FILE_SIZE=${it.length()}\n" +
                     "FILE_TIMESTAMP=${it.lastModified()}"
-                def hash = new BigInteger(1, sha1.digest(inputFile.bytes)).toString(16)
-                println inputFile
-                println cacheDir + hash + File.separator + 'output/jars/classes.jar'
+                String hash = new BigInteger(1, sha1.digest(inputFile.bytes)).toString(16)
                 cacheDir + hash + File.separator + 'output/jars/classes.jar'
             }).asFileTree
     }

@@ -24,7 +24,6 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.specs.Specs
 import org.gradle.util.GradleVersion
-import org.gradle.util.VersionNumber
 
 /**
  * A configurator for Android Lint tasks.

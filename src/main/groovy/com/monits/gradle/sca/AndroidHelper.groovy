@@ -50,7 +50,7 @@ final class AndroidHelper {
      * @param project The project to analyze.
      * @return True if a report per variant is expected, false otherwise
      */
-    public static boolean lintReportPerVariant(final Project project) {
+    static boolean lintReportPerVariant(final Project project) {
         getCurrentVersion(project) >= REPORT_PER_VARIANT_ANDROID_GRADLE_VERSION
     }
 
@@ -62,7 +62,7 @@ final class AndroidHelper {
      * @param project The project to analyze
      * @return True if the build is using build-cache, false otherwise
      */
-    public static boolean usesBuildCache(final Project project) {
+    static boolean usesBuildCache(final Project project) {
         getCurrentVersion(project) >= BUILD_CACHE_ANDROID_GRADLE_VERSION &&
             (!project.hasProperty(ANDROID_ENABLE_CACHE_PROPERTY) ||
                 project.property(ANDROID_ENABLE_CACHE_PROPERTY) == 'true')
@@ -73,12 +73,12 @@ final class AndroidHelper {
      * @param project The project to analyze.
      * @return The location of Android's build-cache directory.
      */
-    public static String getBuildCacheDir(final Project project) {
+    static String getBuildCacheDir(final Project project) {
         if (project.hasProperty(ANDROID_CACHE_LOCATION)) {
             return project.property(ANDROID_CACHE_LOCATION)
         }
 
-        def home = homeDir
+        String home = homeDir
         if (home) {
             return home + '/.android/build-cache/'
         }
@@ -90,7 +90,7 @@ final class AndroidHelper {
      * Retrieves the current Android Home path, or null if unknown.
      * @return The current Android Home.
      */
-    public static String getHomeDir() {
+    static String getHomeDir() {
         // Home candidates and order according to http://tools.android.com/tips/lint-custom-rules
         String home = System.getProperty(ANDROID_SDK_HOME)
         if (home == null) {
