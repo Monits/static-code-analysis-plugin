@@ -38,8 +38,8 @@ abstract class AbstractIntegTestFixture extends Specification {
     static final String LIBB_PATH = ':libb'
     static final String ANDROID_MANIFEST_PATH = 'src/main/AndroidManifest.xml'
     static final String BUILD_GRADLE_FILENAME = 'build.gradle'
-    private static final String TARGET_ANDROID_VERSION = Jvm.current.java8Compatible ? '25' : '23'
-    private static final String BUILD_TOOLS_ANDROID_VERSION = Jvm.current.java8Compatible ? '25.0.0' : '23.0.2'
+    private static final String TARGET_ANDROID_VERSION = Jvm.current().java8Compatible ? '25' : '23'
+    private static final String BUILD_TOOLS_ANDROID_VERSION = Jvm.current().java8Compatible ? '25.0.0' : '23.0.2'
 
     @Rule
     final TemporaryFolder testProjectDir = new TemporaryFolder()
