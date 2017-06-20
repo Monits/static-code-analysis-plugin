@@ -14,13 +14,13 @@
 package com.monits.gradle.sca.fixture
 
 import com.monits.gradle.sca.io.TestFile
-import org.gradle.internal.jvm.Jvm
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.util.GradleVersion
 import org.gradle.util.VersionNumber
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.util.environment.Jvm
 
 /**
  * Base specification for integration testing of a gradle plugin.
@@ -38,8 +38,8 @@ abstract class AbstractIntegTestFixture extends Specification {
     static final String LIBB_PATH = ':libb'
     static final String ANDROID_MANIFEST_PATH = 'src/main/AndroidManifest.xml'
     static final String BUILD_GRADLE_FILENAME = 'build.gradle'
-    private static final String TARGET_ANDROID_VERSION = Jvm.current().java8Compatible ? '25' : '23'
-    private static final String BUILD_TOOLS_ANDROID_VERSION = Jvm.current().java8Compatible ? '25.0.0' : '23.0.2'
+    private static final String TARGET_ANDROID_VERSION = Jvm.current.java8Compatible ? '25' : '23'
+    private static final String BUILD_TOOLS_ANDROID_VERSION = Jvm.current.java8Compatible ? '25.0.0' : '23.0.2'
 
     @Rule
     final TemporaryFolder testProjectDir = new TemporaryFolder()
