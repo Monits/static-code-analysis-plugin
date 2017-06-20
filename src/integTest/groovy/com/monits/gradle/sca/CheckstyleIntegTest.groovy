@@ -132,6 +132,7 @@ class CheckstyleIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         then:
         result.task(':downloadCheckstyleXmlTest').outcome == SUCCESS
         result.task(':downloadCheckstyleXmlMain').outcome == SUCCESS
+        result.task(taskName()).outcome == SUCCESS
         assertThat(result.output, containsString('Running in offline mode. Using a possibly outdated version of'))
     }
 

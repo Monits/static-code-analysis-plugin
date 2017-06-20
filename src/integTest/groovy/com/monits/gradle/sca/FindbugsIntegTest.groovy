@@ -68,7 +68,8 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         // setup a remote config
         buildScriptFile() << '''
             staticCodeAnalysis {
-                findbugsExclude = 'http://static.monits.com/findbugs-exclusions-android.xml'
+                findbugsExclude = 'https://raw.githubusercontent.com/Monits/static-code-analysis-plugin/' +
+                    'staging/defaults/findbugs/findbugs-exclusions-android.xml'
             }
         '''
         goodCode()
@@ -95,7 +96,8 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         // setup a remote config
         buildScriptFile() << '''
             staticCodeAnalysis {
-                findbugsExclude = 'http://static.monits.com/findbugs-exclusions-android.xml'
+                findbugsExclude = 'https://raw.githubusercontent.com/Monits/static-code-analysis-plugin/' +
+                    'staging/defaults/findbugs/findbugs-exclusions-android.xml'
             }
         '''
         goodCode()
@@ -117,7 +119,8 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         // setup a remote config
         buildScriptFile() << '''
             staticCodeAnalysis {
-                findbugsExclude = 'http://static.monits.com/findbugs-exclusions-android.xml'
+                findbugsExclude = 'https://raw.githubusercontent.com/Monits/static-code-analysis-plugin/' +
+                    'staging/defaults/findbugs/findbugs-exclusions-android.xml'
             }
         '''
         writeEmptySuppressionFilter('main')

@@ -169,7 +169,6 @@
         </module>
         <module name="FinalClass"/>
         <module name="ModifierOrder"/>
-        <module name="RedundantModifier"/>
         <module name="SimplifyBooleanExpression"/>
         <module name="SimplifyBooleanReturn"/>
         <!-- Just allow spaces for indentation -->

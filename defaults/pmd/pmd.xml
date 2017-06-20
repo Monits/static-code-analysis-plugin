@@ -54,19 +54,13 @@
   <rule ref="rulesets/java/naming.xml/BooleanGetMethodName" />
   <rule ref="rulesets/java/optimizations.xml">
     <exclude name="AvoidInstantiatingObjectsInLoops" />
-    <!-- Duplicates of Checkstyle's FinalParametersCheck -->
+    <!-- Checkstyle's FinalParametersCheck forces final vars instead of detecting those that could be final -->
     <exclude name="MethodArgumentCouldBeFinal" />
     <exclude name="LocalVariableCouldBeFinal" />
   </rule>
   <rule ref="rulesets/java/strings.xml">
     <exclude name="AvoidDuplicateLiterals"/>
   </rule>
-  <rule ref="rulesets/java/unnecessary.xml">
-    <!-- Less powerful than Checkstyle's RedundantModifier -->
-    <exclude name="UnnecessaryFinalModifier" />
-  </rule>
-  <rule ref="rulesets/java/unusedcode.xml">
-    <!-- Less powerful than Checkstyle's RedundantModifier -->
-    <exclude name="UnusedModifier" />
-  </rule>
+  <rule ref="rulesets/java/unnecessary.xml"/>
+  <rule ref="rulesets/java/unusedcode.xml"/>
 </ruleset>
