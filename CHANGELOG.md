@@ -1,5 +1,11 @@
 ## History
 
+# v2.5
+* **2.5.0**
+
+ Improvements:
+ * The plugin can properly handle Android's build-cache
+
 # v2.4
 * **2.4.0**
 
