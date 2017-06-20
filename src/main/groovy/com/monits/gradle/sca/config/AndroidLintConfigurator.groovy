@@ -13,6 +13,7 @@
  */
 package com.monits.gradle.sca.config
 
+import com.monits.gradle.sca.AndroidHelper
 import com.monits.gradle.sca.StaticCodeAnalysisExtension
 import com.monits.gradle.sca.task.CleanupAndroidLintTask
 import com.monits.gradle.sca.task.ResolveAndroidLintTask
@@ -30,8 +31,6 @@ import org.gradle.util.VersionNumber
 */
 @CompileStatic
 class AndroidLintConfigurator implements AnalysisConfigurator {
-    private static final String ANDROID_GRADLE_VERSION_PROPERTY_NAME = 'androidGradlePluginVersion'
-    private static final VersionNumber REPORT_PER_VARIANT_ANDROID_GRADLE_VERSION_2_0_0 = VersionNumber.parse('2.0.0')
     private static final GradleVersion CACHEABLE_TASK_GRADLE_VERSION = GradleVersion.version('3.0')
     private static final String USE_JACK_PROPERTY_NAME = 'useJack'
     private static final String JACK_OPTIONS_PROPERTY_NAME = 'jackOptions'
@@ -212,7 +211,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
             File definiteOutput = output
             if (!output) {
                 // Convention naming changed along the way
-                if (lintReportPerVariant(task)) {
+                if (AndroidHelper.lintReportPerVariant(project)) {
                     definiteOutput = project.file(
                             "${project.buildDir}/outputs/lint-results-${variantName}.${extension}")
                 } else {
@@ -221,14 +220,5 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
             }
             task.outputs.file definiteOutput
         }
-    }
-
-    private static boolean lintReportPerVariant(final Task task) {
-        if (!task.hasProperty(ANDROID_GRADLE_VERSION_PROPERTY_NAME)) {
-            return false
-        }
-
-        String versionStr = task.property(ANDROID_GRADLE_VERSION_PROPERTY_NAME) as String
-        VersionNumber.parse(versionStr) >= REPORT_PER_VARIANT_ANDROID_GRADLE_VERSION_2_0_0
     }
 }

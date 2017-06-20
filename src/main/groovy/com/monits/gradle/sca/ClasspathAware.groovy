@@ -22,6 +22,8 @@ import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileTree
 import org.gradle.api.file.FileVisitDetails
 
+import java.security.MessageDigest
+
 /**
  * Trait for configuring classpath aware tasks.
 */
@@ -94,16 +96,37 @@ trait ClasspathAware {
         }
 
         task.classpath = project.configurations.scaconfig +
-                project.fileTree(
-                        dir:"${project.buildDir}/intermediates/exploded-aar/",
-                        include:'**/*.jar',
-                        exclude:"${project.rootProject.name}/*/unspecified/jars/classes.jar",) +
+                getJarsForAarDependencies(project) +
                 mockableAndroidJar +
                 // TODO : is it okay to always use debug?
                 getNonAnalyzedProjectClasses(project, DEBUG_SOURCESET, sourceSetClasses) +
                 // TODO : is it okay to always include test classes?
                 project.files(pathToCompiledClasses(project, 'testDebug')) +
                 classTree
+    }
+
+    @CompileStatic(TypeCheckingMode.SKIP)
+    static FileTree getJarsForAarDependencies(final Project project) {
+        if (!AndroidHelper.usesBuildCache(project)) {
+            return project.fileTree(
+                dir:"${project.buildDir}/intermediates/exploded-aar/",
+                include:'**/*.jar',
+                exclude:"${project.rootProject.name}/*/unspecified/jars/classes.jar",)
+        }
+
+        def cacheDir = AndroidHelper.getBuildCacheDir(project)
+        project.files(project.configurations.scaconfig.files.findAll { File it -> it.name.endsWith '.aar' }
+            .collect { File it ->
+                def sha1 = MessageDigest.getInstance("SHA1")
+                def inputFile = 'COMMAND=PREPARE_LIBRARY\n' +
+                    "FILE_PATH=${it.absolutePath}\n" +
+                    "FILE_SIZE=${it.length()}\n" +
+                    "FILE_TIMESTAMP=${it.lastModified()}"
+                def hash = new BigInteger(1, sha1.digest(inputFile.bytes)).toString(16)
+                println inputFile
+                println cacheDir + hash + File.separator + 'output/jars/classes.jar'
+                cacheDir + hash + File.separator + 'output/jars/classes.jar'
+            }).asFileTree
     }
 
     /**

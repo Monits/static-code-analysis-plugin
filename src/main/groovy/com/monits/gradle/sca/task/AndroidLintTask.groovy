@@ -13,6 +13,7 @@
  */
 package com.monits.gradle.sca.task
 
+import com.monits.gradle.sca.AndroidHelper
 import groovy.io.FileType
 import groovy.transform.CompileStatic
 import org.gradle.api.DefaultTask
@@ -26,8 +27,6 @@ import org.gradle.api.tasks.TaskAction
 */
 @CompileStatic
 abstract class AndroidLintTask extends DefaultTask {
-    private static final String ANDROID_SDK_HOME = 'ANDROID_SDK_HOME'
-
     protected AndroidLintTask() {
         /*
          * This tasks actually depend on the androidLint configuration, but there seems to be now way
@@ -47,17 +46,7 @@ abstract class AndroidLintTask extends DefaultTask {
     @InputDirectory
     @OutputDirectory
     File getAndroidLintHome() {
-        // Home candidates and order according to http://tools.android.com/tips/lint-custom-rules
-        String home = System.getProperty(ANDROID_SDK_HOME)
-        if (home == null) {
-            home = System.getenv(ANDROID_SDK_HOME)
-        }
-        if (home == null) {
-            home = System.getProperty('user.home')
-        }
-        if (home == null) {
-            home = System.getenv('HOME')
-        }
+        String home = AndroidHelper.homeDir
 
         if (home == null) {
             throw new GradleException('Neither ANDROID_SDK_HOME, nor user.home nor HOME could be found.')
