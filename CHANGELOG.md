@@ -5,6 +5,8 @@
 
  Improvements:
  * The plugin can properly handle Android's build-cache
+ * Upgraded Checkstyle to 7.8.2
+ * Upgraded fb-contrib to 7.0.2
 
 # v2.4
 * **2.4.2**
