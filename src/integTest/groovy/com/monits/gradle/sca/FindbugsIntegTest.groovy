@@ -275,9 +275,6 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
             }
 
             android {
-                compileSdkVersion 25
-                buildToolsVersion "25.0.0"
-
                 defaultConfig {
                     minSdkVersion 16
                 }

@@ -167,8 +167,8 @@ abstract class AbstractIntegTestFixture extends Specification {
         """ + staticCodeAnalysisConfig(toolsConfig) +
         '''
             android {
-                compileSdkVersion 23
-                buildToolsVersion "23.0.2"
+                compileSdkVersion 25
+                buildToolsVersion "25.0.0"
             }
         ''' as TestFile
     }
