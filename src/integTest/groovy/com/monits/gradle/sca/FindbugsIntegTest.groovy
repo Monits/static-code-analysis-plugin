@@ -243,14 +243,15 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         gradleVersion = gradleVersionForAndroid(androidVersion)
     }
 
+    @Unroll('multimodule classes are available when using android gradle plugin #androidVersion and gradle #gradleVersion')
     @SuppressWarnings('MethodName')
-    void 'multimodule android project has all classes'() {
+    void 'multimodule classes are available'() {
         given:
-        setupMultimoduleAndroidProject()
+        setupMultimoduleAndroidProject(androidVersion)
 
         when:
         BuildResult result = gradleRunner()
-                .withGradleVersion(gradleVersionForAndroid(DEFAULT_ANDROID_VERSION))
+                .withGradleVersion(gradleVersion)
                 .build()
 
         then:
@@ -263,6 +264,10 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
 
         // make sure nothing is reported
         finbugsReport.assertContents(containsString('<Errors errors="0" missingClasses="0">'))
+
+        where:
+        androidVersion << AndroidLintIntegTest.ANDROID_PLUGIN_VERSIONS
+        gradleVersion = gradleVersionForAndroid(androidVersion)
     }
 
     @Unroll('AAR classes are available when using android gradle plugin #androidVersion and gradle #gradleVersion')
