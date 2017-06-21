@@ -243,7 +243,8 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         gradleVersion = gradleVersionForAndroid(androidVersion)
     }
 
-    @Unroll('multimodule classes are available when using android gradle plugin #androidVersion and gradle #gradleVersion')
+    @Unroll('multimodule classes are available when using ' +
+        'android gradle plugin #androidVersion and gradle #gradleVersion')
     @SuppressWarnings('MethodName')
     void 'multimodule classes are available'() {
         given:

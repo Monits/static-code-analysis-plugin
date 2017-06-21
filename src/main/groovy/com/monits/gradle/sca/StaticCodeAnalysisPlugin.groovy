@@ -206,7 +206,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
                     // Deal with changing APIs from Gradle...
                     String targetConfiguration
                     if (GradleVersion.current() >= GradleVersion.version('3.2')) {
-                        targetConfiguration = it.targetConfiguration?:Dependency.DEFAULT_CONFIGURATION
+                        targetConfiguration = it.targetConfiguration ?: Dependency.DEFAULT_CONFIGURATION
                     } else {
                         targetConfiguration = it.configuration
                     }
