@@ -143,6 +143,7 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         given:
         writeBuildFile()
         useEmptySuppressionFilter()
+        //noinspection LongLine
         file('src/main/java/com/monits/ClassA.java') << '''
             package com.monits;
 
@@ -243,9 +244,8 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         gradleVersion = gradleVersionForAndroid(androidVersion)
     }
 
-    @Unroll('multimodule classes are available when using ' +
-        'android gradle plugin #androidVersion and gradle #gradleVersion')
-    @SuppressWarnings('MethodName')
+    @SuppressWarnings(['MethodName', 'LineLength', 'LongLine'])
+    @Unroll('multimodule classes are available when using android gradle plugin #androidVersion and gradle #gradleVersion')
     void 'multimodule classes are available'() {
         given:
         setupMultimoduleAndroidProject(androidVersion)
