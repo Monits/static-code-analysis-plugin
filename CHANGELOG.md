@@ -1,5 +1,16 @@
 ## History
 
+# v2.5
+* **2.5.0**
+
+ Improvements:
+ * The plugin can properly handle Android's build-cache
+ * Upgraded Checkstyle to 7.8.2
+ * Upgraded fb-contrib to 7.0.2
+
+ Bug fixes:
+ * Fix [#17](https://github.com/Monits/static-code-analysis-plugin/issues/17) - The plugin now works with Android's build-cache
+
 # v2.4
 * **2.4.2**
 

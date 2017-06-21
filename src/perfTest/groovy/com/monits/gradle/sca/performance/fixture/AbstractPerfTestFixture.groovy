@@ -34,7 +34,7 @@ abstract class AbstractPerfTestFixture extends Specification {
     static final List<String> TESTED_GRADLE_VERSIONS_FOR_ANDROID = (['2.8', '2.14.1'] +
         (Jvm.current.java8Compatible ? [GradleVersion.current().version] : [] as List<String>))
         .takeRight(2).asImmutable()
-    static final String BASELINE_PLUGIN_VERSION = '"com.monits:static-code-analysis-plugin:2.4.0"'
+    static final String BASELINE_PLUGIN_VERSION = '"com.monits:static-code-analysis-plugin:2.4.2"'
 
     static final int NUMBER_OF_CLASSES_TO_ANALYZE = 100
 
@@ -183,8 +183,8 @@ abstract class AbstractPerfTestFixture extends Specification {
         """ + staticCodeAnalysisConfig(toolsConfig) +
         '''
             android {
-                compileSdkVersion 23
-                buildToolsVersion "23.0.2"
+                compileSdkVersion 25
+                buildToolsVersion "25.0.0"
             }
         ''' as TestFile
     }
@@ -247,6 +247,6 @@ abstract class AbstractPerfTestFixture extends Specification {
     @SuppressWarnings('DuplicateNumberLiteral')
     String androidVersionForGradle(final String gradleVersion) {
         GradleVersion.version(gradleVersion) < GradleVersion.version('3.0') ?
-            DEFAULT_ANDROID_VERSION : '2.2.3'
+            DEFAULT_ANDROID_VERSION : '2.3.3'
     }
 }

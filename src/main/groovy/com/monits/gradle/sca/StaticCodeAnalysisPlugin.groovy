@@ -28,6 +28,7 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.plugins.JavaBasePlugin
+import org.gradle.util.GradleVersion
 
 /**
  * Static code analysis plugin for Android and Java projects
@@ -94,7 +95,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     @CompileStatic(TypeCheckingMode.SKIP)
     private void defineConfigurations() {
         // Wait until the default configuration is available
-        project.configurations.matching { Configuration config -> config.name == 'default' }
+        project.configurations.matching { Configuration config -> config.name == Dependency.DEFAULT_CONFIGURATION }
             .all { Configuration config ->
                 project.configurations {
                     archives {
@@ -118,6 +119,9 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         project.configurations {
             scaconfig { // Custom configuration for static code analysis
                 description = 'Configuration used for Static Code Analysis'
+            }
+            scaconfigModules { // Custom configuration for static code analysis
+                description = 'Configuration used for Static Code Analysis containing only module dependencies'
             }
             androidLint { // Configuration used for android linters
                 transitive = false
@@ -186,19 +190,29 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     /**
      * Adds all dependencies except modules from given config to scaconfig.
      *
-     * Modules are skipped, but transient dependencies are added
-     * (and transient modules skipped).
+     * Modules are added to scaconfigModules, but transient dependencies are added.
      *
-     * @param config The config whose dependencies are to be added to scaconfig
+     * @param config The config whose dependencies are to be added to scaconfig / scaconfigModules
      */
     @CompileStatic(TypeCheckingMode.SKIP)
     private void addDepsButModulesToScaconfig(final Configuration config) {
         // support lazy dependency configuration
         config.allDependencies.all {
-            if (it in ProjectDependency && it.group == project.rootProject.name) {
+            if (it in ProjectDependency) {
+                project.dependencies.scaconfigModules it
+
                 // support lazy configuration creation
-                project.rootProject.findProject(':' + it.name).configurations.all { c ->
-                    if (c.name == it.configuration) {
+                it.dependencyProject.configurations.all { c ->
+                    // Deal with changing APIs from Gradle...
+                    String targetConfiguration
+                    if (GradleVersion.current() >= GradleVersion.version('3.2')) {
+                        targetConfiguration = it.targetConfiguration ?: Dependency.DEFAULT_CONFIGURATION
+                    } else {
+                        targetConfiguration = it.configuration
+                    }
+
+                    // take transitive dependencies
+                    if (c.name == targetConfiguration) {
                         addDepsButModulesToScaconfig(c)
                     }
                 }

@@ -20,6 +20,7 @@ import org.gradle.util.VersionNumber
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.util.environment.Jvm
 
 /**
  * Base specification for integration testing of a gradle plugin.
@@ -37,6 +38,9 @@ abstract class AbstractIntegTestFixture extends Specification {
     static final String LIBB_PATH = ':libb'
     static final String ANDROID_MANIFEST_PATH = 'src/main/AndroidManifest.xml'
     static final String BUILD_GRADLE_FILENAME = 'build.gradle'
+    private static final String TARGET_ANDROID_VERSION = Jvm.current.java8Compatible ? '25' : '23'
+    private static final String BUILD_TOOLS_ANDROID_VERSION = Jvm.current.java8Compatible ? '25.0.0' : '23.0.2'
+    private static final String DEFAULT_ANDROID_PACKAGE = 'com.monits.staticCodeAnalysis'
 
     @Rule
     final TemporaryFolder testProjectDir = new TemporaryFolder()
@@ -165,21 +169,21 @@ abstract class AbstractIntegTestFixture extends Specification {
             }
 
         """ + staticCodeAnalysisConfig(toolsConfig) +
-        '''
+        """
             android {
-                compileSdkVersion 23
-                buildToolsVersion "23.0.2"
+                compileSdkVersion ${TARGET_ANDROID_VERSION}
+                buildToolsVersion "${BUILD_TOOLS_ANDROID_VERSION}"
             }
-        ''' as TestFile
+        """ as TestFile
     }
 
-    TestFile writeAndroidManifest() {
-        file(ANDROID_MANIFEST_PATH) << '''
+    TestFile writeAndroidManifest(final String packageName = DEFAULT_ANDROID_PACKAGE) {
+        file(ANDROID_MANIFEST_PATH) << """
             <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-                package="com.monits.staticCodeAnalysis"
+                package="${packageName}"
                 android:versionCode="1">
             </manifest>
-        ''' as TestFile
+        """ as TestFile
     }
 
     @SuppressWarnings('FactoryMethodName')
@@ -197,15 +201,16 @@ abstract class AbstractIntegTestFixture extends Specification {
 
     abstract String toolName()
 
-    private void setupAndroidSubProject(final String dir) {
-        writeAndroidBuildFile().renameTo(file(dir + BUILD_GRADLE_FILENAME))
-        writeAndroidManifest().renameTo(file(dir + ANDROID_MANIFEST_PATH))
+    private void setupAndroidSubProject(final String dir, final String androidVersion = DEFAULT_ANDROID_VERSION) {
+        writeAndroidBuildFile(androidVersion).renameTo(file(dir + BUILD_GRADLE_FILENAME))
+        writeAndroidManifest(DEFAULT_ANDROID_PACKAGE + '.' + dir.replace('/', ''))
+            .renameTo(file(dir + ANDROID_MANIFEST_PATH))
         file('src').deleteDir()
     }
 
-    void setupMultimoduleAndroidProject() {
-        setupAndroidSubProject(LIBA_DIRNAME)
-        setupAndroidSubProject(LIBB_DIRNAME)
+    void setupMultimoduleAndroidProject(final String androidVersion = DEFAULT_ANDROID_VERSION) {
+        setupAndroidSubProject(LIBA_DIRNAME, androidVersion)
+        setupAndroidSubProject(LIBB_DIRNAME, androidVersion)
 
         file(LIBB_DIRNAME + BUILD_GRADLE_FILENAME) << """
             dependencies {
