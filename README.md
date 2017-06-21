@@ -22,6 +22,7 @@ used Gradle version. Just updating Gradle will introduce newer tools.
  * Easy configuration through DSL.
  * Easily and reliably include [custom Android Lint rules](http://tools.android.com/tips/lint-custom-rules) accross teams and CI servers.
  * Backporting of fixes and improvements from later Gradle versions (in case you can't update)
+ * Fully compatible with the use of Android's build cache.
 
 # Adding it to your project
 
@@ -29,7 +30,7 @@ We are on [the Grade Plugin Portal](https://plugins.gradle.org/plugin/com.monits
 
 ```
 plugins {
-  id 'com.monits.staticCodeAnalysis' version '2.4.2'
+  id 'com.monits.staticCodeAnalysis' version '2.5.0'
 }
 ```
 
@@ -43,7 +44,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath 'com.monits:static-code-analysis-plugin:2.4.2'
+    classpath 'com.monits:static-code-analysis-plugin:2.5.0'
   }
 }
 
@@ -58,7 +59,7 @@ buildscript {
     jcenter()
   }
   dependencies {
-    classpath 'com.monits:static-code-analysis-plugin:2.4.2'
+    classpath 'com.monits:static-code-analysis-plugin:2.5.0'
   }
 }
 
