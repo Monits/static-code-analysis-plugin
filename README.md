@@ -71,7 +71,8 @@ The plugin is compatible with Gradle 2.3+ and Gradle 3.0+. We are commited to su
 It supports all versions of the Android plugin from 1.1.0 onwards, up to 2.2.2.
 
 
-##DSL
+## DSL
+
 Configuring Static Code Analysis is very simple and intuitive thanks to its DSL. You can choose
 which encapsulated plugin to run and set its configuration files. Here is a quick example
 
