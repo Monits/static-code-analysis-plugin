@@ -35,7 +35,16 @@
     </properties>
   </rule>
 
-  <rule ref="rulesets/java/empty.xml" />
+  <rule ref="rulesets/java/empty.xml">
+    <!-- Customized below. -->
+    <exclude name="EmptyCatchBlock"/>
+  </rule>
+  <rule ref="rulesets/java/empty.xml/EmptyCatchBlock">
+    <properties>
+      <property name="allowCommentedBlocks" value="true"/>
+    </properties>
+  </rule>
+
   <rule ref="rulesets/java/finalizers.xml" />
   <rule ref="rulesets/java/imports.xml">
     <exclude name="TooManyStaticImports" />
