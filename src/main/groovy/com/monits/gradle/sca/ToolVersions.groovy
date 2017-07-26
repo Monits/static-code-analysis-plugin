@@ -78,6 +78,10 @@ final class ToolVersions {
             (ignoreJre && checkstyleVersion == LATEST_CHECKSTYLE_VERSION_JAVA_7)
     }
 
+    static boolean isCheckstyleCacheSupported() {
+        checkstyleVersion > BACKWARDS_CHECKSTYLE_VERSION
+    }
+
     static String getCheckstyleUpdateInstructions() {
         if (GradleVersion.current() < GRADLE_VERSION_CHECKSTYLE) {
             return String.format(UPDATE_INSTRUCTIONS, TOOL_GRADLE, GRADLE_VERSION_CHECKSTYLE.version)

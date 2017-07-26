@@ -187,7 +187,6 @@
         </module>
         <module name="SuppressWarningsHolder"/>
 
-
         <!-- Allow to disable checks with comments -->
         <module name="SuppressionCommentFilter"/>
     </module>
