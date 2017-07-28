@@ -22,6 +22,7 @@
     <issue id="Typos" severity="error" />
     <issue id="PluralsCandidate" severity="error" />
     <issue id="StringFormatCount" severity="error" />
+    <issue id="WifiManagerPotentialLeak" severity="error" />
 
     <!-- Security checks -->
     <issue id="AddJavascriptInterface" severity="error" />
