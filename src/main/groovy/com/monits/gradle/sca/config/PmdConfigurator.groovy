@@ -28,6 +28,7 @@ import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.plugins.quality.Pmd
 import org.gradle.api.plugins.quality.PmdExtension
 import org.gradle.api.plugins.quality.PmdReports
+import org.gradle.api.reporting.ConfigurableReport;
 import org.gradle.api.reporting.ReportingExtension
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
@@ -161,9 +162,7 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
 
                 it.reports { PmdReports r ->
                     r.with {
-                        xml.enabled = true
-                        xml.setDestination(new File(project.extensions.getByType(ReportingExtension).file(PMD),
-                            "pmd-${sourceSetName}.xml"))
+                        configureXmlReport(xml, project, sourceSetName)
                         html.enabled = false
                     }
                 }
@@ -178,6 +177,18 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
         }
 
         project.tasks.findByName('check').dependsOn pmdRootTask
+    }
+
+    /*
+     * Gradle 4.2 deprecated setDestination(Object) in favor of the new setDestination(File) which didn't exist before
+     * Therefore, static compilation against the new method fails on older Gradle versions, but forcing the usage of the old
+     * one produces deprecation warnings on 4.2, so we let the runtime decide which method to use
+    */
+    @CompileStatic(TypeCheckingMode.SKIP)
+    private static void configureXmlReport(final ConfigurableReport report, final Project project,final String sourceSetName) {
+        report.enabled = true
+        report.setDestination(new File(project.extensions.getByType(ReportingExtension).file(PMD),
+            "pmd-${sourceSetName}.xml"))
     }
 
     private static Task getOrCreateTask(final Project project, final String taskName, final Closure closure) {

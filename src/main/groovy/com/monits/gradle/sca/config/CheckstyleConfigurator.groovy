@@ -26,6 +26,7 @@ import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.plugins.quality.Checkstyle
 import org.gradle.api.plugins.quality.CheckstyleExtension
 import org.gradle.api.plugins.quality.CheckstyleReports
+import org.gradle.api.reporting.ConfigurableReport;
 import org.gradle.api.reporting.ReportingExtension
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
@@ -112,8 +113,7 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
                     setConfigFile configSource
 
                     reports { CheckstyleReports r ->
-                        r.xml.setDestination(new File(project.extensions.getByType(ReportingExtension).file(CHECKSTYLE),
-                            "checkstyle-${sourceSetName}.xml"))
+                        configureXmlReport(r.xml, project, sourceSetName)
 
                         if (r.hasProperty('html')) {
                             r.html.enabled = false // added in gradle 2.10, but unwanted
@@ -136,6 +136,17 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
         }
 
         project.tasks.findByName('check').dependsOn checkstyleRootTask
+    }
+
+    /*
+     * Gradle 4.2 deprecated setDestination(Object) in favor of the new setDestination(File) which didn't exist before
+     * Therefore, static compilation against the new method fails on older Gradle versions, but forcing the usage of the old
+     * one produces deprecation warnings on 4.2, so we let the runtime decide which method to use
+    */
+    @CompileStatic(TypeCheckingMode.SKIP)
+    private static void configureXmlReport(final ConfigurableReport report, final Project project,final String sourceSetName) {
+        report.setDestination(new File(project.extensions.getByType(ReportingExtension).file(CHECKSTYLE),
+            "checkstyle-${sourceSetName}.xml"))
     }
 
     private static Task getOrCreateTask(final Project project, final String taskName, final Closure closure) {
