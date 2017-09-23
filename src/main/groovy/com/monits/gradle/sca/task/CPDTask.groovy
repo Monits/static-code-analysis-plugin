@@ -23,7 +23,6 @@ import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputFile
-import org.gradle.api.tasks.ParallelizableTask
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.SkipWhenEmpty
@@ -35,7 +34,6 @@ import org.gradle.api.tasks.VerificationTask
 */
 @CompileStatic
 @CacheableTask
-@ParallelizableTask
 class CPDTask extends DefaultTask implements VerificationTask {
 
     private static final String CPD = 'cpd'

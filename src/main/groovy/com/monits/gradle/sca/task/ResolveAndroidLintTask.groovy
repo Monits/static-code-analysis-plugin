@@ -13,13 +13,11 @@
  */
 package com.monits.gradle.sca.task
 
-import org.gradle.api.tasks.ParallelizableTask
 import org.gradle.api.tasks.TaskAction
 
 /**
  * Task to resolve AndroidLint dependencies and move them to the Android Lint Home directory.
 */
-@ParallelizableTask
 class ResolveAndroidLintTask extends AndroidLintTask {
 
     @TaskAction

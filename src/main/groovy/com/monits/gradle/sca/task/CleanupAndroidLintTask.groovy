@@ -15,14 +15,12 @@ package com.monits.gradle.sca.task
 
 import groovy.io.FileType
 import groovy.transform.CompileStatic
-import org.gradle.api.tasks.ParallelizableTask
 import org.gradle.api.tasks.TaskAction
 
 /**
  * Task to clean up and restore Android Lint Home after running.
 */
 @CompileStatic
-@ParallelizableTask
 class CleanupAndroidLintTask extends AndroidLintTask {
 
     @TaskAction
