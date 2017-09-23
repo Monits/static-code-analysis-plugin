@@ -23,7 +23,7 @@ dependencies {
 }
 
 task perfTest(type: Test) {
-    testClassesDir = sourceSets.perfTest.output.classesDir
+    testClassesDirs = sourceSets.perfTest.output.classesDirs
     classpath = sourceSets.perfTest.runtimeClasspath
 
     // output test failure causes for easier Travis integration

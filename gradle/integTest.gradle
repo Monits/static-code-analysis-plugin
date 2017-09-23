@@ -23,7 +23,7 @@ dependencies {
 }
 
 task integTest(type: Test) {
-    testClassesDir = sourceSets.integTest.output.classesDir
+    testClassesDirs = sourceSets.integTest.output.classesDirs
     classpath = sourceSets.integTest.runtimeClasspath
     maxParallelForks = Math.max(1f, Runtime.runtime.availableProcessors() / 2)
 
