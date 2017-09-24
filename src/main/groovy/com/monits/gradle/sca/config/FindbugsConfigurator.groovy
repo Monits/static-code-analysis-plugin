@@ -28,7 +28,7 @@ import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.plugins.quality.FindBugs
 import org.gradle.api.plugins.quality.FindBugsExtension
 import org.gradle.api.plugins.quality.FindBugsReports
-import org.gradle.api.reporting.ConfigurableReport;
+import org.gradle.api.reporting.ConfigurableReport
 import org.gradle.api.reporting.ReportingExtension
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.compile.JavaCompile
@@ -171,13 +171,14 @@ class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
 
     /*
      * Gradle 4.2 deprecated setDestination(Object) in favor of the new setDestination(File) which didn't exist before
-     * Therefore, static compilation against the new method fails on older Gradle versions, but forcing the usage of the old
-     * one produces deprecation warnings on 4.2, so we let the runtime decide which method to use
+     * Therefore, static compilation against the new method fails on older Gradle versions, but forcing the usage of
+     * the old one produces deprecation warnings on 4.2, so we let the runtime decide which method to use
     */
     @CompileStatic(TypeCheckingMode.SKIP)
-    private static void configureXmlReport(final ConfigurableReport report, final Project project,final String sourceSetName) {
-        report.setDestination(new File(project.extensions.getByType(ReportingExtension).file(FINDBUGS),
-            "findbugs-${sourceSetName}.xml"))
+    private static void configureXmlReport(final ConfigurableReport report, final Project project,
+            final String sourceSetName) {
+        report.destination = new File(project.extensions.getByType(ReportingExtension).file(FINDBUGS),
+            "findbugs-${sourceSetName}.xml")
         report.withMessages = true
     }
 

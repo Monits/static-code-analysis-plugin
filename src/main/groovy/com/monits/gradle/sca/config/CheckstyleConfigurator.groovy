@@ -26,7 +26,7 @@ import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.plugins.quality.Checkstyle
 import org.gradle.api.plugins.quality.CheckstyleExtension
 import org.gradle.api.plugins.quality.CheckstyleReports
-import org.gradle.api.reporting.ConfigurableReport;
+import org.gradle.api.reporting.ConfigurableReport
 import org.gradle.api.reporting.ReportingExtension
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
@@ -114,14 +114,14 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
 
                     /*
                      * Gradle 4.0 introduced a config property setting by default to config/checkstyle
-                     * After any other checkstyle task downloads a new config there, all other would be invalidated
-                     * so we manually disable it.
+                     * After any other checkstyle task downloads a new config there,
+                     * all other would be invalidated so we manually disable it.
                     */
                     if (GradleVersion.current() >= GRADLE4) {
-                        setConfigDir project.<File>provider({ null })
+                        configDir = project.<File>provider { null }
                     }
 
-                    setConfigFile configSource
+                    configFile = configSource
 
                     reports { CheckstyleReports r ->
                         configureXmlReport(r.xml, project, sourceSetName)
@@ -151,13 +151,14 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
 
     /*
      * Gradle 4.2 deprecated setDestination(Object) in favor of the new setDestination(File) which didn't exist before
-     * Therefore, static compilation against the new method fails on older Gradle versions, but forcing the usage of the old
-     * one produces deprecation warnings on 4.2, so we let the runtime decide which method to use
+     * Therefore, static compilation against the new method fails on older Gradle versions, but forcing the usage of
+     * the old one produces deprecation warnings on 4.2, so we let the runtime decide which method to use
     */
     @CompileStatic(TypeCheckingMode.SKIP)
-    private static void configureXmlReport(final ConfigurableReport report, final Project project,final String sourceSetName) {
-        report.setDestination(new File(project.extensions.getByType(ReportingExtension).file(CHECKSTYLE),
-            "checkstyle-${sourceSetName}.xml"))
+    private static void configureXmlReport(final ConfigurableReport report, final Project project,
+            final String sourceSetName) {
+        report.destination = new File(project.extensions.getByType(ReportingExtension).file(CHECKSTYLE),
+            "checkstyle-${sourceSetName}.xml")
     }
 
     private static Task getOrCreateTask(final Project project, final String taskName, final Closure closure) {

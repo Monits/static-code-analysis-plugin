@@ -228,31 +228,31 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         }
     }
 
-    private withAndroidPlugins(final Class<AnalysisConfigurator> configClass) {
+    private void withAndroidPlugins(final Class<AnalysisConfigurator> configClass) {
         AnalysisConfigurator configurator = configClass.newInstance()
         Action<? extends Plugin> configureAction = { configurator.applyAndroidConfig(project, extension) }
 
         withAndroidPlugins configureAction
     }
 
-    private withPlugin(final Class<? extends Plugin> pluginClass, final Class<AnalysisConfigurator> configClass) {
+    private void withPlugin(final Class<? extends Plugin> pluginClass, final Class<AnalysisConfigurator> configClass) {
         AnalysisConfigurator  configurator = configClass.newInstance()
         Action<? extends Plugin> configureAction = { configurator.applyConfig(project, extension) }
 
         withPlugin(pluginClass, configureAction)
     }
 
-    private withPlugin(final Class<? extends Plugin> pluginClass, final Action<? extends Plugin> configureAction) {
+    private void withPlugin(final Class<? extends Plugin> pluginClass, final Action<? extends Plugin> configureAction) {
         project.plugins.withType(pluginClass, configureAction)
     }
 
-    private withAndroidPlugins(final Action<? extends Plugin> configureAction) {
+    private void withAndroidPlugins(final Action<? extends Plugin> configureAction) {
         withOptionalPlugin('com.android.build.gradle.AppPlugin', configureAction)
         withOptionalPlugin('com.android.build.gradle.LibraryPlugin', configureAction)
     }
 
     @SuppressWarnings(['ClassForName', 'EmptyCatchBlock'])
-    private withOptionalPlugin(final String pluginClassName, final Action<? extends Plugin> configureAction) {
+    private void withOptionalPlugin(final String pluginClassName, final Action<? extends Plugin> configureAction) {
         try {
             // Will most likely throw a ClassNotFoundException
             Class<?> pluginClass = Class.forName(pluginClassName)

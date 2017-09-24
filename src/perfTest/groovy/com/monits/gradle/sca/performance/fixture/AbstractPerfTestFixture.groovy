@@ -77,7 +77,7 @@ abstract class AbstractPerfTestFixture extends Specification {
             .withArguments('check', '--stacktrace')
     }
 
-    TestFile file(path) {
+    TestFile file(String path) {
         File f = new File(testProjectDir.root.absolutePath + File.separator + path)
         f.parentFile.mkdirs()
         new TestFile(f)

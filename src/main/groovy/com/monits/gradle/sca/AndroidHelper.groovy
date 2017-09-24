@@ -90,6 +90,7 @@ final class AndroidHelper {
      * Retrieves the current Android Home path, or null if unknown.
      * @return The current Android Home.
      */
+    @SuppressWarnings('CouldBeSwitchStatement')
     static String getHomeDir() {
         // Home candidates and order according to http://tools.android.com/tips/lint-custom-rules
         String home = System.getProperty(ANDROID_SDK_HOME)

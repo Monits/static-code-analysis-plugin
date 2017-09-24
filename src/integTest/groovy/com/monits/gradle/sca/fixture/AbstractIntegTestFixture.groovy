@@ -70,7 +70,7 @@ abstract class AbstractIntegTestFixture extends Specification {
             .withArguments('check', '--stacktrace')
     }
 
-    TestFile file(path) {
+    TestFile file(String path) {
         File f = new File(testProjectDir.root, path)
         f.parentFile.mkdirs()
         new TestFile(f)
@@ -101,7 +101,7 @@ abstract class AbstractIntegTestFixture extends Specification {
         writeBuildFile(configMap)
     }
 
-    TestFile writeBuildFile(toolsConfig) {
+    TestFile writeBuildFile(Map<String, Boolean> toolsConfig) {
         buildScriptFile() << """
             buildscript {
                 dependencies {
@@ -123,7 +123,7 @@ abstract class AbstractIntegTestFixture extends Specification {
         """ + staticCodeAnalysisConfig(toolsConfig) as TestFile
     }
 
-    String staticCodeAnalysisConfig(toolsConfig) {
+    String staticCodeAnalysisConfig(Map<String, Boolean> toolsConfig) {
         """
             // disable all other checks
             staticCodeAnalysis {
@@ -143,7 +143,7 @@ abstract class AbstractIntegTestFixture extends Specification {
         writeAndroidBuildFile(configMap)
     }
 
-    TestFile writeAndroidBuildFile(toolsConfig) {
+    TestFile writeAndroidBuildFile(Map<String, Object> toolsConfig) {
         buildScriptFile() << """
             buildscript {
                 dependencies {
