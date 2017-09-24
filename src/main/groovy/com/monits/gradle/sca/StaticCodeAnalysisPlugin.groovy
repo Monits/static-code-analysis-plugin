@@ -45,6 +45,8 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     private final static String PMD_DEFAULT_ANDROID_RULES = DEFAULTS_LOCATION + 'pmd/pmd-android.xml'
     private final static String PMD_BACKWARDS_RULES = DEFAULTS_LOCATION + 'pmd/pmd-5.1.3.xml'
     private final static String FINDBUGS_DEFAULT_SUPPRESSION_FILTER =
+        DEFAULTS_LOCATION + 'findbugs/findbugs-exclusions.xml'
+    private final static String FINDBUGS_DEFAULT_ANDROID_SUPPRESSION_FILTER =
         DEFAULTS_LOCATION + 'findbugs/findbugs-exclusions-android.xml'
     private final static String ANDROID_DEFAULT_RULES = DEFAULTS_LOCATION + 'android/android-lint.xml'
     private final static String PROVIDED = 'provided'
@@ -182,6 +184,13 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
 
         // default suppression filter for findbugs for Android
         withAndroidPlugins {
+            extension.conventionMapping.with {
+                findbugsExclude = { FINDBUGS_DEFAULT_ANDROID_SUPPRESSION_FILTER }
+            }
+        }
+
+        // default suppression filter for findbugs for Java
+        withPlugin(JavaBasePlugin) {
             extension.conventionMapping.with {
                 findbugsExclude = { FINDBUGS_DEFAULT_SUPPRESSION_FILTER }
             }
