@@ -6,7 +6,7 @@
  Improvements:
  * Upgraded to fully support Gradle 4.+
  * Upgraded PMD to 5.8.1
- * Upgraded Checkstyle to 8.1
+ * Upgraded Checkstyle to 8.2
  * Upgraded fb-contrib to 7.0.5
  * Changed default Android Lint warning `WifiManagerPotentialLeak` to error.
 
