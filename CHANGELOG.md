@@ -1,6 +1,13 @@
 ## History
 
 # v2.5
+* **2.5.1 - UNRELEASED**
+
+ Improvements:
+ * Upgraded PMD to 5.8.1
+ * Upgraded Checkstyle to 8.1
+ * Changed default Android Lint warning `WifiManagerPotentialLeak` to error.
+
 * **2.5.0**
 
  Improvements:

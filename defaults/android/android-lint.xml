@@ -22,6 +22,7 @@
     <issue id="Typos" severity="error" />
     <issue id="PluralsCandidate" severity="error" />
     <issue id="StringFormatCount" severity="error" />
+    <issue id="WifiManagerPotentialLeak" severity="error" />
 
     <!-- Security checks -->
     <issue id="AddJavascriptInterface" severity="error" />
@@ -49,6 +50,7 @@
     <issue id="MergeRootFrame" severity="error" />
     <issue id="NestedWeights" severity="error" />
     <issue id="ObsoleteLayoutParam" severity="error" />
+    <issue id="ObsoleteSdkInt" severity="error" />
     <issue id="Overdraw" severity="warning" />
     <issue id="Recycle" severity="error" />
     <issue id="TooDeepLayout" severity="error" />
