@@ -1,13 +1,16 @@
 ## History
 
-# v2.5
-* **2.5.1 - UNRELEASED**
+# v2.6
+* **2.6.0 - UNRELEASED**
 
  Improvements:
+ * Upgraded to fully support Gradle 4.+
  * Upgraded PMD to 5.8.1
  * Upgraded Checkstyle to 8.1
+ * Upgraded fb-contrib to 7.0.5
  * Changed default Android Lint warning `WifiManagerPotentialLeak` to error.
 
+# v2.5
 * **2.5.0**
 
  Improvements:
