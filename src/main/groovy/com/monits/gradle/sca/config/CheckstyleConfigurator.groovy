@@ -30,6 +30,7 @@ import org.gradle.api.reporting.ConfigurableReport;
 import org.gradle.api.reporting.ReportingExtension
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.util.GradleVersion
 import org.gradle.util.GUtil
 
 /**
@@ -38,6 +39,7 @@ import org.gradle.util.GUtil
 @CompileStatic
 class CheckstyleConfigurator implements AnalysisConfigurator {
     private static final String CHECKSTYLE = 'checkstyle'
+    private static final GradleVersion GRADLE4 = GradleVersion.version('4.0.0')
 
     private final RemoteConfigLocator configLocator = new RemoteConfigLocator(CHECKSTYLE)
 
@@ -108,6 +110,15 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
                 t.with {
                     if (remoteLocation) {
                         dependsOn project.tasks.findByName(downloadTaskName)
+                    }
+
+                    /*
+                     * Gradle 4.0 introduced a config property setting by default to config/checkstyle
+                     * After any other checkstyle task downloads a new config there, all other would be invalidated
+                     * so we manually disable it.
+                    */
+                    if (GradleVersion.current() >= GRADLE4) {
+                        setConfigDir project.<File>provider({ null })
                     }
 
                     setConfigFile configSource
