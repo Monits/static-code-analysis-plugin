@@ -158,8 +158,6 @@
         <module name="EmptyBlock">
             <property name="option" value="text"/>
         </module>
-        <!-- Allow comments to be accessible for checks -->
-        <module name="FileContentsHolder"/>
         <module name="FinalLocalVariable">
             <!-- The new better way, not usable until we fully migrate (and then, remove FOR_EACH_CLAUSE from FinalParameters) -->
             <!--            <property name="validateEnhancedForLoopVariable" value="true"/>-->
