@@ -30,7 +30,7 @@ We are on [the Grade Plugin Portal](https://plugins.gradle.org/plugin/com.monits
 
 ```
 plugins {
-  id 'com.monits.staticCodeAnalysis' version '2.5.0'
+  id 'com.monits.staticCodeAnalysis' version '2.6.0'
 }
 ```
 
@@ -44,7 +44,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath 'com.monits:static-code-analysis-plugin:2.5.0'
+    classpath 'com.monits:static-code-analysis-plugin:2.6.0'
   }
 }
 
@@ -59,16 +59,16 @@ buildscript {
     jcenter()
   }
   dependencies {
-    classpath 'com.monits:static-code-analysis-plugin:2.5.0'
+    classpath 'com.monits:static-code-analysis-plugin:2.6.0'
   }
 }
 
 apply plugin: 'com.monits.staticCodeAnalysis'
 ```
 
-The plugin is compatible with Gradle 2.3+ and Gradle 3.0+. We are commited to supporting the last 2 major gradle versions.
+The plugin is compatible with Gradle 2.3+, Gradle 3.0+ and Gradle 4.0+. We are commited to supporting at least the last 2 major gradle versions.
 
-It supports all versions of the Android plugin from 1.1.0 onwards, up to 2.2.2.
+It supports all versions of the Android plugin from 1.1.0 onwards, up to 3.0.0-beta4.
 
 
 ## DSL

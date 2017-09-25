@@ -1,7 +1,7 @@
 ## History
 
 # v2.6
-* **2.6.0 - UNRELEASED**
+* **2.6.0**
 
  Improvements:
  * Upgraded to fully support Gradle 4.+
@@ -12,6 +12,7 @@
     PMD checks when duplicate, and suppressing rules that are broken. Tests also
     have a more lax configurartion out of the box.
  * Changed default Android Lint warning `WifiManagerPotentialLeak` to error.
+ * Fully supports Android Gradle plugin 3.0.0-beta4
 
  Bug fixes:
  * [#16](https://github.com/Monits/static-code-analysis-plugin/issues/16) - Remove usage of all deprecated Gradle APIs
