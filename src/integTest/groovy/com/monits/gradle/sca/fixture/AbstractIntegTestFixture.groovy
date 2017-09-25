@@ -154,6 +154,7 @@ abstract class AbstractIntegTestFixture extends Specification {
 
                 repositories {
                     jcenter()
+                    ${toolsConfig.get(ANDROID_VERSION, DEFAULT_ANDROID_VERSION).startsWith('3') ? 'google()' : ''}
                 }
             }
 
