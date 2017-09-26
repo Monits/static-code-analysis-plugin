@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2016 Monits S.A.
+ * Copyright 2010-2017 Monits S.A.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at
@@ -26,9 +26,11 @@ import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.plugins.quality.Checkstyle
 import org.gradle.api.plugins.quality.CheckstyleExtension
 import org.gradle.api.plugins.quality.CheckstyleReports
+import org.gradle.api.reporting.ConfigurableReport
 import org.gradle.api.reporting.ReportingExtension
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.util.GradleVersion
 import org.gradle.util.GUtil
 
 /**
@@ -37,6 +39,7 @@ import org.gradle.util.GUtil
 @CompileStatic
 class CheckstyleConfigurator implements AnalysisConfigurator {
     private static final String CHECKSTYLE = 'checkstyle'
+    private static final GradleVersion GRADLE4 = GradleVersion.version('4.0.0')
 
     private final RemoteConfigLocator configLocator = new RemoteConfigLocator(CHECKSTYLE)
 
@@ -109,11 +112,19 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
                         dependsOn project.tasks.findByName(downloadTaskName)
                     }
 
-                    setConfigFile configSource
+                    /*
+                     * Gradle 4.0 introduced a config property setting by default to config/checkstyle
+                     * After any other checkstyle task downloads a new config there,
+                     * all other would be invalidated so we manually disable it.
+                    */
+                    if (GradleVersion.current() >= GRADLE4) {
+                        configDir = project.<File>provider { null }
+                    }
+
+                    configFile = configSource
 
                     reports { CheckstyleReports r ->
-                        r.xml.setDestination(new File(project.extensions.getByType(ReportingExtension).file(CHECKSTYLE),
-                            "checkstyle-${sourceSetName}.xml"))
+                        configureXmlReport(r.xml, project, sourceSetName)
 
                         if (r.hasProperty('html')) {
                             r.html.enabled = false // added in gradle 2.10, but unwanted
@@ -136,6 +147,18 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
         }
 
         project.tasks.findByName('check').dependsOn checkstyleRootTask
+    }
+
+    /*
+     * Gradle 4.2 deprecated setDestination(Object) in favor of the new setDestination(File) which didn't exist before
+     * Therefore, static compilation against the new method fails on older Gradle versions, but forcing the usage of
+     * the old one produces deprecation warnings on 4.2, so we let the runtime decide which method to use
+    */
+    @CompileStatic(TypeCheckingMode.SKIP)
+    private static void configureXmlReport(final ConfigurableReport report, final Project project,
+            final String sourceSetName) {
+        report.destination = new File(project.extensions.getByType(ReportingExtension).file(CHECKSTYLE),
+            "checkstyle-${sourceSetName}.xml")
     }
 
     private static Task getOrCreateTask(final Project project, final String taskName, final Closure closure) {

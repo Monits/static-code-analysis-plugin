@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2016 Monits S.A.
+ * Copyright 2010-2017 Monits S.A.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at
@@ -27,7 +27,7 @@ import spock.util.environment.Jvm
 */
 abstract class AbstractIntegTestFixture extends Specification {
     // A sample of gradle versions to be considered in general testing
-    static final TESTED_GRADLE_VERSIONS = ['2.3', '2.4', '2.7', '2.8', '2.10', '2.14.1', '3.0', '3.1', '3.3']
+    static final TESTED_GRADLE_VERSIONS = ['2.3', '2.4', '2.7', '2.8', '2.10', '2.14.1', '3.0', '3.1', '3.3', '4.0']
 
     private static final String ANDROID_1_5_0 = '1.5.0'
     static final String DEFAULT_ANDROID_VERSION = ANDROID_1_5_0
@@ -70,7 +70,7 @@ abstract class AbstractIntegTestFixture extends Specification {
             .withArguments('check', '--stacktrace')
     }
 
-    TestFile file(path) {
+    TestFile file(String path) {
         File f = new File(testProjectDir.root, path)
         f.parentFile.mkdirs()
         new TestFile(f)
@@ -101,7 +101,7 @@ abstract class AbstractIntegTestFixture extends Specification {
         writeBuildFile(configMap)
     }
 
-    TestFile writeBuildFile(toolsConfig) {
+    TestFile writeBuildFile(Map<String, Boolean> toolsConfig) {
         buildScriptFile() << """
             buildscript {
                 dependencies {
@@ -123,7 +123,7 @@ abstract class AbstractIntegTestFixture extends Specification {
         """ + staticCodeAnalysisConfig(toolsConfig) as TestFile
     }
 
-    String staticCodeAnalysisConfig(toolsConfig) {
+    String staticCodeAnalysisConfig(Map<String, Boolean> toolsConfig) {
         """
             // disable all other checks
             staticCodeAnalysis {
@@ -143,7 +143,7 @@ abstract class AbstractIntegTestFixture extends Specification {
         writeAndroidBuildFile(configMap)
     }
 
-    TestFile writeAndroidBuildFile(toolsConfig) {
+    TestFile writeAndroidBuildFile(Map<String, Object> toolsConfig) {
         buildScriptFile() << """
             buildscript {
                 dependencies {
@@ -154,6 +154,7 @@ abstract class AbstractIntegTestFixture extends Specification {
 
                 repositories {
                     jcenter()
+                    ${toolsConfig.get(ANDROID_VERSION, DEFAULT_ANDROID_VERSION).startsWith('3') ? 'google()' : ''}
                 }
             }
 
@@ -242,6 +243,6 @@ abstract class AbstractIntegTestFixture extends Specification {
         androidVersionNumber < VersionNumber.parse(ANDROID_1_5_0) ? '2.9' :
             androidVersionNumber.major < 2 ||
                 (androidVersionNumber.major == 2 && androidVersionNumber.minor < 2) ?
-                    '2.14.1' : GradleVersion.current().version
+                    '2.14.1' : androidVersionNumber.major < 3 ? '3.5' : GradleVersion.current().version
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2016 Monits S.A.
+ * Copyright 2010-2017 Monits S.A.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at
@@ -28,6 +28,7 @@ import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.plugins.quality.FindBugs
 import org.gradle.api.plugins.quality.FindBugsExtension
 import org.gradle.api.plugins.quality.FindBugsReports
+import org.gradle.api.reporting.ConfigurableReport
 import org.gradle.api.reporting.ReportingExtension
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.compile.JavaCompile
@@ -151,9 +152,7 @@ class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
 
                     reports { FindBugsReports r ->
                         r.with {
-                            xml.setDestination(new File(project.extensions.getByType(ReportingExtension).file(FINDBUGS),
-                                "findbugs-${sourceSetName}.xml"))
-                            xml.withMessages = true
+                            configureXmlReport(xml, project, sourceSetName)
                         }
                     }
                 }
@@ -168,6 +167,19 @@ class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
         }
 
         project.tasks.findByName('check').dependsOn findbugsRootTask
+    }
+
+    /*
+     * Gradle 4.2 deprecated setDestination(Object) in favor of the new setDestination(File) which didn't exist before
+     * Therefore, static compilation against the new method fails on older Gradle versions, but forcing the usage of
+     * the old one produces deprecation warnings on 4.2, so we let the runtime decide which method to use
+    */
+    @CompileStatic(TypeCheckingMode.SKIP)
+    private static void configureXmlReport(final ConfigurableReport report, final Project project,
+            final String sourceSetName) {
+        report.destination = new File(project.extensions.getByType(ReportingExtension).file(FINDBUGS),
+            "findbugs-${sourceSetName}.xml")
+        report.withMessages = true
     }
 
     private static String generateTaskName(final String taskName = FINDBUGS, final String sourceSetName) {

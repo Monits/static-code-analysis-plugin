@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2016 Monits S.A.
+ * Copyright 2010-2017 Monits S.A.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at
@@ -18,7 +18,6 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputFile
-import org.gradle.api.tasks.ParallelizableTask
 import org.gradle.api.tasks.StopExecutionException
 import org.gradle.api.tasks.TaskAction
 import org.gradle.util.GradleVersion
@@ -26,7 +25,6 @@ import org.gradle.util.GradleVersion
 /**
  * A task to download a remote file.
 */
-@ParallelizableTask
 class DownloadTask extends DefaultTask {
 
     @Input

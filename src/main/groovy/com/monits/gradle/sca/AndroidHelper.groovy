@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2016 Monits S.A.
+ * Copyright 2010-2017 Monits S.A.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at
@@ -14,8 +14,8 @@
 package com.monits.gradle.sca
 
 import groovy.transform.CompileStatic
+import java.util.regex.Matcher
 import org.gradle.api.Project
-import org.gradle.api.Task
 import org.gradle.util.VersionNumber
 
 /**
@@ -26,7 +26,7 @@ final class AndroidHelper {
     private static final String ANDROID_SDK_HOME = 'ANDROID_SDK_HOME'
     private static final String ANDROID_ENABLE_CACHE_PROPERTY = 'android.enableBuildCache'
     private static final String ANDROID_CACHE_LOCATION = 'android.buildCacheDir'
-    private static final String ANDROID_GRADLE_VERSION_PROPERTY_NAME = 'androidGradlePluginVersion'
+    private static final String ANDROID_DEPENDENCY_PATTERN = /com\.android\.tools\.build\/gradle\/([^\/]+)/
     private static final VersionNumber BUILD_CACHE_ANDROID_GRADLE_VERSION = VersionNumber.parse('2.3.0')
     private static final VersionNumber REPORT_PER_VARIANT_ANDROID_GRADLE_VERSION = VersionNumber.parse('2.0.0')
 
@@ -36,13 +36,15 @@ final class AndroidHelper {
      * @return The version of the used plugin, or {@see VersionNumber#UNKNOWN} if not known.
      */
     private static VersionNumber getCurrentVersion(final Project project) {
-        Task lintTask = project.tasks.findByName('lint')
+        File androidDependency = project.buildscript.configurations.getByName('classpath').resolve()
+            .find { it =~ ANDROID_DEPENDENCY_PATTERN }
+        Matcher matcher = androidDependency =~ ANDROID_DEPENDENCY_PATTERN
 
-        if (!lintTask.hasProperty(ANDROID_GRADLE_VERSION_PROPERTY_NAME)) {
+        if (!matcher.find()) {
             return VersionNumber.UNKNOWN
         }
 
-        VersionNumber.parse(lintTask.property(ANDROID_GRADLE_VERSION_PROPERTY_NAME) as String)
+        VersionNumber.parse(matcher.group(1))
     }
 
     /**
@@ -90,6 +92,7 @@ final class AndroidHelper {
      * Retrieves the current Android Home path, or null if unknown.
      * @return The current Android Home.
      */
+    @SuppressWarnings('CouldBeSwitchStatement')
     static String getHomeDir() {
         // Home candidates and order according to http://tools.android.com/tips/lint-custom-rules
         String home = System.getProperty(ANDROID_SDK_HOME)

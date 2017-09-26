@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2016 Monits S.A.
+ * Copyright 2010-2017 Monits S.A.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at
@@ -45,6 +45,8 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     private final static String PMD_DEFAULT_ANDROID_RULES = DEFAULTS_LOCATION + 'pmd/pmd-android.xml'
     private final static String PMD_BACKWARDS_RULES = DEFAULTS_LOCATION + 'pmd/pmd-5.1.3.xml'
     private final static String FINDBUGS_DEFAULT_SUPPRESSION_FILTER =
+        DEFAULTS_LOCATION + 'findbugs/findbugs-exclusions.xml'
+    private final static String FINDBUGS_DEFAULT_ANDROID_SUPPRESSION_FILTER =
         DEFAULTS_LOCATION + 'findbugs/findbugs-exclusions-android.xml'
     private final static String ANDROID_DEFAULT_RULES = DEFAULTS_LOCATION + 'android/android-lint.xml'
     private final static String PROVIDED = 'provided'
@@ -183,6 +185,13 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         // default suppression filter for findbugs for Android
         withAndroidPlugins {
             extension.conventionMapping.with {
+                findbugsExclude = { FINDBUGS_DEFAULT_ANDROID_SUPPRESSION_FILTER }
+            }
+        }
+
+        // default suppression filter for findbugs for Java
+        withPlugin(JavaBasePlugin) {
+            extension.conventionMapping.with {
                 findbugsExclude = { FINDBUGS_DEFAULT_SUPPRESSION_FILTER }
             }
         }
@@ -228,31 +237,31 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         }
     }
 
-    private withAndroidPlugins(final Class<AnalysisConfigurator> configClass) {
+    private void withAndroidPlugins(final Class<AnalysisConfigurator> configClass) {
         AnalysisConfigurator configurator = configClass.newInstance()
         Action<? extends Plugin> configureAction = { configurator.applyAndroidConfig(project, extension) }
 
         withAndroidPlugins configureAction
     }
 
-    private withPlugin(final Class<? extends Plugin> pluginClass, final Class<AnalysisConfigurator> configClass) {
+    private void withPlugin(final Class<? extends Plugin> pluginClass, final Class<AnalysisConfigurator> configClass) {
         AnalysisConfigurator  configurator = configClass.newInstance()
         Action<? extends Plugin> configureAction = { configurator.applyConfig(project, extension) }
 
         withPlugin(pluginClass, configureAction)
     }
 
-    private withPlugin(final Class<? extends Plugin> pluginClass, final Action<? extends Plugin> configureAction) {
+    private void withPlugin(final Class<? extends Plugin> pluginClass, final Action<? extends Plugin> configureAction) {
         project.plugins.withType(pluginClass, configureAction)
     }
 
-    private withAndroidPlugins(final Action<? extends Plugin> configureAction) {
+    private void withAndroidPlugins(final Action<? extends Plugin> configureAction) {
         withOptionalPlugin('com.android.build.gradle.AppPlugin', configureAction)
         withOptionalPlugin('com.android.build.gradle.LibraryPlugin', configureAction)
     }
 
     @SuppressWarnings(['ClassForName', 'EmptyCatchBlock'])
-    private withOptionalPlugin(final String pluginClassName, final Action<? extends Plugin> configureAction) {
+    private void withOptionalPlugin(final String pluginClassName, final Action<? extends Plugin> configureAction) {
         try {
             // Will most likely throw a ClassNotFoundException
             Class<?> pluginClass = Class.forName(pluginClassName)

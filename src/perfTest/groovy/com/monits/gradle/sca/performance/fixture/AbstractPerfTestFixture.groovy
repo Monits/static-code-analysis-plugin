@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2016 Monits S.A.
+ * Copyright 2010-2017 Monits S.A.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at
@@ -77,7 +77,7 @@ abstract class AbstractPerfTestFixture extends Specification {
             .withArguments('check', '--stacktrace')
     }
 
-    TestFile file(path) {
+    TestFile file(String path) {
         File f = new File(testProjectDir.root.absolutePath + File.separator + path)
         f.parentFile.mkdirs()
         new TestFile(f)

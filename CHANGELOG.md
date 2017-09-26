@@ -1,13 +1,24 @@
 ## History
 
-# v2.5
-* **2.5.1 - UNRELEASED**
+# v2.6
+* **2.6.0**
 
  Improvements:
+ * Upgraded to fully support Gradle 4.+
  * Upgraded PMD to 5.8.1
- * Upgraded Checkstyle to 8.1
+ * Upgraded Checkstyle to 8.2
+ * Upgraded fb-contrib to 7.0.5
+ * Java projects now use a default suppression similar to the Android one, favoring
+    PMD checks when duplicate, and suppressing rules that are broken. Tests also
+    have a more lax configurartion out of the box.
  * Changed default Android Lint warning `WifiManagerPotentialLeak` to error.
+ * Fully supports Android Gradle plugin 3.0.0-beta4
 
+ Bug fixes:
+ * [#16](https://github.com/Monits/static-code-analysis-plugin/issues/16) - Remove usage of all deprecated Gradle APIs
+ * A regression under Gradle 4.x where checkstyle reports where incorrectly considered out of date.
+
+# v2.5
 * **2.5.0**
 
  Improvements:

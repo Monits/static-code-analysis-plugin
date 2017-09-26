@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2016 Monits S.A.
+ * Copyright 2010-2017 Monits S.A.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at
@@ -15,14 +15,12 @@ package com.monits.gradle.sca.task
 
 import groovy.io.FileType
 import groovy.transform.CompileStatic
-import org.gradle.api.tasks.ParallelizableTask
 import org.gradle.api.tasks.TaskAction
 
 /**
  * Task to clean up and restore Android Lint Home after running.
 */
 @CompileStatic
-@ParallelizableTask
 class CleanupAndroidLintTask extends AndroidLintTask {
 
     @TaskAction
