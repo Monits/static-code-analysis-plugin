@@ -182,17 +182,17 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             androidLintConfig = { ANDROID_DEFAULT_RULES }
         }
 
+        // default suppression filter for findbugs for Java - order is important, Android plugin applies Java
+        withPlugin(JavaBasePlugin) {
+            extension.conventionMapping.with {
+                findbugsExclude = { FINDBUGS_DEFAULT_SUPPRESSION_FILTER }
+            }
+        }
+
         // default suppression filter for findbugs for Android
         withAndroidPlugins {
             extension.conventionMapping.with {
                 findbugsExclude = { FINDBUGS_DEFAULT_ANDROID_SUPPRESSION_FILTER }
-            }
-        }
-
-        // default suppression filter for findbugs for Java
-        withPlugin(JavaBasePlugin) {
-            extension.conventionMapping.with {
-                findbugsExclude = { FINDBUGS_DEFAULT_SUPPRESSION_FILTER }
             }
         }
 
