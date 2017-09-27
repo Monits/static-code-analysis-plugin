@@ -389,6 +389,48 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
             .assertContents(containsString('<Errors errors="0" missingClasses="0">'))
     }
 
+    @SuppressWarnings('MethodName')
+    void 'Android project has android suppressions'() {
+        given:
+        writeAndroidBuildFile(DEFAULT_ANDROID_VERSION)
+        writeAndroidManifest()
+        goodCode()
+
+        when:
+        BuildResult result = gradleRunner()
+                .withGradleVersion(gradleVersionForAndroid(DEFAULT_ANDROID_VERSION))
+                .build()
+
+        then:
+        result.task(taskName()).outcome == SUCCESS
+
+        // Make sure findbugs suppression file exists and has the proper version
+        suppressionFilter('main').exists()
+        suppressionFilter('main').assertContents(containsString('<Source name="~.*Activity.java"/>'))
+        suppressionFilter('test').exists()
+        suppressionFilter('test').assertContents(containsString('<Source name="~.*Activity.java"/>'))
+    }
+
+    @SuppressWarnings('MethodName')
+    void 'Java project has Java suppressions'() {
+        given:
+        writeBuildFile()
+        goodCode()
+
+        when:
+        BuildResult result = gradleRunner()
+                .build()
+
+        then:
+        result.task(taskName()).outcome == SUCCESS
+
+        // Make sure findbugs suppression file exists and has the proper version
+        suppressionFilter('main').exists()
+        suppressionFilter('main').assertContents(not(containsString('<Source name="~.*Activity.java"/>')))
+        suppressionFilter('test').exists()
+        suppressionFilter('test').assertContents(not(containsString('<Source name="~.*Activity.java"/>')))
+    }
+
     @Override
     String reportFileName(final String sourceSet) {
         "build/reports/findbugs/findbugs${sourceSet ? "-${sourceSet}" : '-main'}.xml"
@@ -416,9 +458,13 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
     }
 
     TestFile writeEmptySuppressionFilter(final String sourceSet = null) {
-        file("config/findbugs/excludeFilter${sourceSet ? "-${sourceSet}" : ''}.xml") << '''
+        suppressionFilter(sourceSet) << '''
             <FindBugsFilter>
             </FindBugsFilter>
         ''' as TestFile
+    }
+
+    TestFile suppressionFilter(final String sourceSet = null) {
+        file("config/findbugs/excludeFilter${sourceSet ? "-${sourceSet}" : ''}.xml")
     }
 }
