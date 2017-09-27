@@ -8,9 +8,12 @@
             <!-- This pattern is simply wrong, and asks people to violate equals simmetry -->
             <Bug pattern="EQ_DOESNT_OVERRIDE_EQUALS" />
 
-            <!-- This pattern request for StandardCharsets that are available in API level 19 -->
+            <!-- This pattern requests for StandardCharsets that is available in API level 19 -->
             <Bug pattern="CSI_CHAR_SET_ISSUES_USE_STANDARD_CHARSET_NAME" />
             <Bug pattern="CSI_CHAR_SET_ISSUES_USE_STANDARD_CHARSET" />
+            
+            <!-- This patterns requests for java.nio.file.Files that is available in API level 19 -->
+            <Bug pattern="IOI_USE_OF_FILE_STREAM_CONSTRUCTORS" /> 
 
             <!-- This is supposedly turned off by default, by I'm seeing it here and there... fb-contrib's is better -->
             <Bug pattern="CD_CIRCULAR_DEPENDENCY" />
