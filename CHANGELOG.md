@@ -1,6 +1,10 @@
 ## History
 
 # v2.6
+* **2.6.1**
+ Bug fixes:
+ * Android no longer applies the Java suppression for Findbugs by default
+
 * **2.6.0**
 
  Improvements:
