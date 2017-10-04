@@ -1,6 +1,10 @@
 ## History
 
 # v2.6
+* **2.6.2**
+
+ No changes, just upgraded Gradle Portal plugin version to fix some issues with plugin uploading
+
 * **2.6.1**
  Bug fixes:
  * Android no longer applies the Java suppression for Findbugs by default
