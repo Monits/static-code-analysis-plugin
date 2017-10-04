@@ -8,6 +8,9 @@ target/
 build/
 config/checkstyle/
 
+# jenv files
+.java-version
+
 # Gradle related files
 .gradle/
 
