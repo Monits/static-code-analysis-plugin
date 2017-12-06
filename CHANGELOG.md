@@ -6,6 +6,9 @@
  Improvements:
  * Upgraded Checkstyle to 8.4
 
+Bug fixes:
+ * [#23](https://github.com/Monits/static-code-analysis-plugin/issues/23) - IllegalStateException: Resolving configuration 'releasePublish' directly is not allowed under AGP 3.0.0
+
 * **2.6.2**
 
  No changes, just upgraded Gradle Portal plugin version to fix some issues with plugin uploading
