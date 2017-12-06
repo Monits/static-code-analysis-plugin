@@ -27,6 +27,9 @@ task integTest(type: Test) {
     classpath = sourceSets.integTest.runtimeClasspath
     maxParallelForks = Math.max(1f, Runtime.runtime.availableProcessors() / 2)
 
+    // Card.io is causing trouble
+    jvmArgs '-noverify'
+
     // output test failure causes for easier Travis integration
     testLogging {
         events "PASSED", "FAILED"
