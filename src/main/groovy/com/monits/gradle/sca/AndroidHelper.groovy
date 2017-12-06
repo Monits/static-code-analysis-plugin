@@ -35,7 +35,7 @@ final class AndroidHelper {
      * @param project The project on which to analyze the used plugin version.
      * @return The version of the used plugin, or {@see VersionNumber#UNKNOWN} if not known.
      */
-    private static VersionNumber getCurrentVersion(final Project project) {
+    static VersionNumber getCurrentVersion(final Project project) {
         File androidDependency = project.buildscript.configurations.getByName('classpath').resolve()
             .find { it =~ ANDROID_DEPENDENCY_PATTERN }
         Matcher matcher = androidDependency =~ ANDROID_DEPENDENCY_PATTERN
