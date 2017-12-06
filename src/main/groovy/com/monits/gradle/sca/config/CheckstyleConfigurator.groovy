@@ -22,6 +22,7 @@ import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Namer
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.plugins.quality.Checkstyle
 import org.gradle.api.plugins.quality.CheckstyleExtension
@@ -40,6 +41,7 @@ import org.gradle.util.GUtil
 class CheckstyleConfigurator implements AnalysisConfigurator {
     private static final String CHECKSTYLE = 'checkstyle'
     private static final GradleVersion GRADLE4 = GradleVersion.version('4.0.0')
+    private static final GradleVersion GRADLE3_3 = GradleVersion.version('3.3')
 
     private final RemoteConfigLocator configLocator = new RemoteConfigLocator(CHECKSTYLE)
 
@@ -63,7 +65,14 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
         setupTasksPerSourceSet(project, extension, project.android.sourceSets) { task, sourceSet ->
             source sourceSet.java.srcDirs
             exclude '**/gen/**'
-            classpath = project.configurations[sourceSet.packageConfigurationName]
+
+            // Make sure the config is resolvable... AGP 3 decided to play with this...
+            Configuration config = project.configurations[sourceSet.packageConfigurationName]
+            if (GradleVersion.current() >= GRADLE3_3) {
+                config.canBeResolved = true
+            }
+
+            classpath = config
         }
     }
 
