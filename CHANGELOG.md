@@ -1,11 +1,10 @@
 ## History
 
 # v2.6
-* **2.6.3**
+* **2.6.3 - UNRELEASED**
 
  Improvements:
  * Upgraded Checkstyle to 8.5
- * On newer Android Gradle Plugin versions (2.0 and newer), tasks are configured earlier in the Gradle lifecycle
 
 Bug fixes:
  * [#23](https://github.com/Monits/static-code-analysis-plugin/issues/23) - IllegalStateException: Resolving configuration 'releasePublish' directly is not allowed under AGP 3.0.0
