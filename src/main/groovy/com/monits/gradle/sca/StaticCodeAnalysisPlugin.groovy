@@ -237,15 +237,16 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         }
     }
 
-    private void withAndroidPlugins(final Class<AnalysisConfigurator> configClass) {
-        AnalysisConfigurator configurator = configClass.newInstance()
+    private void withAndroidPlugins(final Class<? extends AnalysisConfigurator> configClass) {
+        AnalysisConfigurator configurator = configClass.newInstance(new Object[0])
         Action<? extends Plugin> configureAction = { configurator.applyAndroidConfig(project, extension) }
 
         withAndroidPlugins configureAction
     }
 
-    private void withPlugin(final Class<? extends Plugin> pluginClass, final Class<AnalysisConfigurator> configClass) {
-        AnalysisConfigurator  configurator = configClass.newInstance()
+    private void withPlugin(final Class<? extends Plugin> pluginClass,
+                            final Class<? extends AnalysisConfigurator> configClass) {
+        AnalysisConfigurator  configurator = configClass.newInstance(new Object[0])
         Action<? extends Plugin> configureAction = { configurator.applyConfig(project, extension) }
 
         withPlugin(pluginClass, configureAction)

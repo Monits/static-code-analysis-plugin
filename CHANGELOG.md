@@ -1,7 +1,7 @@
 ## History
 
 # v2.6
-* **2.6.3 - UNRELEASED**
+* **2.6.3**
 
  Improvements:
  * Upgraded Checkstyle to 8.5
