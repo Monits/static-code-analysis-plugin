@@ -29,7 +29,6 @@ import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.util.GradleVersion
-import org.gradle.util.VersionNumber
 
 /**
  * Static code analysis plugin for Android and Java projects
@@ -56,6 +55,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     private Project project
 
     @CompileStatic(TypeCheckingMode.SKIP)
+    @SuppressWarnings('UnnecessaryGetter')
     @Override
     void apply(Project project) {
         this.project = project
@@ -65,42 +65,33 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         addFindbugsAnnotationDependencies()
         configureExtensionRule()
 
-        addDepsButModulesToScaconfig project.configurations.compile
-        addDepsButModulesToScaconfig project.configurations.testCompile
+        project.afterEvaluate {
+            addDepsButModulesToScaconfig project.configurations.compile
+            addDepsButModulesToScaconfig project.configurations.testCompile
 
-        if (AndroidHelper.getCurrentVersion(project) < VersionNumber.parse('2.0.0')) {
-            project.afterEvaluate {
-                // must be done in `afterEvaluate` for compatibility with android plugin [1.0, 2.0.0)
-                setupTasks()
+            // Apply Android Lint configuration
+            // must be done in `afterEvaluate` for compatibility with android plugin [1.0, 1.3)
+            withAndroidPlugins AndroidLintConfigurator
+
+            if (extension.getFindbugs()) {
+                withAndroidPlugins FindbugsConfigurator
+                withPlugin(JavaBasePlugin, FindbugsConfigurator)
             }
-        } else {
-            setupTasks()
-        }
-    }
 
-    @SuppressWarnings('UnnecessaryGetter')
-    private void setupTasks() {
-        // Apply Android Lint configuration
-        withAndroidPlugins AndroidLintConfigurator
+            if (extension.getCheckstyle()) {
+                withAndroidPlugins CheckstyleConfigurator
+                withPlugin(JavaBasePlugin, CheckstyleConfigurator)
+            }
 
-        if (extension.getFindbugs()) {
-            withAndroidPlugins FindbugsConfigurator
-            withPlugin(JavaBasePlugin, FindbugsConfigurator)
-        }
+            if (extension.getPmd()) {
+                withAndroidPlugins PmdConfigurator
+                withPlugin(JavaBasePlugin, PmdConfigurator)
+            }
 
-        if (extension.getCheckstyle()) {
-            withAndroidPlugins CheckstyleConfigurator
-            withPlugin(JavaBasePlugin, CheckstyleConfigurator)
-        }
-
-        if (extension.getPmd()) {
-            withAndroidPlugins PmdConfigurator
-            withPlugin(JavaBasePlugin, PmdConfigurator)
-        }
-
-        if (extension.getCpd()) {
-            withAndroidPlugins CpdConfigurator
-            withPlugin(JavaBasePlugin, CpdConfigurator)
+            if (extension.getCpd()) {
+                withAndroidPlugins CpdConfigurator
+                withPlugin(JavaBasePlugin, CpdConfigurator)
+            }
         }
     }
 
@@ -246,16 +237,15 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         }
     }
 
-    private void withAndroidPlugins(final Class<? extends AnalysisConfigurator> configClass) {
+    private void withAndroidPlugins(final Class<AnalysisConfigurator> configClass) {
         AnalysisConfigurator configurator = configClass.newInstance()
         Action<? extends Plugin> configureAction = { configurator.applyAndroidConfig(project, extension) }
 
         withAndroidPlugins configureAction
     }
 
-    private void withPlugin(final Class<? extends Plugin> pluginClass,
-                            final Class<? extends AnalysisConfigurator> configClass) {
-        AnalysisConfigurator  configurator = configClass.newInstance(new Object[0])
+    private void withPlugin(final Class<? extends Plugin> pluginClass, final Class<AnalysisConfigurator> configClass) {
+        AnalysisConfigurator  configurator = configClass.newInstance()
         Action<? extends Plugin> configureAction = { configurator.applyConfig(project, extension) }
 
         withPlugin(pluginClass, configureAction)
