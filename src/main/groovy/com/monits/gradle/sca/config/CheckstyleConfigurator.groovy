@@ -68,7 +68,7 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
 
             // Make sure the config is resolvable... AGP 3 decided to play with this...
             Configuration config = project.configurations[sourceSet.packageConfigurationName]
-            if (GradleVersion.current() >= GRADLE3_3) {
+            if (GradleVersion.current() >= GRADLE3_3 && config.state == Configuration.State.UNRESOLVED) {
                 config.canBeResolved = true
             }
 
