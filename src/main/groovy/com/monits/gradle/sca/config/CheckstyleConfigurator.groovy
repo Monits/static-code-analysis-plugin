@@ -18,6 +18,7 @@ import com.monits.gradle.sca.StaticCodeAnalysisExtension
 import com.monits.gradle.sca.ToolVersions
 import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
+import org.gradle.api.GradleException
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Namer
 import org.gradle.api.Project
@@ -31,8 +32,8 @@ import org.gradle.api.reporting.ConfigurableReport
 import org.gradle.api.reporting.ReportingExtension
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
-import org.gradle.util.GradleVersion
 import org.gradle.util.GUtil
+import org.gradle.util.GradleVersion
 
 /**
  * A configurator for Checkstyle tasks.
@@ -69,7 +70,11 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
             // Make sure the config is resolvable... AGP 3 decided to play with this...
             Configuration config = project.configurations[sourceSet.packageConfigurationName]
             if (GradleVersion.current() >= GRADLE3_3 && config.state == Configuration.State.UNRESOLVED) {
-                config.canBeResolved = true
+                try {
+                    config.canBeResolved = true
+                } catch (GradleException ignore) {
+                    // ignored, may happen under cross-module dependencies
+                }
             }
 
             classpath = config
