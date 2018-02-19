@@ -18,7 +18,6 @@ import com.monits.gradle.sca.StaticCodeAnalysisExtension
 import com.monits.gradle.sca.ToolVersions
 import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
-import org.gradle.api.GradleException
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Namer
 import org.gradle.api.Project
@@ -69,12 +68,9 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
 
             // Make sure the config is resolvable... AGP 3 decided to play with this...
             Configuration config = project.configurations[sourceSet.packageConfigurationName]
-            if (GradleVersion.current() >= GRADLE3_3 && config.state == Configuration.State.UNRESOLVED) {
-                try {
-                    config.canBeResolved = true
-                } catch (GradleException ignore) {
-                    // ignored, may happen under cross-module dependencies
-                }
+            if (GradleVersion.current() >= GRADLE3_3 && config.state == Configuration.State.UNRESOLVED
+                    && !config.canBeResolved) {
+                config.canBeResolved = true
             }
 
             classpath = config
@@ -176,14 +172,14 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
     }
 
     private static Task getOrCreateTask(final Project project, final String taskName, final Closure closure) {
-        Task pmdTask
+        Task checkstyleTask
         if (project.tasks.findByName(taskName)) {
-            pmdTask = project.tasks.findByName(taskName)
+            checkstyleTask = project.tasks.findByName(taskName)
         } else {
-            pmdTask = project.task(taskName, type:Checkstyle)
+            checkstyleTask = project.task(taskName, type:Checkstyle)
         }
 
-        pmdTask.configure closure
+        checkstyleTask.configure closure
     }
 
     private static String generateTaskName(final String taskName = CHECKSTYLE, final String sourceSetName) {
