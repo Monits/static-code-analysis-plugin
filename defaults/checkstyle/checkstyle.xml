@@ -185,11 +185,11 @@
             <property name="ignoreComments" value="true"/>
         </module>
         <module name="SuppressWarningsHolder"/>
-
-        <!-- Allow to disable checks with comments -->
-        <module name="SuppressionCommentFilter"/>
     </module>
     
+    <!-- Allow to disable checks with comments -->
+    <module name="SuppressionCommentFilter"/>
+
     <!-- Allow to disable checks with @SuppressWarnings -->
     <module name="SuppressWarningsFilter"/>
     <module name="SuppressionFilter">
