@@ -4,7 +4,7 @@
 ### 2.6.3
 
  Improvements:
- * Upgraded Checkstyle to 8.5
+ * Upgraded Checkstyle to 8.9
 
 Bug fixes:
  * [#23](https://github.com/Monits/static-code-analysis-plugin/issues/23) - IllegalStateException: Resolving configuration 'releasePublish' directly is not allowed under AGP 3.0.0
