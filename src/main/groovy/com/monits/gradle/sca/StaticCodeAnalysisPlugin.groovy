@@ -174,10 +174,10 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             }
             pmdRules = {
                 if (ToolVersions.isLatestPmdVersion()) {
-                    return [PMD_DEFAULT_RULES, PMD_DEFAULT_ANDROID_RULES]
+                    return [PMD_DEFAULT_RULES]
                 }
 
-                [PMD_BACKWARDS_RULES, PMD_DEFAULT_ANDROID_RULES]
+                [PMD_BACKWARDS_RULES]
             }
             androidLintConfig = { ANDROID_DEFAULT_RULES }
         }
@@ -189,10 +189,17 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             }
         }
 
-        // default suppression filter for findbugs for Android
+        // default suppression filter for findbugs for Android + PMD android rules
         withAndroidPlugins {
             extension.conventionMapping.with {
                 findbugsExclude = { FINDBUGS_DEFAULT_ANDROID_SUPPRESSION_FILTER }
+                pmdRules = {
+                    if (ToolVersions.isLatestPmdVersion()) {
+                        return [PMD_DEFAULT_RULES, PMD_DEFAULT_ANDROID_RULES]
+                    }
+
+                    [PMD_BACKWARDS_RULES, PMD_DEFAULT_ANDROID_RULES]
+                }
             }
         }
 

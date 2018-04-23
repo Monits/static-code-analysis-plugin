@@ -215,7 +215,7 @@ class PmdIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         then:
         result.task(taskName()).outcome == SUCCESS
 
-        // Make sure checkstyle reports exist
+        // Make sure PMD reports exist
         reportFile().exists()
         reportFile('test').exists()
 
@@ -225,7 +225,7 @@ class PmdIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
     }
 
     @SuppressWarnings('MethodName')
-    void 'pmd download remote config'() {
+    void 'pmd download remote config for Java'() {
         given:
         writeBuildFile()
         goodCode()
@@ -237,13 +237,38 @@ class PmdIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         then:
         result.task(taskName()).outcome == SUCCESS
 
+        // The config must exist, but  only for Java projects
+        file('config/pmd/pmd-main-pmd.xml').exists()
+        file('config/pmd/pmd-test-pmd.xml').exists()
+        !file('config/pmd/pmd-main-pmd-android.xml').exists()
+        !file('config/pmd/pmd-test-pmd-android.xml').exists()
+
+        // Make sure PMD report exists
+        reportFile().exists()
+    }
+
+    @SuppressWarnings('MethodName')
+    void 'pmd download remote config for Android'() {
+        given:
+        writeAndroidBuildFile()
+        writeAndroidManifest()
+        goodCode()
+
+        when:
+        BuildResult result = gradleRunner()
+            .withGradleVersion(gradleVersionForAndroid(DEFAULT_ANDROID_VERSION))
+            .build()
+
+        then:
+        result.task(taskName()).outcome == SUCCESS
+
         // The config must exist
         file('config/pmd/pmd-main-pmd.xml').exists()
         file('config/pmd/pmd-main-pmd-android.xml').exists()
         file('config/pmd/pmd-test-pmd.xml').exists()
         file('config/pmd/pmd-test-pmd-android.xml').exists()
 
-        // Make sure checkstyle report exists
+        // Make sure PMD report exists
         reportFile().exists()
     }
 
@@ -280,9 +305,7 @@ class PmdIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
 
         then:
         result.task(':downloadPmdXmlMainPmd').outcome == SUCCESS
-        result.task(':downloadPmdXmlMainPmdAndroid').outcome == SUCCESS
         result.task(':downloadPmdXmlTestPmd').outcome == SUCCESS
-        result.task(':downloadPmdXmlTestPmdAndroid').outcome == SUCCESS
         assertThat(result.output, containsString('Running in offline mode. Using a possibly outdated version of'))
     }
 
