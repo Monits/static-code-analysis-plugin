@@ -1,6 +1,11 @@
 ## History
 
 # v2.6
+### 2.6.4 - Unreleased
+
+Bug fixes:
+ * [#26](https://github.com/Monits/static-code-analysis-plugin/issues/26) - Standard java projects download android configuration
+
 ### 2.6.3
 
  Improvements:
