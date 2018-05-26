@@ -3,6 +3,9 @@
 # v2.6
 ### 2.6.4 - Unreleased
 
+Improvements:
+ * Upgraded Checkstyle to 8.10
+
 Bug fixes:
  * [#26](https://github.com/Monits/static-code-analysis-plugin/issues/26) - Standard java projects download android configuration
 
