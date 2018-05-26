@@ -33,7 +33,7 @@ final class ToolVersions {
 
     private final static String FINDBUGS_TOOL_VERSION = '3.0.1'
     private final static String FINDBUGS_MONITS_VERSION = '0.2.0'
-    private final static String FB_CONTRIB_VERSION = '7.0.5'
+    private final static String FB_CONTRIB_VERSION = '7.4.0'
 
     private final static String TOOL_GRADLE = 'Gradle'
     private final static String TOOL_JRE = 'Java'
