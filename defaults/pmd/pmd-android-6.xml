@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<ruleset xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	name="Monits Java ruleset"
+	xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
+  <description>
+     Custom ruleset for Java projects
+  </description>
+
+  <rule ref="category/java/errorprone.xml/CallSuperFirst"/>
+  <rule ref="category/java/errorprone.xml/CallSuperLast" />
+  <rule ref="category/java/errorprone.xml/DoNotHardCodeSDCard" />
+</ruleset>
