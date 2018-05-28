@@ -5,7 +5,7 @@
 
 Improvements:
  * Upgraded Checkstyle to 8.10
- * Upgraded fb-contrib to 7.4.0
+ * Upgraded fb-contrib to 7.4.1
  * Upgraded PMD to 6.3.0
 
 Bug fixes:
