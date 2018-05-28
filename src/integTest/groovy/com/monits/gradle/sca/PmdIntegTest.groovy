@@ -52,10 +52,10 @@ class PmdIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
 
         // Make sure report exists and was using the expected tool version
         reportFile('main').exists()
-        reportFile('main').assertContents(containsString("<pmd version=\"$pmdVersion\""))
+        reportFile('main').assertContents(containsString("version=\"$pmdVersion\""))
 
         reportFile('test').exists()
-        reportFile('test').assertContents(containsString("<pmd version=\"$pmdVersion\""))
+        reportFile('test').assertContents(containsString("version=\"$pmdVersion\""))
 
         where:
         version << TESTED_GRADLE_VERSIONS
@@ -238,10 +238,10 @@ class PmdIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         result.task(taskName()).outcome == SUCCESS
 
         // The config must exist, but  only for Java projects
-        file('config/pmd/pmd-main-pmd.xml').exists()
-        file('config/pmd/pmd-test-pmd.xml').exists()
-        !file('config/pmd/pmd-main-pmd-android.xml').exists()
-        !file('config/pmd/pmd-test-pmd-android.xml').exists()
+        file('config/pmd/pmd-main-pmd-6.xml').exists()
+        file('config/pmd/pmd-test-pmd-6.xml').exists()
+        !file('config/pmd/pmd-main-pmd-android-6.xml').exists()
+        !file('config/pmd/pmd-test-pmd-android-6.xml').exists()
 
         // Make sure PMD report exists
         reportFile().exists()
@@ -263,10 +263,10 @@ class PmdIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         result.task(taskName()).outcome == SUCCESS
 
         // The config must exist
-        file('config/pmd/pmd-main-pmd.xml').exists()
-        file('config/pmd/pmd-main-pmd-android.xml').exists()
-        file('config/pmd/pmd-test-pmd.xml').exists()
-        file('config/pmd/pmd-test-pmd-android.xml').exists()
+        file('config/pmd/pmd-main-pmd-6.xml').exists()
+        file('config/pmd/pmd-main-pmd-android-6.xml').exists()
+        file('config/pmd/pmd-test-pmd-6.xml').exists()
+        file('config/pmd/pmd-test-pmd-android-6.xml').exists()
 
         // Make sure PMD report exists
         reportFile().exists()
@@ -284,7 +284,7 @@ class PmdIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
             .buildAndFail()
 
         then:
-        result.task(':downloadPmdXmlMainPmd').outcome == FAILED
+        result.task(':downloadPmdXmlMainPmd6').outcome == FAILED
         assertThat(result.output, containsString('Running in offline mode, but there is no cached version'))
     }
 
@@ -292,10 +292,8 @@ class PmdIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
     void 'running offline with a cached file passes but warns'() {
         given:
         writeBuildFile()
-        writeAlmostEmptyPmdConfig('main-pmd')
-        writeAlmostEmptyPmdConfig('main-pmd-android')
-        writeAlmostEmptyPmdConfig('test-pmd')
-        writeAlmostEmptyPmdConfig('test-pmd-android')
+        writeAlmostEmptyPmdConfig('main-pmd-6')
+        writeAlmostEmptyPmdConfig('test-pmd-6')
         goodCode()
 
         when:
@@ -304,8 +302,8 @@ class PmdIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
             .build()
 
         then:
-        result.task(':downloadPmdXmlMainPmd').outcome == SUCCESS
-        result.task(':downloadPmdXmlTestPmd').outcome == SUCCESS
+        result.task(':downloadPmdXmlMainPmd6').outcome == SUCCESS
+        result.task(':downloadPmdXmlTestPmd6').outcome == SUCCESS
         assertThat(result.output, containsString('Running in offline mode. Using a possibly outdated version of'))
     }
 
