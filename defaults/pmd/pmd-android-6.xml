@@ -4,10 +4,11 @@
 	name="Monits Java ruleset"
 	xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
   <description>
-     Custom ruleset for Java projects
+     Custom ruleset for Android projects
   </description>
 
   <rule ref="category/java/errorprone.xml/CallSuperFirst"/>
   <rule ref="category/java/errorprone.xml/CallSuperLast" />
   <rule ref="category/java/errorprone.xml/DoNotHardCodeSDCard" />
+  <rule ref="category/java/bestpractices.xml/AccessorClassGeneration" />
 </ruleset>
