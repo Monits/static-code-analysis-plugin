@@ -6,7 +6,7 @@
 Improvements:
  * Upgraded Checkstyle to 8.10
  * Upgraded fb-contrib to 7.4.1
- * Upgraded PMD to 6.3.0
+ * Upgraded PMD to 6.4.0
 
 Bug fixes:
  * [#26](https://github.com/Monits/static-code-analysis-plugin/issues/26) - Standard java projects download android configuration
