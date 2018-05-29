@@ -6,6 +6,7 @@ bin/
 gen/
 target/
 build/
+out/
 config/checkstyle/
 
 # jenv files

@@ -22,6 +22,7 @@ import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Namer
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.plugins.quality.Checkstyle
 import org.gradle.api.plugins.quality.CheckstyleExtension
@@ -30,8 +31,8 @@ import org.gradle.api.reporting.ConfigurableReport
 import org.gradle.api.reporting.ReportingExtension
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
-import org.gradle.util.GradleVersion
 import org.gradle.util.GUtil
+import org.gradle.util.GradleVersion
 
 /**
  * A configurator for Checkstyle tasks.
@@ -40,6 +41,7 @@ import org.gradle.util.GUtil
 class CheckstyleConfigurator implements AnalysisConfigurator {
     private static final String CHECKSTYLE = 'checkstyle'
     private static final GradleVersion GRADLE4 = GradleVersion.version('4.0.0')
+    private static final GradleVersion GRADLE3_3 = GradleVersion.version('3.3')
 
     private final RemoteConfigLocator configLocator = new RemoteConfigLocator(CHECKSTYLE)
 
@@ -63,7 +65,15 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
         setupTasksPerSourceSet(project, extension, project.android.sourceSets) { task, sourceSet ->
             source sourceSet.java.srcDirs
             exclude '**/gen/**'
-            classpath = project.configurations[sourceSet.packageConfigurationName]
+
+            // Make sure the config is resolvable... AGP 3 decided to play with this...
+            Configuration config = project.configurations[sourceSet.packageConfigurationName]
+            if (GradleVersion.current() >= GRADLE3_3 && config.state == Configuration.State.UNRESOLVED
+                    && !config.canBeResolved) {
+                config.canBeResolved = true
+            }
+
+            classpath = config
         }
     }
 
@@ -162,14 +172,14 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
     }
 
     private static Task getOrCreateTask(final Project project, final String taskName, final Closure closure) {
-        Task pmdTask
+        Task checkstyleTask
         if (project.tasks.findByName(taskName)) {
-            pmdTask = project.tasks.findByName(taskName)
+            checkstyleTask = project.tasks.findByName(taskName)
         } else {
-            pmdTask = project.task(taskName, type:Checkstyle)
+            checkstyleTask = project.task(taskName, type:Checkstyle)
         }
 
-        pmdTask.configure closure
+        checkstyleTask.configure closure
     }
 
     private static String generateTaskName(final String taskName = CHECKSTYLE, final String sourceSetName) {

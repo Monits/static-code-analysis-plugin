@@ -18,6 +18,12 @@
             <!-- This is supposedly turned off by default, by I'm seeing it here and there... fb-contrib's is better -->
             <Bug pattern="CD_CIRCULAR_DEPENDENCY" />
 
+	    <!-- Android's Java doesn't support this yet -->
+	    <Bug pattern="UTWR_USE_TRY_WITH_RESOURCES" />
+
+	    <!-- equivalent rule already present in Monits' Findbugs Plugin -->
+	    <Bug pattern="AI_ANNOTATION_ISSUES_NEEDS_NULLABLE" />
+
             <!-- We will use PMD since its faster -->
             <Bug pattern="FORBIDDEN_SYSTEM" />
             <Bug pattern="USBR_UNNECESSARY_STORE_BEFORE_RETURN"/>

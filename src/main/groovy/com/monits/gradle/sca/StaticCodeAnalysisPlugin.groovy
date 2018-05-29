@@ -41,8 +41,9 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     private final static String CHECKSTYLE_DEFAULT_RULES = DEFAULTS_LOCATION + 'checkstyle/checkstyle.xml'
     private final static String CHECKSTYLE_CACHE_RULES = DEFAULTS_LOCATION + 'checkstyle/checkstyle-cache.xml'
     private final static String CHECKSTYLE_BACKWARDS_RULES = DEFAULTS_LOCATION + 'checkstyle/checkstyle-6.7.xml'
-    private final static String PMD_DEFAULT_RULES = DEFAULTS_LOCATION + 'pmd/pmd.xml'
-    private final static String PMD_DEFAULT_ANDROID_RULES = DEFAULTS_LOCATION + 'pmd/pmd-android.xml'
+    private final static String PMD_DEFAULT_RULES = DEFAULTS_LOCATION + 'pmd/pmd-6.xml'
+    private final static String PMD_DEFAULT_ANDROID_RULES = DEFAULTS_LOCATION + 'pmd/pmd-android-6.xml'
+    private final static String PMD_BACKWARDS_ANDROID_RULES = DEFAULTS_LOCATION + 'pmd/pmd-android.xml'
     private final static String PMD_BACKWARDS_RULES = DEFAULTS_LOCATION + 'pmd/pmd-5.1.3.xml'
     private final static String FINDBUGS_DEFAULT_SUPPRESSION_FILTER =
         DEFAULTS_LOCATION + 'findbugs/findbugs-exclusions.xml'
@@ -174,10 +175,10 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             }
             pmdRules = {
                 if (ToolVersions.isLatestPmdVersion()) {
-                    return [PMD_DEFAULT_RULES, PMD_DEFAULT_ANDROID_RULES]
+                    return [PMD_DEFAULT_RULES]
                 }
 
-                [PMD_BACKWARDS_RULES, PMD_DEFAULT_ANDROID_RULES]
+                [PMD_BACKWARDS_RULES]
             }
             androidLintConfig = { ANDROID_DEFAULT_RULES }
         }
@@ -189,10 +190,17 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             }
         }
 
-        // default suppression filter for findbugs for Android
+        // default suppression filter for findbugs for Android + PMD android rules
         withAndroidPlugins {
             extension.conventionMapping.with {
                 findbugsExclude = { FINDBUGS_DEFAULT_ANDROID_SUPPRESSION_FILTER }
+                pmdRules = {
+                    if (ToolVersions.isLatestPmdVersion()) {
+                        return [PMD_DEFAULT_RULES, PMD_DEFAULT_ANDROID_RULES]
+                    }
+
+                    [PMD_BACKWARDS_RULES, PMD_BACKWARDS_ANDROID_RULES]
+                }
             }
         }
 
@@ -237,15 +245,16 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         }
     }
 
-    private void withAndroidPlugins(final Class<AnalysisConfigurator> configClass) {
-        AnalysisConfigurator configurator = configClass.newInstance()
+    private void withAndroidPlugins(final Class<? extends AnalysisConfigurator> configClass) {
+        AnalysisConfigurator configurator = configClass.newInstance(new Object[0])
         Action<? extends Plugin> configureAction = { configurator.applyAndroidConfig(project, extension) }
 
         withAndroidPlugins configureAction
     }
 
-    private void withPlugin(final Class<? extends Plugin> pluginClass, final Class<AnalysisConfigurator> configClass) {
-        AnalysisConfigurator  configurator = configClass.newInstance()
+    private void withPlugin(final Class<? extends Plugin> pluginClass,
+                            final Class<? extends AnalysisConfigurator> configClass) {
+        AnalysisConfigurator  configurator = configClass.newInstance(new Object[0])
         Action<? extends Plugin> configureAction = { configurator.applyConfig(project, extension) }
 
         withPlugin(pluginClass, configureAction)
