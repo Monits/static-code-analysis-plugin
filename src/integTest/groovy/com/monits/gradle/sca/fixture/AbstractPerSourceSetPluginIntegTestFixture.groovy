@@ -26,9 +26,9 @@ import static org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
 */
 abstract class AbstractPerSourceSetPluginIntegTestFixture extends AbstractPluginIntegTestFixture {
 
-    static final MAIN_SOURCESET = 'main'
-    static final TEST_SOURCESET = 'test'
-    static final ANDROID_TEST_SOURCESET = 'androidTest'
+    static final String MAIN_SOURCESET = 'main'
+    static final String TEST_SOURCESET = 'test'
+    static final String ANDROID_TEST_SOURCESET = 'androidTest'
 
     @SuppressWarnings('MethodName')
     void 'multimodule android project runs all tasks'() {
