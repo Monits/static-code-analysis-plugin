@@ -1,7 +1,9 @@
 ## History
 
 # v2.6
-### 2.6.5 (unreleased)
+### 2.6.r65 (unreleased)
+
+### 2.6.5
 
 Improvements:
  * Upgraded to Gradle 4.8
