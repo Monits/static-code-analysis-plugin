@@ -3,6 +3,10 @@
 # v2.6
 ### 2.6.r65 (unreleased)
 
+Improvements:
+ * Upgraded to Gradle 4.9
+ * Fully support `api` and `implementation` configurations
+
 ### 2.6.5
 
 Improvements:
