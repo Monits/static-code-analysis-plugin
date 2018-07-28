@@ -175,12 +175,12 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         writeAndroidBuildFile(DEFAULT_ANDROID_VERSION)
         writeAndroidManifest()
         useEmptySuppressionFilter()
-        file('src/main/res/values/strings.xml') <<
-            '''<?xml version="1.0" encoding="utf-8"?>
-                <resources>
-                    <string name="greeting">Hey there!</string>
-                </resources>
-            '''
+        file('src/main/res/values/strings.xml') << '''\
+            <?xml version="1.0" encoding="utf-8"?>
+            <resources>
+                <string name="greeting">Hey there!</string>
+            </resources>
+        '''.stripIndent()
         file('src/main/java/com/monits/ClassA.java') << '''
             package com.monits;
 
@@ -254,6 +254,34 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         BuildResult result = gradleRunner()
                 .withGradleVersion(gradleVersion)
                 .build()
+
+        then:
+        result.task(':libb' + taskName()).outcome == SUCCESS
+
+        // The report must exist, and not complain on missing classes from liba
+        TestFile finbugsReport = file('libb/' + reportFileName(null))
+        finbugsReport.exists()
+        finbugsReport.assertContents(not(containsString('<MissingClass>liba.ClassA</MissingClass>')))
+
+        // make sure nothing is reported
+        finbugsReport.assertContents(containsString('<Errors errors="0" missingClasses="0">'))
+
+        where:
+        androidVersion << AndroidLintIntegTest.ANDROID_PLUGIN_VERSIONS
+        gradleVersion = gradleVersionForAndroid(androidVersion)
+    }
+
+    @SuppressWarnings(['MethodName', 'LineLength', 'LongLine'])
+    @Unroll('mixed multimodule classes are available when using android gradle plugin #androidVersion and gradle #gradleVersion')
+    void 'mixed multimodule classes are available'() {
+        given:
+        setupMixedMultimoduleAndroidProject(androidVersion)
+
+        when:
+        BuildResult result = gradleRunner()
+            .withGradleVersion(gradleVersion)
+            .forwardOutput()
+            .build()
 
         then:
         result.task(':libb' + taskName()).outcome == SUCCESS

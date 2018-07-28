@@ -21,6 +21,8 @@ import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.file.ConfigurableFileTree
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileTree
+import org.gradle.api.plugins.JavaPluginConvention
+import org.gradle.api.tasks.SourceSet
 
 import java.security.MessageDigest
 
@@ -78,8 +80,21 @@ trait ClasspathAware {
         // Manually add classes of project dependencies
         FileCollection dependantModuleClasses = project.files()
         project.configurations.scaconfigModules.dependencies.all { ProjectDependency dependency ->
-            // TODO : is it okay to always use debug?
-            dependantModuleClasses += getProjectClassTree(dependency.dependencyProject, DEBUG_SOURCESET)
+            Project proj = dependency.dependencyProject
+
+            // is it an Android plugin?
+            if (proj.plugins.hasPlugin('com.android.application') || proj.plugins.hasPlugin('com.android.library')) {
+                // TODO : is it okay to always use debug?
+                dependantModuleClasses += getProjectClassTree(proj, DEBUG_SOURCESET)
+            } else if (proj.plugins.hasPlugin('java')) {
+                // TODO : is it okay to always use all sourcesets?
+                proj.convention.getPlugin(JavaPluginConvention).sourceSets.all { SourceSet ss ->
+                    dependantModuleClasses += ss.output
+                }
+            } else {
+                project.logger.warn("The project depends on ${proj.path} which is neither an Android nor" +
+                    " a Java project, ignoring it");
+            }
         }
 
         FileCollection mockableAndroidJar = project.files()
