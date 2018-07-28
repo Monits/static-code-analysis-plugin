@@ -6,6 +6,8 @@
 Improvements:
  * Upgraded to Gradle 4.9
  * Fully support `api` and `implementation` configurations
+ * Upgraded fb-contrib to 7.4.3
+ * Upgraded Checkstyle to 8.11
 
 ### 2.6.5
 
