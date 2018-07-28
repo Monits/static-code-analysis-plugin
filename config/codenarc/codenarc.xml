@@ -7,7 +7,10 @@
     <ruleset-ref path='rulesets/basic.xml'/>
     <ruleset-ref path='rulesets/braces.xml'/>
     <ruleset-ref path='rulesets/concurrency.xml'/>
-    <ruleset-ref path='rulesets/convention.xml'/>
+    <ruleset-ref path='rulesets/convention.xml'>
+        <!-- I don't necessarilly agree, specially when static is recommended just because no fields are used -->
+        <exclude name='StaticMethodsBeforeInstanceMethods'/>
+    </ruleset-ref>
     <ruleset-ref path='rulesets/design.xml'/>
     <ruleset-ref path='rulesets/dry.xml'>
         <rule-config name='DuplicateStringLiteral'>

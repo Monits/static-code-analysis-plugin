@@ -203,13 +203,6 @@ abstract class AbstractIntegTestFixture extends Specification {
 
     abstract String toolName()
 
-    private void setupAndroidSubProject(final String dir, final String androidVersion = DEFAULT_ANDROID_VERSION) {
-        writeAndroidBuildFile(androidVersion).renameTo(file(dir + BUILD_GRADLE_FILENAME))
-        writeAndroidManifest(DEFAULT_ANDROID_PACKAGE + '.' + dir.replace('/', ''))
-            .renameTo(file(dir + ANDROID_MANIFEST_PATH))
-        file('src').deleteDir()
-    }
-
     void setupMultimoduleAndroidProject(final String androidVersion = DEFAULT_ANDROID_VERSION) {
         setupAndroidSubProject(LIBA_DIRNAME, androidVersion)
         setupAndroidSubProject(LIBB_DIRNAME, androidVersion)
@@ -245,5 +238,12 @@ abstract class AbstractIntegTestFixture extends Specification {
             androidVersionNumber.major < 2 ||
                 (androidVersionNumber.major == 2 && androidVersionNumber.minor < 2) ?
                     '2.14.1' : androidVersionNumber.major < 3 ? '3.5' : GradleVersion.current().version
+    }
+
+    private void setupAndroidSubProject(final String dir, final String androidVersion = DEFAULT_ANDROID_VERSION) {
+        writeAndroidBuildFile(androidVersion).renameTo(file(dir + BUILD_GRADLE_FILENAME))
+        writeAndroidManifest(DEFAULT_ANDROID_PACKAGE + '.' + dir.replace('/', ''))
+            .renameTo(file(dir + ANDROID_MANIFEST_PATH))
+        file('src').deleteDir()
     }
 }

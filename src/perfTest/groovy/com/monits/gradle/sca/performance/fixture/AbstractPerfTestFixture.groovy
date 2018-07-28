@@ -207,13 +207,6 @@ abstract class AbstractPerfTestFixture extends Specification {
 
     abstract String toolName()
 
-    private void setupAndroidSubProject(final String packageName, final String dir, final String androidVersion,
-                                        final String pluginVersion = "files($pluginClasspathString)") {
-        writeAndroidBuildFile(androidVersion, pluginVersion).renameTo(file(dir + BUILD_GRADLE_FILENAME))
-        writeAndroidManifest(packageName).renameTo(file(dir + ANDROID_MANIFEST_PATH))
-        file('src').deleteDir()
-    }
-
     void setupMultimoduleAndroidProject(final String androidVersion,
                                         final String pluginVersion = "files($pluginClasspathString)",
                                         final int numberOfClasses = NUMBER_OF_CLASSES_TO_ANALYZE) {
@@ -248,5 +241,12 @@ abstract class AbstractPerfTestFixture extends Specification {
     String androidVersionForGradle(final String gradleVersion) {
         GradleVersion.version(gradleVersion) < GradleVersion.version('3.0') ?
             DEFAULT_ANDROID_VERSION : '2.3.3'
+    }
+
+    private void setupAndroidSubProject(final String packageName, final String dir, final String androidVersion,
+                                        final String pluginVersion = "files($pluginClasspathString)") {
+        writeAndroidBuildFile(androidVersion, pluginVersion).renameTo(file(dir + BUILD_GRADLE_FILENAME))
+        writeAndroidManifest(packageName).renameTo(file(dir + ANDROID_MANIFEST_PATH))
+        file('src').deleteDir()
     }
 }

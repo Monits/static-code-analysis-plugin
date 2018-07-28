@@ -52,7 +52,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     private final static String PROVIDED = 'provided'
 
     private final static GradleVersion GRADLE_3_2 = GradleVersion.version('3.2')
-    private final static JAVA_PLUGIN_ID = 'java'
+    private final static String JAVA_PLUGIN_ID = 'java'
 
     private StaticCodeAnalysisExtension extension
     private Project project

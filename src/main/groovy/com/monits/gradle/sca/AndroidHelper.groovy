@@ -31,23 +31,6 @@ final class AndroidHelper {
     private static final VersionNumber REPORT_PER_VARIANT_ANDROID_GRADLE_VERSION = VersionNumber.parse('2.0.0')
 
     /**
-     * Retrieves the current plugin version, if available.
-     * @param project The project on which to analyze the used plugin version.
-     * @return The version of the used plugin, or {@see VersionNumber#UNKNOWN} if not known.
-     */
-    private static VersionNumber getCurrentVersion(final Project project) {
-        File androidDependency = project.buildscript.configurations.getByName('classpath').resolve()
-            .find { it =~ ANDROID_DEPENDENCY_PATTERN }
-        Matcher matcher = androidDependency =~ ANDROID_DEPENDENCY_PATTERN
-
-        if (!matcher.find()) {
-            return VersionNumber.UNKNOWN
-        }
-
-        VersionNumber.parse(matcher.group(1))
-    }
-
-    /**
      * Checks if the current Android Plugin produces a report per variant or not.
      * @param project The project to analyze.
      * @return True if a report per variant is expected, false otherwise
@@ -106,5 +89,22 @@ final class AndroidHelper {
             home = System.getenv('HOME')
         }
         home
+    }
+
+    /**
+     * Retrieves the current plugin version, if available.
+     * @param project The project on which to analyze the used plugin version.
+     * @return The version of the used plugin, or {@see VersionNumber#UNKNOWN} if not known.
+     */
+    private static VersionNumber getCurrentVersion(final Project project) {
+        File androidDependency = project.buildscript.configurations.getByName('classpath').resolve()
+            .find { it =~ ANDROID_DEPENDENCY_PATTERN }
+        Matcher matcher = androidDependency =~ ANDROID_DEPENDENCY_PATTERN
+
+        if (!matcher.find()) {
+            return VersionNumber.UNKNOWN
+        }
+
+        VersionNumber.parse(matcher.group(1))
     }
 }

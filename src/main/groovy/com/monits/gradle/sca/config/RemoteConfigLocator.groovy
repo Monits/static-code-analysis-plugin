@@ -30,6 +30,10 @@ class RemoteConfigLocator {
         this.pluginName = pluginName
     }
 
+    static boolean isRemoteLocation(final String path) {
+        path.startsWith('http://') || path.startsWith('https://')
+    }
+
     /**
      * Creates a task to download a remote config to a local directory. The task may just make a copy
      * from a file if it detects it's already being downloaded by previously created task.
@@ -78,10 +82,6 @@ class RemoteConfigLocator {
         }
 
         project.rootProject.tasks.findByPath(DOWNLOAD_TASKS[configLocation]) as DownloadTask
-    }
-
-    static boolean isRemoteLocation(final String path) {
-        path.startsWith('http://') || path.startsWith('https://')
     }
 
     private String getDestinationDirectory(final Project project) {
