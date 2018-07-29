@@ -10,6 +10,9 @@ Improvements:
  * Upgraded Checkstyle to 8.11
  * Android projects that depend on a Java module in mixed multimodule projects
 
+Bug fixes:
+ * PMD now properly receives compiled class info for Android projects
+
 ### 2.6.5
 
 Improvements:
