@@ -152,7 +152,7 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
                 rulesets.add(configSource.absolutePath)
             }
 
-            Task pmdTask = getOrCreateTask(project, generateTaskName(sourceSetName)) { Pmd it ->
+            Task pmdTask = project.tasks.maybeCreate(generateTaskName(sourceSetName), Pmd).configure { Pmd it ->
                 // most defaults are good enough
                 if (!downloadTasks.empty) {
                     it.dependsOn downloadTasks
@@ -190,17 +190,6 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
         report.enabled = true
         report.destination = new File(project.extensions.getByType(ReportingExtension).file(PMD),
             "pmd-${sourceSetName}.xml")
-    }
-
-    private static Task getOrCreateTask(final Project project, final String taskName, final Closure closure) {
-        Task pmdTask
-        if (project.tasks.findByName(taskName)) {
-            pmdTask = project.tasks.findByName(taskName)
-        } else {
-            pmdTask = project.task(taskName, type:Pmd)
-        }
-
-        pmdTask.configure closure
     }
 
     private static String generateTaskName(final String taskName = PMD, final String sourceSetName,

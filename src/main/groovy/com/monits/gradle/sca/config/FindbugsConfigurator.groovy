@@ -139,24 +139,25 @@ class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
                 }
             }
 
-            Task findbugsTask = getOrCreateTask(project, generateTaskName(sourceSetName)) { FindBugs it ->
-                it.with {
-                    // most defaults are good enough
-                    if (remoteLocation) {
-                        dependsOn project.tasks.findByName(downloadTaskName)
-                    }
+            Task findbugsTask = project.tasks.maybeCreate(generateTaskName(sourceSetName), FindBugs)
+                .configure { FindBugs it ->
+                    it.with {
+                        // most defaults are good enough
+                        if (remoteLocation) {
+                            dependsOn project.tasks.findByName(downloadTaskName)
+                        }
 
-                    if (filterSource) {
-                        excludeFilter = filterSource
-                    }
+                        if (filterSource) {
+                            excludeFilter = filterSource
+                        }
 
-                    reports { FindBugsReports r ->
-                        r.with {
-                            configureXmlReport(xml, project, sourceSetName)
+                        reports { FindBugsReports r ->
+                            r.with {
+                                configureXmlReport(xml, project, sourceSetName)
+                            }
                         }
                     }
                 }
-            }
 
             if (configuration) {
                 // Add the sourceset as second parameter for configuration closure
@@ -184,16 +185,5 @@ class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
 
     private static String generateTaskName(final String taskName = FINDBUGS, final String sourceSetName) {
         GUtil.toLowerCamelCase(String.format('%s %s', taskName, sourceSetName))
-    }
-
-    private static Task getOrCreateTask(final Project project, final String taskName, final Closure closure) {
-        Task findbugsTask
-        if (project.tasks.findByName(taskName)) {
-            findbugsTask = project.tasks.findByName(taskName)
-        } else {
-            findbugsTask = project.task(taskName, type:FindBugs)
-        }
-
-        findbugsTask.configure closure
     }
 }
