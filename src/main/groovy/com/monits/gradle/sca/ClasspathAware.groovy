@@ -102,7 +102,8 @@ trait ClasspathAware {
             mockableAndroidJar += mockableAndroidJarTask.outputs.files
         }
 
-        task.classpath = project.configurations.scaconfig +
+        task.classpath =
+                project.files(project.configurations.scaconfig.files.findAll { File it -> !it.name.endsWith('.aar') }) +
                 getJarsForAarDependencies(project) +
                 mockableAndroidJar +
                 // TODO : is it okay to always use debug?
