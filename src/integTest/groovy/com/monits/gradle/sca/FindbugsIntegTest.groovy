@@ -280,7 +280,6 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         when:
         BuildResult result = gradleRunner()
             .withGradleVersion(gradleVersion)
-            .forwardOutput()
             .build()
 
         then:
