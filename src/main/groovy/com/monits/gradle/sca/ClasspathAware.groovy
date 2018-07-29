@@ -93,7 +93,7 @@ trait ClasspathAware {
                 }
             } else {
                 project.logger.warn("The project depends on ${proj.path} which is neither an Android nor" +
-                    " a Java project, ignoring it");
+                    ' a Java project, ignoring it')
             }
         }
 

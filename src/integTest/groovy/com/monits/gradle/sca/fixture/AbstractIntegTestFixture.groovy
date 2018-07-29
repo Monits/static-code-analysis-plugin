@@ -207,52 +207,14 @@ abstract class AbstractIntegTestFixture extends Specification {
         setupAndroidSubProject(LIBA_DIRNAME, androidVersion)
         setupAndroidSubProject(LIBB_DIRNAME, androidVersion)
 
-        file(LIBB_DIRNAME + BUILD_GRADLE_FILENAME) << """
-            dependencies {
-                compile project('${LIBA_PATH}')
-            }
-        """
-
-        file('settings.gradle') << """
-            include '${LIBA_PATH}', '${LIBB_PATH}'
-        """
-        file(BUILD_GRADLE_FILENAME).createNewFile() // empty root build.gradle
-
-        file(LIBA_DIRNAME + 'src/main/java/liba/ClassA.java') <<
-                'package liba; public class ClassA { public boolean isFoo(Object arg) { return true; } }'
-        file(LIBA_DIRNAME + 'src/test/java/liba/ClassATest.java') <<
-                'package liba; public class ClassATest { public boolean isFoo(Object arg) { return true; } }'
-        file(LIBB_DIRNAME + 'src/main/java/libb/ClassB.java') <<
-                'package libb; import liba.ClassA; public class ClassB { public boolean isFoo(Object arg) {' +
-                ' ClassA a = new ClassA(); return a.isFoo(arg); } }'
-        file(LIBB_DIRNAME + 'src/test/java/libb/ClassBTest.java') <<
-                'package libb; public class ClassBTest { public boolean isFoo(Object arg) { return true; } }'
+        setupSubmoduleContents()
     }
 
     void setupMixedMultimoduleAndroidProject(final String androidVersion = DEFAULT_ANDROID_VERSION) {
         setupJavaSubProject(LIBA_DIRNAME)
         setupAndroidSubProject(LIBB_DIRNAME, androidVersion)
 
-        file(LIBB_DIRNAME + BUILD_GRADLE_FILENAME) << """
-            dependencies {
-                compile project('${LIBA_PATH}')
-            }
-        """
-
-        file('settings.gradle') << """
-            include '${LIBA_PATH}', '${LIBB_PATH}'
-        """
-        file(BUILD_GRADLE_FILENAME).createNewFile() // empty root build.gradle
-
-        file(LIBA_DIRNAME + 'src/main/java/liba/ClassA.java') <<
-        'package liba; public class ClassA { public boolean isFoo(Object arg) { return true; } }'
-        file(LIBA_DIRNAME + 'src/test/java/liba/ClassATest.java') <<
-        'package liba; public class ClassATest { public boolean isFoo(Object arg) { return true; } }'
-        file(LIBB_DIRNAME + 'src/main/java/libb/ClassB.java') <<
-        'package libb; import liba.ClassA; public class ClassB { public boolean isFoo(Object arg) {' +
-            ' ClassA a = new ClassA(); return a.isFoo(arg); } }'
-        file(LIBB_DIRNAME + 'src/test/java/libb/ClassBTest.java') <<
-        'package libb; public class ClassBTest { public boolean isFoo(Object arg) { return true; } }'
+        setupSubmoduleContents()
     }
 
     @SuppressWarnings('DuplicateNumberLiteral')
@@ -275,6 +237,28 @@ abstract class AbstractIntegTestFixture extends Specification {
 
     private void setupJavaSubProject(final String dir) {
         writeBuildFile().renameTo(file(dir + BUILD_GRADLE_FILENAME))
-        file('src').deleteDir()
+    }
+
+    private void setupSubmoduleContents() {
+        file(LIBB_DIRNAME + BUILD_GRADLE_FILENAME) << """
+            dependencies {
+                compile project('${LIBA_PATH}')
+            }
+        """
+
+        file('settings.gradle') << """
+            include '${LIBA_PATH}', '${LIBB_PATH}'
+        """
+        file(BUILD_GRADLE_FILENAME).createNewFile() // empty root build.gradle
+
+        file(LIBA_DIRNAME + 'src/main/java/liba/ClassA.java') <<
+        'package liba; public class ClassA { public boolean isFoo(Object arg) { return true; } }'
+        file(LIBA_DIRNAME + 'src/test/java/liba/ClassATest.java') <<
+        'package liba; public class ClassATest { public boolean isFoo(Object arg) { return true; } }'
+        file(LIBB_DIRNAME + 'src/main/java/libb/ClassB.java') <<
+        'package libb; import liba.ClassA; public class ClassB { public boolean isFoo(Object arg) {' +
+            ' ClassA a = new ClassA(); return a.isFoo(arg); } }'
+        file(LIBB_DIRNAME + 'src/test/java/libb/ClassBTest.java') <<
+        'package libb; public class ClassBTest { public boolean isFoo(Object arg) { return true; } }'
     }
 }
