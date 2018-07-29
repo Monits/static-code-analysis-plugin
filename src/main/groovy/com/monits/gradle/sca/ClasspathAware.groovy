@@ -48,6 +48,7 @@ trait ClasspathAware {
     private static final String MAIN_SOURCESET = 'main'
     private static final String TEST_SOURCESET = 'test'
     private static final String ANDROID_TEST_SOURCESET = 'androidTest'
+    private static final String AAR_EXTENSTION = '.aar'
 
     void setupAndroidClasspathAwareTask(final Task taskToConfigure, final Project project,
                                         final Collection<String> sourceSetClasses) {
@@ -105,7 +106,8 @@ trait ClasspathAware {
         }
 
         task.classpath =
-                project.files(project.configurations.scaconfig.files.findAll { File it -> !it.name.endsWith('.aar') }) +
+                project.files(project.configurations.scaconfig.files
+                    .findAll { File it -> !it.name.endsWith(AAR_EXTENSTION) }) +
                 getJarsForAarDependencies(project) +
                 mockableAndroidJar +
                 // TODO : is it okay to always use debug?
@@ -139,7 +141,7 @@ trait ClasspathAware {
         }
 
         String cacheDir = AndroidHelper.getBuildCacheDir(project)
-        project.files(project.configurations.scaconfig.files.findAll { File it -> it.name.endsWith '.aar' }
+        project.files(project.configurations.scaconfig.files.findAll { File it -> it.name.endsWith AAR_EXTENSTION }
             .collect { File it ->
             MessageDigest sha1 = MessageDigest.getInstance('SHA1')
             String inputFile = 'COMMAND=PREPARE_LIBRARY\n' +
