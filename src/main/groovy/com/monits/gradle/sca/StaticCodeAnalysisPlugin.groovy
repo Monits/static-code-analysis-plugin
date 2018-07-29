@@ -253,7 +253,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
                     }
 
                     // take transitive dependencies
-                    if (c.name == targetConfiguration) {
+                    if (c.name == targetConfiguration || c.name == Dependency.ARCHIVES_CONFIGURATION) {
                         addDepsToScaconfig(c)
                     }
                 }
