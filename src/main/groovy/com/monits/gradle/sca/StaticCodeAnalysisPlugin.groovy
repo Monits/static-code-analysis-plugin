@@ -73,6 +73,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             addDepsToScaconfig 'testCompile'
             addDepsToScaconfig 'api'
             addDepsToScaconfig 'implementation'
+            addDepsToScaconfig 'testImplementation'
 
             // Apply Android Lint configuration
             // must be done in `afterEvaluate` for compatibility with android plugin [1.0, 1.3)
