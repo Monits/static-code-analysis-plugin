@@ -49,7 +49,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     private final static String FINDBUGS_DEFAULT_ANDROID_SUPPRESSION_FILTER =
         DEFAULTS_LOCATION + 'findbugs/findbugs-exclusions-android.xml'
     private final static String ANDROID_DEFAULT_RULES = DEFAULTS_LOCATION + 'android/android-lint.xml'
-    private final static String PROVIDED = 'provided'
+    private final static String COMPILE_ONLY = 'compileOnly'
 
     private final static GradleVersion GRADLE_3_2 = GradleVersion.version('3.2')
     private final static String JAVA_PLUGIN_ID = 'java'
@@ -106,21 +106,15 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         // Wait until the default configuration is available
         project.configurations.matching { Configuration config -> config.name == Dependency.DEFAULT_CONFIGURATION }
             .all { Configuration config ->
-                project.configurations {
-                    archives {
-                        extendsFrom project.configurations.default
-                    }
-                }
-
-                if (project.configurations.findByName(PROVIDED) == null) {
+                if (project.configurations.findByName(COMPILE_ONLY) == null) {
                     project.configurations {
-                        provided {
+                        compileOnly {
                             description = 'Compile only dependencies'
                             dependencies.all { Dependency dep ->
                                 project.configurations.default.exclude group:dep.group, module:dep.name
                             }
                         }
-                        compile.extendsFrom provided
+                        compile.extendsFrom compileOnly
                     }
                 }
             }
@@ -143,11 +137,11 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     // See: https://code.google.com/p/android/issues/detail?id=208474
     @CompileStatic(TypeCheckingMode.SKIP)
     private void addFindbugsAnnotationDependencies() {
-        // Wait until the provided configuration is available
-        project.configurations.matching { Configuration config -> config.name == PROVIDED }
+        // Wait until the compileOnly configuration is available
+        project.configurations.matching { Configuration config -> config.name == COMPILE_ONLY }
             .all { Configuration config ->
                 project.dependencies {
-                    provided('com.google.code.findbugs:annotations:' + ToolVersions.findbugsVersion) {
+                    compileOnly('com.google.code.findbugs:annotations:' + ToolVersions.findbugsVersion) {
                         /*
                              * This jar both includes and depends on jcip and jsr-305. One is enough
                              * See https://github.com/findbugsproject/findbugs/issues/94
