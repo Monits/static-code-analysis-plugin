@@ -9,6 +9,7 @@ Improvements:
  * Upgraded fb-contrib to 7.4.3
  * Upgraded Checkstyle to 8.11
  * Android projects that depend on a Java module in mixed multimodule projects
+ * `compileOnly` is now used instead of `provided`
 
 Bug fixes:
  * PMD now properly receives compiled class info for Android projects
