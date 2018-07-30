@@ -98,59 +98,59 @@ class CpdIntegTest extends AbstractPluginIntegTestFixture {
 
     void setupProjectWithViolations(final boolean ignoreErrors) {
         writeBuildFile() << """
-            staticCodeAnalysis {
-                ignoreErrors = ${ignoreErrors}
-            }
-        """
+            |staticCodeAnalysis {
+            |    ignoreErrors = ${ignoreErrors}
+            |}
+        """.stripMargin()
         // Write a large chunk of code repeated several times...
         1.upto(5) {
             file("src/main/java/com/monits/Class${it}.java") << """
-                package com.monits;
-
-                public class Class${it} {
-                    public boolean isFoo(Object arg) {
-                        return true;
-                    }
-
-                    public boolean isBar(Bar arg) {
-                        return arg == null ? false : arg.someMethod();
-                    }
-
-                    public String greeting() {
-                        return "It's dangerous to go alone! take this.";
-                    }
-
-                    public int surprise() {
-                        return hashCode() * 2 % getClass().getName().length() ^ 0x0f;
-                    }
-
-                    public void doSomethingStupid() {
-                        final String msg;
-                        if (surprise() > getClass().getName().length()) {
-                            msg = this.greeting();
-                        } else if (isBar(null)) {
-                            msg = "Ok, this is awkward...";
-                        } else {
-                            msg = "It's a trap! " + toString();
-                        }
-
-                        System.out.println(msg);
-                    }
-
-                    @Override
-                    public String toString() {
-                        return "ClassTest{" +
-                            getClass().getName() +
-                            "}@" + hashCode();
-                    }
-
-                    public static class Bar {
-                        public boolean someMethod() {
-                            return true;
-                        }
-                    }
-                }
-            """
+                |package com.monits;
+                |
+                |public class Class${it} {
+                |    public boolean isFoo(Object arg) {
+                |        return true;
+                |    }
+                |
+                |    public boolean isBar(Bar arg) {
+                |        return arg == null ? false : arg.someMethod();
+                |    }
+                |
+                |    public String greeting() {
+                |        return "It's dangerous to go alone! take this.";
+                |    }
+                |
+                |    public int surprise() {
+                |        return hashCode() * 2 % getClass().getName().length() ^ 0x0f;
+                |    }
+                |
+                |    public void doSomethingStupid() {
+                |        final String msg;
+                |        if (surprise() > getClass().getName().length()) {
+                |            msg = this.greeting();
+                |        } else if (isBar(null)) {
+                |            msg = "Ok, this is awkward...";
+                |        } else {
+                |            msg = "It's a trap! " + toString();
+                |        }
+                |
+                |        System.out.println(msg);
+                |    }
+                |
+                |    @Override
+                |    public String toString() {
+                |        return "ClassTest{" +
+                |            getClass().getName() +
+                |            "}@" + hashCode();
+                |    }
+                |
+                |   public static class Bar {
+                |        public boolean someMethod() {
+                |            return true;
+                |        }
+                |    }
+                |}
+            """.stripMargin()
         }
     }
 

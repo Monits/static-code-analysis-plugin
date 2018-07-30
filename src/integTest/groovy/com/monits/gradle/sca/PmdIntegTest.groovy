@@ -68,22 +68,22 @@ class PmdIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         given:
         writeBuildFile()
         buildScriptFile() << '''
-            afterEvaluate {
-                Task pmdTask = project.tasks.getByPath(':pmdMain')
-                pmdTask.doLast {
-                    if (!classpath.empty) {
-                        println "Auxclasspath is configured for main " + classpath.asPath
-                    }
-                }
-
-                Task pmdTestTask = project.tasks.getByPath(':pmdTest')
-                pmdTestTask.doLast {
-                    if (!classpath.empty) {
-                        println "Auxclasspath is configured for test " + classpath.asPath
-                    }
-                }
-            }
-        '''
+            |afterEvaluate {
+            |    Task pmdTask = project.tasks.getByPath(':pmdMain')
+            |    pmdTask.doLast {
+            |        if (!classpath.empty) {
+            |            println "Auxclasspath is configured for main " + classpath.asPath
+            |        }
+            |    }
+            |
+            |    Task pmdTestTask = project.tasks.getByPath(':pmdTest')
+            |    pmdTestTask.doLast {
+            |        if (!classpath.empty) {
+            |            println "Auxclasspath is configured for test " + classpath.asPath
+            |        }
+            |    }
+            |}
+        '''.stripMargin()
         goodCode()
 
         when:
@@ -117,24 +117,24 @@ class PmdIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         writeAndroidBuildFile()
         writeAndroidManifest()
         buildScriptFile() << '''
-            afterEvaluate {
-                Task configPmdTask = project.tasks.getByPath(':configureClasspathForPmdMain')
-                configPmdTask.doLast {
-                    Task pmdTask = project.tasks.getByPath(':pmdMain')
-                    if (!pmdTask.classpath.empty) {
-                        println "Auxclasspath is configured for main " + pmdTask.classpath.asPath
-                    }
-                }
-
-                Task configTestPmdTask = project.tasks.getByPath(':configureClasspathForPmdTest')
-                configTestPmdTask.doLast {
-                    Task pmdTask = project.tasks.getByPath(':pmdTest')
-                    if (!pmdTask.classpath.empty) {
-                        println "Auxclasspath is configured for test " + pmdTask.classpath.asPath
-                    }
-                }
-            }
-        '''
+            |afterEvaluate {
+            |    Task configPmdTask = project.tasks.getByPath(':configureClasspathForPmdMain')
+            |    configPmdTask.doLast {
+            |        Task pmdTask = project.tasks.getByPath(':pmdMain')
+            |        if (!pmdTask.classpath.empty) {
+            |            println "Auxclasspath is configured for main " + pmdTask.classpath.asPath
+            |        }
+            |    }
+            |
+            |    Task configTestPmdTask = project.tasks.getByPath(':configureClasspathForPmdTest')
+            |    configTestPmdTask.doLast {
+            |        Task pmdTask = project.tasks.getByPath(':pmdTest')
+            |        if (!pmdTask.classpath.empty) {
+            |            println "Auxclasspath is configured for test " + pmdTask.classpath.asPath
+            |        }
+            |    }
+            |}
+        '''.stripMargin()
         goodCode()
 
         when:
@@ -184,25 +184,25 @@ class PmdIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
     void 'dsl allows to override rules per sourceset'() {
         given:
         writeBuildFile() << '''
-            staticCodeAnalysis {
-                sourceSetConfig {
-                    test {
-                        pmdRules = ['test-pmd.xml']
-                    }
-                }
-            }
-        '''
-        file('test-pmd.xml') <<
-            '''<?xml version="1.0"?>
-            <ruleset name="Monits Java ruleset"
-                    xmlns="http://pmd.sf.net/ruleset/1.0.0"
-                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                    xsi:schemaLocation="http://pmd.sf.net/ruleset/1.0.0 http://pmd.sf.net/ruleset_xml_schema.xsd"
-                    xsi:noNamespaceSchemaLocation="http://pmd.sf.net/ruleset_xml_schema.xsd">
-
-                <rule ref="rulesets/java/comments.xml/CommentDefaultAccessModifier" />
-            </ruleset>
-        '''
+            |staticCodeAnalysis {
+            |    sourceSetConfig {
+            |        test {
+            |            pmdRules = ['test-pmd.xml']
+            |        }
+            |    }
+            |}
+        '''.stripMargin()
+        file('test-pmd.xml') << '''\
+            |<?xml version="1.0"?>
+            |<ruleset name="Monits Java ruleset"
+            |        xmlns="http://pmd.sf.net/ruleset/1.0.0"
+            |        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            |        xsi:schemaLocation="http://pmd.sf.net/ruleset/1.0.0 http://pmd.sf.net/ruleset_xml_schema.xsd"
+            |        xsi:noNamespaceSchemaLocation="http://pmd.sf.net/ruleset_xml_schema.xsd">
+            |
+            |    <rule ref="rulesets/java/comments.xml/CommentDefaultAccessModifier" />
+            |</ruleset>
+        '''.stripMargin()
         goodCode()
         // Class with CommentDefaultAccessModifier violation
         file('src/main/java/com/monits/BadPmd.java') <<
@@ -323,17 +323,17 @@ class PmdIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
     }
 
     TestFile writeAlmostEmptyPmdConfig(final String fileClassifier = null) {
-        file("config/pmd/pmd${fileClassifier ? "-${fileClassifier}" : ''}.xml") <<
-            '''<?xml version="1.0" encoding="UTF-8"?>
-            <ruleset name="Monits Test ruleset"
-                xmlns="http://pmd.sf.net/ruleset/1.0.0"
-                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                xsi:schemaLocation="http://pmd.sf.net/ruleset/1.0.0 http://pmd.sf.net/ruleset_xml_schema.xsd"
-                xsi:noNamespaceSchemaLocation="http://pmd.sf.net/ruleset_xml_schema.xsd">
-
-                <rule ref="rulesets/java/basic.xml" />
-                <rule ref="rulesets/java/android.xml" />
-            </ruleset>
-        ''' as TestFile
+        file("config/pmd/pmd${fileClassifier ? "-${fileClassifier}" : ''}.xml") << '''\
+            |<?xml version="1.0" encoding="UTF-8"?>
+            |<ruleset name="Monits Test ruleset"
+            |    xmlns="http://pmd.sf.net/ruleset/1.0.0"
+            |    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            |    xsi:schemaLocation="http://pmd.sf.net/ruleset/1.0.0 http://pmd.sf.net/ruleset_xml_schema.xsd"
+            |    xsi:noNamespaceSchemaLocation="http://pmd.sf.net/ruleset_xml_schema.xsd">
+            |
+            |    <rule ref="rulesets/java/basic.xml" />
+            |    <rule ref="rulesets/java/android.xml" />
+            |</ruleset>
+        '''.stripMargin() as TestFile
     }
 }

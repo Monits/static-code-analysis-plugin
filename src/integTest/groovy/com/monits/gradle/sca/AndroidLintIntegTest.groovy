@@ -270,12 +270,12 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
     }
 
     TestFile writeSimpleAndroidLintConfig(final String project = null) {
-        file("config/android/android-lint${project ? "-${project}" : ''}.xml") <<
-            '''<?xml version="1.0" encoding="UTF-8"?>
-            <lint>
-                <issue id="InvalidPackage" severity="warning" />
-            </lint>
-        ''' as TestFile
+        file("config/android/android-lint${project ? "-${project}" : ''}.xml") << '''\
+            |<?xml version="1.0" encoding="UTF-8"?>
+            |<lint>
+            |    <issue id="InvalidPackage" severity="warning" />
+            |</lint>
+        '''.stripMargin() as TestFile
     }
 
     @SuppressWarnings('GStringExpressionWithinString')
@@ -283,27 +283,27 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
         writeSimpleAndroidLintConfig()
 
         buildScriptFile() << '''
-            staticCodeAnalysis {
-                androidLintConfig = "${project.rootDir}/config/android/android-lint.xml"
-            }
-        '''
+            |staticCodeAnalysis {
+            |    androidLintConfig = "${project.rootDir}/config/android/android-lint.xml"
+            |}
+        '''.stripMargin()
     }
 
     void setupProjectWithViolations(final boolean ignoreErrors) {
         writeAndroidManifest()
 
         writeAndroidBuildFile() << """
-            staticCodeAnalysis {
-                ignoreErrors = ${ignoreErrors}
-            }
-
-            // Treat everything as an error
-            android {
-                lintOptions {
-                    warningsAsErrors true
-                }
-            }
-        """
+            |staticCodeAnalysis {
+            |    ignoreErrors = ${ignoreErrors}
+            |}
+            |
+            |// Treat everything as an error
+            |android {
+            |    lintOptions {
+            |        warningsAsErrors true
+            |    }
+            |}
+        """.stripMargin()
 
         goodCode()
     }

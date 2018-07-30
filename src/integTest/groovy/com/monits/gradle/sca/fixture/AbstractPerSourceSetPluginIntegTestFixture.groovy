@@ -101,28 +101,28 @@ abstract class AbstractPerSourceSetPluginIntegTestFixture extends AbstractPlugin
 
     void setupProjectWithViolations(final boolean ignoreErrors) {
         writeBuildFile() << """
-            staticCodeAnalysis {
-                checkstyleRules = 'config/checkstyle/checkstyle.xml'
-                ignoreErrors = ${ignoreErrors}
-            }
-        """
+            |staticCodeAnalysis {
+            |    checkstyleRules = 'config/checkstyle/checkstyle.xml'
+            |    ignoreErrors = ${ignoreErrors}
+            |}
+        """.stripMargin()
         /*
          Make sure Checkstyle's config is set to errors, warnings won't make it fail,
          see https://issues.gradle.org/browse/GRADLE-2888
           */
-        file('config/checkstyle/checkstyle.xml') <<
-            '''<?xml version="1.0" encoding="UTF-8"?>
-            <!DOCTYPE module PUBLIC "-//Puppy Crawl//DTD Check Configuration 1.3//EN"
-                "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
-            <module name="Checker">
-                <property name="severity" value="error"/>
-                <module name="TreeWalker">
-                    <module name="FinalParameters">
-                        <property name="tokens" value="METHOD_DEF,CTOR_DEF,LITERAL_CATCH,FOR_EACH_CLAUSE"/>
-                    </module>
-                </module>
-            </module>
-        ''' as TestFile
+        file('config/checkstyle/checkstyle.xml') << '''\
+            |<?xml version="1.0" encoding="UTF-8"?>
+            |<!DOCTYPE module PUBLIC "-//Puppy Crawl//DTD Check Configuration 1.3//EN"
+            |    "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
+            |<module name="Checker">
+            |    <property name="severity" value="error"/>
+            |    <module name="TreeWalker">
+            |        <module name="FinalParameters">
+            |            <property name="tokens" value="METHOD_DEF,CTOR_DEF,LITERAL_CATCH,FOR_EACH_CLAUSE"/>
+            |        </module>
+            |    </module>
+            |</module>
+        '''.stripMargin() as TestFile
         goodCode()
     }
 

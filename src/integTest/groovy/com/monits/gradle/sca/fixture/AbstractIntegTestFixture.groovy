@@ -82,17 +82,17 @@ abstract class AbstractIntegTestFixture extends Specification {
             file("src/main/java/com/monits/Class${it}.java") <<
                 "package com.monits; public class Class${it} { public boolean isFoo(Object arg) { return true; } }"
             file("src/test/java/com/monits/Class${it}Test.java") << """
-                package com.monits;
-
-                import org.junit.Test;
-                import static org.junit.Assert.assertTrue;
-
-                public class Class${it}Test extends Object {
-                    @Test
-                    public void isFoo() {
-                        assertTrue("It's not a foo", new Class${it}().isFoo(null));
-                    }
-                }"""
+                |package com.monits;
+                |
+                |import org.junit.Test;
+                |import static org.junit.Assert.assertTrue;
+                |
+                |public class Class${it}Test extends Object {
+                |    @Test
+                |    public void isFoo() {
+                |        assertTrue("It's not a foo", new Class${it}().isFoo(null));
+                |    }
+                |}""".stripMargin()
         }
     }
 
@@ -104,37 +104,36 @@ abstract class AbstractIntegTestFixture extends Specification {
 
     TestFile writeBuildFile(Map<String, Boolean> toolsConfig) {
         buildScriptFile() << """
-            buildscript {
-                dependencies {
-                    classpath files($pluginClasspathString)
-                }
-            }
-
-            repositories {
-                mavenCentral()
-            }
-
-            apply plugin: 'java'
-            apply plugin: 'com.monits.staticCodeAnalysis'
-
-            dependencies {
-                testCompile 'junit:junit:4.12'
-            }
-
-        """ + staticCodeAnalysisConfig(toolsConfig) as TestFile
+            |buildscript {
+            |    dependencies {
+            |        classpath files($pluginClasspathString)
+            |    }
+            |}
+            |
+            |repositories {
+            |    mavenCentral()
+            |}
+            |
+            |apply plugin: 'java'
+            |apply plugin: 'com.monits.staticCodeAnalysis'
+            |
+            |dependencies {
+            |    testCompile 'junit:junit:4.12'
+            |}
+        """.stripMargin() + staticCodeAnalysisConfig(toolsConfig) as TestFile
     }
 
     String staticCodeAnalysisConfig(Map<String, Boolean> toolsConfig) {
         """
-            // disable all other checks
-            staticCodeAnalysis {
-                cpd = ${toolsConfig.get('cpd', false)}
-                checkstyle = ${toolsConfig.get('checkstyle', false)}
-                findbugs = ${toolsConfig.get('findbugs', false)}
-                pmd = ${toolsConfig.get('pmd', false)}
-                androidLint = ${toolsConfig.get('androidLint', false)}
-            }
-        """
+            |// disable all other checks
+            |staticCodeAnalysis {
+            |    cpd = ${toolsConfig.get('cpd', false)}
+            |    checkstyle = ${toolsConfig.get('checkstyle', false)}
+            |    findbugs = ${toolsConfig.get('findbugs', false)}
+            |    pmd = ${toolsConfig.get('pmd', false)}
+            |    androidLint = ${toolsConfig.get('androidLint', false)}
+            |}
+        """.stripMargin()
     }
 
     TestFile writeAndroidBuildFile(final String androidVersion = DEFAULT_ANDROID_VERSION) {
@@ -146,46 +145,45 @@ abstract class AbstractIntegTestFixture extends Specification {
 
     TestFile writeAndroidBuildFile(Map<String, Object> toolsConfig) {
         buildScriptFile() << """
-            buildscript {
-                dependencies {
-                    classpath 'com.android.tools.build:gradle:' +
-                        '${toolsConfig.get(ANDROID_VERSION, DEFAULT_ANDROID_VERSION)}'
-                    classpath files($pluginClasspathString)
-                }
-
-                repositories {
-                    jcenter()
-                    ${toolsConfig.get(ANDROID_VERSION, DEFAULT_ANDROID_VERSION).startsWith('3') ? 'google()' : ''}
-                }
-            }
-
-            repositories {
-                mavenCentral()
-            }
-
-            apply plugin: 'com.android.library'
-            apply plugin: 'com.monits.staticCodeAnalysis'
-
-            dependencies {
-                testCompile 'junit:junit:4.12'
-            }
-
-        """ + staticCodeAnalysisConfig(toolsConfig) +
+            |buildscript {
+            |    dependencies {
+            |        classpath 'com.android.tools.build:gradle:' +
+            |            '${toolsConfig.get(ANDROID_VERSION, DEFAULT_ANDROID_VERSION)}'
+            |        classpath files($pluginClasspathString)
+            |    }
+            |
+            |    repositories {
+            |        jcenter()
+            |        ${toolsConfig.get(ANDROID_VERSION, DEFAULT_ANDROID_VERSION).startsWith('3') ? 'google()' : ''}
+            |    }
+            |}
+            |
+            |repositories {
+            |    mavenCentral()
+            |}
+            |
+            |apply plugin: 'com.android.library'
+            |apply plugin: 'com.monits.staticCodeAnalysis'
+            |
+            |dependencies {
+            |    testCompile 'junit:junit:4.12'
+            |}
+        """.stripMargin() + staticCodeAnalysisConfig(toolsConfig) +
         """
-            android {
-                compileSdkVersion ${TARGET_ANDROID_VERSION}
-                buildToolsVersion "${BUILD_TOOLS_ANDROID_VERSION}"
-            }
-        """ as TestFile
+            |android {
+            |    compileSdkVersion ${TARGET_ANDROID_VERSION}
+            |    buildToolsVersion "${BUILD_TOOLS_ANDROID_VERSION}"
+            |}
+        """.stripMargin() as TestFile
     }
 
     TestFile writeAndroidManifest(final String packageName = DEFAULT_ANDROID_PACKAGE) {
         file(ANDROID_MANIFEST_PATH) << """
-            <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-                package="${packageName}"
-                android:versionCode="1">
-            </manifest>
-        """ as TestFile
+            |<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+            |    package="${packageName}"
+            |    android:versionCode="1">
+            |</manifest>
+        """.stripMargin() as TestFile
     }
 
     @SuppressWarnings('FactoryMethodName')
@@ -241,14 +239,13 @@ abstract class AbstractIntegTestFixture extends Specification {
 
     private void setupSubmoduleContents() {
         file(LIBB_DIRNAME + BUILD_GRADLE_FILENAME) << """
-            dependencies {
-                compile project('${LIBA_PATH}')
-            }
-        """
+            |dependencies {
+            |    compile project('${LIBA_PATH}')
+            |}
+        """.stripMargin()
 
-        file('settings.gradle') << """
-            include '${LIBA_PATH}', '${LIBB_PATH}'
-        """
+        file('settings.gradle') << "include '${LIBA_PATH}', '${LIBB_PATH}'"
+
         file(BUILD_GRADLE_FILENAME).createNewFile() // empty root build.gradle
 
         file(LIBA_DIRNAME + 'src/main/java/liba/ClassA.java') <<
