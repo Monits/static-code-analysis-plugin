@@ -1,6 +1,8 @@
 ## History
 
 # v2.6
+### 2.6.8 (unreleased)
+
 ### 2.6.7
 
 Bug fixes:
