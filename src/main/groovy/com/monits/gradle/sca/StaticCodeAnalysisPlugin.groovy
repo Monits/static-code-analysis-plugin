@@ -137,19 +137,20 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     // See: https://code.google.com/p/android/issues/detail?id=208474
     @CompileStatic(TypeCheckingMode.SKIP)
     private void addFindbugsAnnotationDependencies() {
-        // Wait until the compileOnly configuration is available
-        project.configurations.matching { Configuration config -> config.name == COMPILE_ONLY }
-            .all { Configuration config ->
-                project.dependencies {
-                    compileOnly('com.google.code.findbugs:annotations:' + ToolVersions.findbugsVersion) {
-                        /*
-                             * This jar both includes and depends on jcip and jsr-305. One is enough
-                             * See https://github.com/findbugsproject/findbugs/issues/94
-                             */
-                        transitive = false
-                    }
+        // Wait until the configurations are available
+        project.configurations.matching { Configuration config ->
+            config.name in [COMPILE_ONLY, 'testCompileOnly', 'androidTestCompileOnly']
+        }.all { Configuration config ->
+            project.dependencies {
+                "${config.name}"('com.google.code.findbugs:annotations:' + ToolVersions.findbugsVersion) {
+                    /*
+                     * This jar both includes and depends on jcip and jsr-305. One is enough
+                     * See https://github.com/findbugsproject/findbugs/issues/94
+                     */
+                    transitive = false
                 }
             }
+        }
     }
 
     @CompileStatic(TypeCheckingMode.SKIP)
