@@ -1,7 +1,7 @@
 apply plugin: 'codenarc'
 
 codenarc {
-    toolVersion = '1.0'
+    toolVersion = '1.2'
     ignoreFailures = false
 
     reportFormat = 'xml'

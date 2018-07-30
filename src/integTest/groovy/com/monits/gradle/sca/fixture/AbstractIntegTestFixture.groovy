@@ -27,7 +27,8 @@ import spock.util.environment.Jvm
 */
 abstract class AbstractIntegTestFixture extends Specification {
     // A sample of gradle versions to be considered in general testing
-    static final TESTED_GRADLE_VERSIONS = ['2.3', '2.4', '2.7', '2.8', '2.10', '2.14.1', '3.0', '3.1', '3.3', '4.0']
+    static final List<String> TESTED_GRADLE_VERSIONS = ['2.3', '2.4', '2.7', '2.8', '2.10', '2.14.1', '3.0', '3.1',
+                                                        '3.3', '4.0']
 
     private static final String ANDROID_1_5_0 = '1.5.0'
     static final String DEFAULT_ANDROID_VERSION = ANDROID_1_5_0
@@ -202,6 +203,31 @@ abstract class AbstractIntegTestFixture extends Specification {
 
     abstract String toolName()
 
+    void setupMultimoduleAndroidProject(final String androidVersion = DEFAULT_ANDROID_VERSION) {
+        setupAndroidSubProject(LIBA_DIRNAME, androidVersion)
+        setupAndroidSubProject(LIBB_DIRNAME, androidVersion)
+
+        setupSubmoduleContents()
+    }
+
+    void setupMixedMultimoduleAndroidProject(final String androidVersion = DEFAULT_ANDROID_VERSION) {
+        setupJavaSubProject(LIBA_DIRNAME)
+        setupAndroidSubProject(LIBB_DIRNAME, androidVersion)
+
+        setupSubmoduleContents()
+    }
+
+    @SuppressWarnings('DuplicateNumberLiteral')
+    String gradleVersionForAndroid(final String androidVersion) {
+        VersionNumber androidVersionNumber = VersionNumber.parse(androidVersion)
+
+        // Version 2.2 and up are the only ones compatible with gradle 3
+        androidVersionNumber < VersionNumber.parse(ANDROID_1_5_0) ? '2.9' :
+            androidVersionNumber.major < 2 ||
+                (androidVersionNumber.major == 2 && androidVersionNumber.minor < 2) ?
+                    '2.14.1' : androidVersionNumber.major < 3 ? '3.5' : GradleVersion.current().version
+    }
+
     private void setupAndroidSubProject(final String dir, final String androidVersion = DEFAULT_ANDROID_VERSION) {
         writeAndroidBuildFile(androidVersion).renameTo(file(dir + BUILD_GRADLE_FILENAME))
         writeAndroidManifest(DEFAULT_ANDROID_PACKAGE + '.' + dir.replace('/', ''))
@@ -209,10 +235,11 @@ abstract class AbstractIntegTestFixture extends Specification {
         file('src').deleteDir()
     }
 
-    void setupMultimoduleAndroidProject(final String androidVersion = DEFAULT_ANDROID_VERSION) {
-        setupAndroidSubProject(LIBA_DIRNAME, androidVersion)
-        setupAndroidSubProject(LIBB_DIRNAME, androidVersion)
+    private void setupJavaSubProject(final String dir) {
+        writeBuildFile().renameTo(file(dir + BUILD_GRADLE_FILENAME))
+    }
 
+    private void setupSubmoduleContents() {
         file(LIBB_DIRNAME + BUILD_GRADLE_FILENAME) << """
             dependencies {
                 compile project('${LIBA_PATH}')
@@ -225,24 +252,13 @@ abstract class AbstractIntegTestFixture extends Specification {
         file(BUILD_GRADLE_FILENAME).createNewFile() // empty root build.gradle
 
         file(LIBA_DIRNAME + 'src/main/java/liba/ClassA.java') <<
-                'package liba; public class ClassA { public boolean isFoo(Object arg) { return true; } }'
+        'package liba; public class ClassA { public boolean isFoo(Object arg) { return true; } }'
         file(LIBA_DIRNAME + 'src/test/java/liba/ClassATest.java') <<
-                'package liba; public class ClassATest { public boolean isFoo(Object arg) { return true; } }'
+        'package liba; public class ClassATest { public boolean isFoo(Object arg) { return true; } }'
         file(LIBB_DIRNAME + 'src/main/java/libb/ClassB.java') <<
-                'package libb; import liba.ClassA; public class ClassB { public boolean isFoo(Object arg) {' +
-                ' ClassA a = new ClassA(); return a.isFoo(arg); } }'
+        'package libb; import liba.ClassA; public class ClassB { public boolean isFoo(Object arg) {' +
+            ' ClassA a = new ClassA(); return a.isFoo(arg); } }'
         file(LIBB_DIRNAME + 'src/test/java/libb/ClassBTest.java') <<
-                'package libb; public class ClassBTest { public boolean isFoo(Object arg) { return true; } }'
-    }
-
-    @SuppressWarnings('DuplicateNumberLiteral')
-    String gradleVersionForAndroid(final String androidVersion) {
-        VersionNumber androidVersionNumber = VersionNumber.parse(androidVersion)
-
-        // Version 2.2 and up are the only ones compatible with gradle 3
-        androidVersionNumber < VersionNumber.parse(ANDROID_1_5_0) ? '2.9' :
-            androidVersionNumber.major < 2 ||
-                (androidVersionNumber.major == 2 && androidVersionNumber.minor < 2) ?
-                    '2.14.1' : androidVersionNumber.major < 3 ? '3.5' : GradleVersion.current().version
+        'package libb; public class ClassBTest { public boolean isFoo(Object arg) { return true; } }'
     }
 }

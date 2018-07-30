@@ -116,37 +116,38 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
                 configSource = new File(config.getCheckstyleRules())
             }
 
-            Task checkstyleTask = getOrCreateTask(project, generateTaskName(sourceSetName)) { Checkstyle t ->
-                t.with {
-                    if (remoteLocation) {
-                        dependsOn project.tasks.findByName(downloadTaskName)
-                    }
-
-                    /*
-                     * Gradle 4.0 introduced a config property setting by default to config/checkstyle
-                     * After any other checkstyle task downloads a new config there,
-                     * all other would be invalidated so we manually disable it.
-                    */
-                    if (GradleVersion.current() >= GRADLE4) {
-                        configDir = project.<File>provider { null }
-                    }
-
-                    configFile = configSource
-
-                    reports { CheckstyleReports r ->
-                        configureXmlReport(r.xml, project, sourceSetName)
-
-                        if (r.hasProperty('html')) {
-                            r.html.enabled = false // added in gradle 2.10, but unwanted
+            Task checkstyleTask = project.tasks.maybeCreate(generateTaskName(sourceSetName), Checkstyle)
+                .configure { Checkstyle t ->
+                    t.with {
+                        if (remoteLocation) {
+                            dependsOn project.tasks.findByName(downloadTaskName)
                         }
-                    }
 
-                    // Setup cache file location per-sourceset
-                    configProperties = [
-                      'checkstyle.cache.file':"${project.buildDir}/checkstyle-${sourceSetName}.cache" as Object,
-                    ]
+                        /*
+                             * Gradle 4.0 introduced a config property setting by default to config/checkstyle
+                             * After any other checkstyle task downloads a new config there,
+                             * all other would be invalidated so we manually disable it.
+                            */
+                        if (GradleVersion.current() >= GRADLE4) {
+                            configDir = project.<File> provider { null }
+                        }
+
+                        configFile = configSource
+
+                        reports { CheckstyleReports r ->
+                            configureXmlReport(r.xml, project, sourceSetName)
+
+                            if (r.hasProperty('html')) {
+                                r.html.enabled = false // added in gradle 2.10, but unwanted
+                            }
+                        }
+
+                        // Setup cache file location per-sourceset
+                        configProperties = [
+                            'checkstyle.cache.file':"${project.buildDir}/checkstyle-${sourceSetName}.cache" as Object,
+                        ]
+                    }
                 }
-            }
 
             if (configuration) {
                 // Add the sourceset as second parameter for configuration closure
@@ -169,17 +170,6 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
             final String sourceSetName) {
         report.destination = new File(project.extensions.getByType(ReportingExtension).file(CHECKSTYLE),
             "checkstyle-${sourceSetName}.xml")
-    }
-
-    private static Task getOrCreateTask(final Project project, final String taskName, final Closure closure) {
-        Task checkstyleTask
-        if (project.tasks.findByName(taskName)) {
-            checkstyleTask = project.tasks.findByName(taskName)
-        } else {
-            checkstyleTask = project.task(taskName, type:Checkstyle)
-        }
-
-        checkstyleTask.configure closure
     }
 
     private static String generateTaskName(final String taskName = CHECKSTYLE, final String sourceSetName) {

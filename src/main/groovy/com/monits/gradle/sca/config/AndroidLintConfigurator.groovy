@@ -113,7 +113,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
         lintTask.lintOptions = project.android.lintOptions
     }
 
-    @SuppressWarnings('NoDef') // can't specify a type without depending on Android
+    @SuppressWarnings(['NoDef', 'VariableTypeRequired']) // can't specify a type without depending on Android
     @CompileStatic(TypeCheckingMode.SKIP)
     private static void configureLintInputsAndOutputs(final Project project, final Task lintTask) {
         /*
@@ -153,7 +153,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
         }
     }
 
-    @SuppressWarnings('NoDef') // can't specify a type without depending on Android
+    @SuppressWarnings(['NoDef', 'MethodParameterTypeRequired']) // can't specify a type without depending on Android
     @CompileStatic(TypeCheckingMode.SKIP)
     private static boolean usesJack(final def configuration) {
         // Newer plugin versions have a merged jack config on the config

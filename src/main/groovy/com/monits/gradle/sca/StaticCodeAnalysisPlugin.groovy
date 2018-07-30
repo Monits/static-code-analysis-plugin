@@ -27,7 +27,6 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ProjectDependency
-import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.util.GradleVersion
 
 /**
@@ -50,7 +49,10 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     private final static String FINDBUGS_DEFAULT_ANDROID_SUPPRESSION_FILTER =
         DEFAULTS_LOCATION + 'findbugs/findbugs-exclusions-android.xml'
     private final static String ANDROID_DEFAULT_RULES = DEFAULTS_LOCATION + 'android/android-lint.xml'
-    private final static String PROVIDED = 'provided'
+    private final static String COMPILE_ONLY = 'compileOnly'
+
+    private final static GradleVersion GRADLE_3_2 = GradleVersion.version('3.2')
+    private final static String JAVA_PLUGIN_ID = 'java'
 
     private StaticCodeAnalysisExtension extension
     private Project project
@@ -67,8 +69,11 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         configureExtensionRule()
 
         project.afterEvaluate {
-            addDepsButModulesToScaconfig project.configurations.compile
-            addDepsButModulesToScaconfig project.configurations.testCompile
+            addDepsToScaconfig 'compile'
+            addDepsToScaconfig 'testCompile'
+            addDepsToScaconfig 'api'
+            addDepsToScaconfig 'implementation'
+            addDepsToScaconfig 'testImplementation'
 
             // Apply Android Lint configuration
             // must be done in `afterEvaluate` for compatibility with android plugin [1.0, 1.3)
@@ -76,22 +81,22 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
 
             if (extension.getFindbugs()) {
                 withAndroidPlugins FindbugsConfigurator
-                withPlugin(JavaBasePlugin, FindbugsConfigurator)
+                withPlugin(JAVA_PLUGIN_ID, FindbugsConfigurator)
             }
 
             if (extension.getCheckstyle()) {
                 withAndroidPlugins CheckstyleConfigurator
-                withPlugin(JavaBasePlugin, CheckstyleConfigurator)
+                withPlugin(JAVA_PLUGIN_ID, CheckstyleConfigurator)
             }
 
             if (extension.getPmd()) {
                 withAndroidPlugins PmdConfigurator
-                withPlugin(JavaBasePlugin, PmdConfigurator)
+                withPlugin(JAVA_PLUGIN_ID, PmdConfigurator)
             }
 
             if (extension.getCpd()) {
                 withAndroidPlugins CpdConfigurator
-                withPlugin(JavaBasePlugin, CpdConfigurator)
+                withPlugin(JAVA_PLUGIN_ID, CpdConfigurator)
             }
         }
     }
@@ -101,21 +106,15 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         // Wait until the default configuration is available
         project.configurations.matching { Configuration config -> config.name == Dependency.DEFAULT_CONFIGURATION }
             .all { Configuration config ->
-                project.configurations {
-                    archives {
-                        extendsFrom project.configurations.default
-                    }
-                }
-
-                if (project.configurations.findByName(PROVIDED) == null) {
+                if (project.configurations.findByName(COMPILE_ONLY) == null) {
                     project.configurations {
-                        provided {
+                        compileOnly {
                             description = 'Compile only dependencies'
                             dependencies.all { Dependency dep ->
                                 project.configurations.default.exclude group:dep.group, module:dep.name
                             }
                         }
-                        compile.extendsFrom provided
+                        compile.extendsFrom compileOnly
                     }
                 }
             }
@@ -138,11 +137,11 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     // See: https://code.google.com/p/android/issues/detail?id=208474
     @CompileStatic(TypeCheckingMode.SKIP)
     private void addFindbugsAnnotationDependencies() {
-        // Wait until the provided configuration is available
-        project.configurations.matching { Configuration config -> config.name == PROVIDED }
+        // Wait until the compileOnly configuration is available
+        project.configurations.matching { Configuration config -> config.name == COMPILE_ONLY }
             .all { Configuration config ->
                 project.dependencies {
-                    provided('com.google.code.findbugs:annotations:' + ToolVersions.findbugsVersion) {
+                    compileOnly('com.google.code.findbugs:annotations:' + ToolVersions.findbugsVersion) {
                         /*
                              * This jar both includes and depends on jcip and jsr-305. One is enough
                              * See https://github.com/findbugsproject/findbugs/issues/94
@@ -184,7 +183,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         }
 
         // default suppression filter for findbugs for Java - order is important, Android plugin applies Java
-        withPlugin(JavaBasePlugin) {
+        withPlugin(JAVA_PLUGIN_ID) {
             extension.conventionMapping.with {
                 findbugsExclude = { FINDBUGS_DEFAULT_SUPPRESSION_FILTER }
             }
@@ -213,11 +212,25 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
      * Adds all dependencies except modules from given config to scaconfig.
      *
      * Modules are added to scaconfigModules, but transient dependencies are added.
+     * The configuration is passed by name, and may or may not exist.
+     * When created, all it's dependencies will be processed.
+     *
+     * @param config The config whose dependencies are to be added to scaconfig / scaconfigModules
+     */
+    private void addDepsToScaconfig(final String configName) {
+        project.configurations.matching { Configuration config -> config.name == configName }
+            .all { Configuration config -> addDepsToScaconfig(config) }
+    }
+
+    /**
+     * Adds all dependencies except modules from given config to scaconfig.
+     *
+     * Modules are added to scaconfigModules, but transient dependencies are added.
      *
      * @param config The config whose dependencies are to be added to scaconfig / scaconfigModules
      */
     @CompileStatic(TypeCheckingMode.SKIP)
-    private void addDepsButModulesToScaconfig(final Configuration config) {
+    private void addDepsToScaconfig(final Configuration config) {
         // support lazy dependency configuration
         config.allDependencies.all {
             if (it in ProjectDependency) {
@@ -227,19 +240,18 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
                 it.dependencyProject.configurations.all { c ->
                     // Deal with changing APIs from Gradle...
                     String targetConfiguration
-                    if (GradleVersion.current() >= GradleVersion.version('3.2')) {
+                    if (GradleVersion.current() >= GRADLE_3_2) {
                         targetConfiguration = it.targetConfiguration ?: Dependency.DEFAULT_CONFIGURATION
                     } else {
                         targetConfiguration = it.configuration
                     }
 
                     // take transitive dependencies
-                    if (c.name == targetConfiguration) {
-                        addDepsButModulesToScaconfig(c)
+                    if (c.name == targetConfiguration || c.name == Dependency.ARCHIVES_CONFIGURATION) {
+                        addDepsToScaconfig(c)
                     }
                 }
             } else {
-                // TODO : This includes @aar packages that aren't understood by our tools. Filter them?
                 project.dependencies.scaconfig it
             }
         }
@@ -252,33 +264,20 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         withAndroidPlugins configureAction
     }
 
-    private void withPlugin(final Class<? extends Plugin> pluginClass,
+    private void withPlugin(final String pluginId,
                             final Class<? extends AnalysisConfigurator> configClass) {
         AnalysisConfigurator  configurator = configClass.newInstance(new Object[0])
         Action<? extends Plugin> configureAction = { configurator.applyConfig(project, extension) }
 
-        withPlugin(pluginClass, configureAction)
+        withPlugin(pluginId, configureAction)
     }
 
-    private void withPlugin(final Class<? extends Plugin> pluginClass, final Action<? extends Plugin> configureAction) {
-        project.plugins.withType(pluginClass, configureAction)
+    private void withPlugin(final String pluginId, final Action<? extends Plugin> configureAction) {
+        project.plugins.withId(pluginId, configureAction)
     }
 
     private void withAndroidPlugins(final Action<? extends Plugin> configureAction) {
-        withOptionalPlugin('com.android.build.gradle.AppPlugin', configureAction)
-        withOptionalPlugin('com.android.build.gradle.LibraryPlugin', configureAction)
-    }
-
-    @SuppressWarnings(['ClassForName', 'EmptyCatchBlock'])
-    private void withOptionalPlugin(final String pluginClassName, final Action<? extends Plugin> configureAction) {
-        try {
-            // Will most likely throw a ClassNotFoundException
-            Class<?> pluginClass = Class.forName(pluginClassName)
-            if (Plugin.isAssignableFrom(pluginClass)) {
-                withPlugin(pluginClass as Class<? extends Plugin>, configureAction)
-            }
-        } catch (ClassNotFoundException ignored) {
-            // do nothing
-        }
+        withPlugin('com.android.application', configureAction)
+        withPlugin('com.android.library', configureAction)
     }
 }

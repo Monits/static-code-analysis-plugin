@@ -78,7 +78,6 @@ class CPDTask extends DefaultTask implements VerificationTask {
                 throw new GradleException(message)
             }
         }
-
     }
 
     /*

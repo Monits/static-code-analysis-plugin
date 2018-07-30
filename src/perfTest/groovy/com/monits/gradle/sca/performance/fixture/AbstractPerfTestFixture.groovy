@@ -34,7 +34,7 @@ abstract class AbstractPerfTestFixture extends Specification {
     static final List<String> TESTED_GRADLE_VERSIONS_FOR_ANDROID = (['2.8', '2.14.1'] +
         (Jvm.current.java8Compatible ? [GradleVersion.current().version] : [] as List<String>))
         .takeRight(2).asImmutable()
-    static final String BASELINE_PLUGIN_VERSION = '"com.monits:static-code-analysis-plugin:2.5.0"'
+    static final String BASELINE_PLUGIN_VERSION = '"com.monits:static-code-analysis-plugin:2.6.4"'
 
     static final int NUMBER_OF_CLASSES_TO_ANALYZE = 100
 
@@ -207,13 +207,6 @@ abstract class AbstractPerfTestFixture extends Specification {
 
     abstract String toolName()
 
-    private void setupAndroidSubProject(final String packageName, final String dir, final String androidVersion,
-                                        final String pluginVersion = "files($pluginClasspathString)") {
-        writeAndroidBuildFile(androidVersion, pluginVersion).renameTo(file(dir + BUILD_GRADLE_FILENAME))
-        writeAndroidManifest(packageName).renameTo(file(dir + ANDROID_MANIFEST_PATH))
-        file('src').deleteDir()
-    }
-
     void setupMultimoduleAndroidProject(final String androidVersion,
                                         final String pluginVersion = "files($pluginClasspathString)",
                                         final int numberOfClasses = NUMBER_OF_CLASSES_TO_ANALYZE) {
@@ -248,5 +241,12 @@ abstract class AbstractPerfTestFixture extends Specification {
     String androidVersionForGradle(final String gradleVersion) {
         GradleVersion.version(gradleVersion) < GradleVersion.version('3.0') ?
             DEFAULT_ANDROID_VERSION : '2.3.3'
+    }
+
+    private void setupAndroidSubProject(final String packageName, final String dir, final String androidVersion,
+                                        final String pluginVersion = "files($pluginClasspathString)") {
+        writeAndroidBuildFile(androidVersion, pluginVersion).renameTo(file(dir + BUILD_GRADLE_FILENAME))
+        writeAndroidManifest(packageName).renameTo(file(dir + ANDROID_MANIFEST_PATH))
+        file('src').deleteDir()
     }
 }

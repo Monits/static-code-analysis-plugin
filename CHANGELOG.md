@@ -1,6 +1,28 @@
 ## History
 
 # v2.6
+### 2.6.7 (unreleased)
+
+### 2.6.6
+
+Improvements:
+ * Upgraded to Gradle 4.9
+ * Fully support `api` and `implementation` configurations
+ * Upgraded fb-contrib to 7.4.3
+ * Upgraded Checkstyle to 8.11
+ * Android projects that depend on a Java module in mixed multimodule projects
+ * `compileOnly` is now used instead of `provided`
+
+Bug fixes:
+ * PMD now properly receives compiled class info for Android projects
+
+### 2.6.5
+
+Improvements:
+ * Upgraded to Gradle 4.8
+ * Upgraded PMD to 6.5.0
+ * Upgraded Checkstyle to 8.10.1
+
 ### 2.6.4
 
 Improvements:
