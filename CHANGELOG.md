@@ -1,7 +1,9 @@
 ## History
 
 # v2.6
-### 2.6.6 (unreleased)
+### 2.6.7 (unreleased)
+
+### 2.6.6
 
 Improvements:
  * Upgraded to Gradle 4.9
