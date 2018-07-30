@@ -3,6 +3,9 @@
 # v2.6
 ### 2.6.8 (unreleased)
 
+Improvements:
+ * Upgraded PMD to 6.6.0
+
 ### 2.6.7
 
 Bug fixes:
