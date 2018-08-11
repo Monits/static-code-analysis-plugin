@@ -19,10 +19,7 @@
     </ruleset-ref>
 <!--    <ruleset-ref path='rulesets/enhanced.xml'/> -->
     <ruleset-ref path='rulesets/exceptions.xml'/>
-    <ruleset-ref path='rulesets/formatting.xml'>
-        <!-- Disabled until they fix https://github.com/CodeNarc/CodeNarc/issues/345 -->
-        <exclude name='Indentation'/>
-    </ruleset-ref>
+    <ruleset-ref path='rulesets/formatting.xml'/>
     <ruleset-ref path='rulesets/generic.xml'/>
     <ruleset-ref path='rulesets/groovyism.xml'/>
     <ruleset-ref path='rulesets/imports.xml'>

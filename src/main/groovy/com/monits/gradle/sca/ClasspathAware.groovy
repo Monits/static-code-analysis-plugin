@@ -143,27 +143,27 @@ trait ClasspathAware {
         String cacheDir = AndroidHelper.getBuildCacheDir(project)
         project.files(project.configurations.scaconfig.files.findAll { File it -> it.name.endsWith AAR_EXTENSTION }
             .collect { File it ->
-            MessageDigest sha1 = MessageDigest.getInstance('SHA1')
-            String inputFile = 'COMMAND=PREPARE_LIBRARY\n' +
-                "FILE_PATH=${it.absolutePath}\n" +
-                "FILE_SIZE=${it.length()}\n" +
-                "FILE_TIMESTAMP=${it.lastModified()}"
-            String hash = new BigInteger(1, sha1.digest(inputFile.bytes)).toString(16)
-            File cacheFile = new File(cacheDir + hash + File.separator + 'output/jars/classes.jar')
+                MessageDigest sha1 = MessageDigest.getInstance('SHA1')
+                String inputFile = 'COMMAND=PREPARE_LIBRARY\n' +
+                    "FILE_PATH=${it.absolutePath}\n" +
+                    "FILE_SIZE=${it.length()}\n" +
+                    "FILE_TIMESTAMP=${it.lastModified()}"
+                String hash = new BigInteger(1, sha1.digest(inputFile.bytes)).toString(16)
+                File cacheFile = new File(cacheDir + hash + File.separator + 'output/jars/classes.jar')
 
-            // If it doesn't exist, create it - (AGP 3.+ no longer creates them)
-            if (!cacheFile.exists()) {
-                ZipFile aarFile = new ZipFile(it)
-                ZipEntry classesEntry = aarFile.getEntry('classes.jar')
+                // If it doesn't exist, create it - (AGP 3.+ no longer creates them)
+                if (!cacheFile.exists()) {
+                    ZipFile aarFile = new ZipFile(it)
+                    ZipEntry classesEntry = aarFile.getEntry('classes.jar')
 
-                if (classesEntry != null) {
-                    cacheFile.parentFile.mkdirs()
-                    cacheFile.createNewFile()
-                    cacheFile << aarFile.getInputStream(classesEntry)
+                    if (classesEntry != null) {
+                        cacheFile.parentFile.mkdirs()
+                        cacheFile.createNewFile()
+                        cacheFile << aarFile.getInputStream(classesEntry)
+                    }
                 }
-            }
 
-            cacheFile
+                cacheFile
         }).asFileTree
     }
 
