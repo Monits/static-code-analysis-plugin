@@ -217,7 +217,7 @@ abstract class AbstractPerfTestFixture extends Specification {
             |}
         """.stripMargin()
 
-        file('settings.gradle') << "include '${LIBA_PATH}', '${LIBB_PATH}'"
+        file('settings.gradle').text = "include '${LIBA_PATH}', '${LIBB_PATH}'"
         file(BUILD_GRADLE_FILENAME).createNewFile() // empty root build.gradle
 
         1.upto(numberOfClasses) {
