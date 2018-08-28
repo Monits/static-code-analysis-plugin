@@ -1,14 +1,7 @@
-buildscript {
-    repositories {
-        maven {
-            url 'https://plugins.gradle.org/m2/'
-        }
-    }
-    dependencies {
-        classpath 'gradle.plugin.nl.javadude.gradle.plugins:license-gradle-plugin:0.12.1'
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
-        classpath 'com.gradle.publish:plugin-publish-plugin:0.9.8'
-    }
+plugins {
+    id 'com.github.hierynomus.license' version '0.14.0'
+    id 'com.jfrog.bintray' version '1.8.4'
+    id 'com.gradle.plugin-publish' version '0.10.0'
 }
 
 repositories {
