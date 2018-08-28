@@ -5,12 +5,7 @@ plugins {
 }
 
 repositories {
-    // Java 7 can't authenticate jcenter's HTTPS certificate
-    if (org.gradle.api.JavaVersion.current().java7) {
-        mavenCentral()
-    } else {
-        jcenter()
-    }
+    jcenter()
 }
 
 group = 'com.monits'

@@ -14,8 +14,8 @@ before_cache:
   - rm -rf $HOME/.gradle/caches/modules-2/modules-2.lock
 
 jdk:
-  - oraclejdk7
   - oraclejdk8
+  - oraclejdk10
 
 env:
   - TEST_SUITE="codenarc integTest"
