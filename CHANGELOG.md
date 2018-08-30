@@ -7,6 +7,7 @@ Improvements:
  * Upgraded PMD to 6.6.0
  * Upgraded Checkstyle to 8.12
  * Upgraded to Gradle 4.10
+ * Android lint task configuration is 3.5X faster
 
 ### 2.6.7
 

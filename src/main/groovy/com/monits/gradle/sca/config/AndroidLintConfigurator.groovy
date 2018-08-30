@@ -44,37 +44,61 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
     @Override
     void applyAndroidConfig(final Project project, final StaticCodeAnalysisExtension extension) {
         project.tasks.matching { Task it -> it.name == 'lint' } .all { Task t ->
-            t.dependsOn project.tasks.create('resolveAndroidLint', ResolveAndroidLintTask)
-            t.finalizedBy project.tasks.create('cleanupAndroidLint', CleanupAndroidLintTask)
+            setupTasks(t, project, extension)
 
             configureLintTask(project, extension, t)
         }
     }
 
-    @SuppressWarnings(['UnnecessaryGetter', 'CatchThrowable']) // yes, we REALLY want to be that generic
-    @CompileStatic(TypeCheckingMode.SKIP)
-    private void configureLintTask(final Project project, final StaticCodeAnalysisExtension extension,
-                                    final Task lintTask) {
-        // TODO : This won't fail on warnings, just like Checkstyle. See https://issues.gradle.org/browse/GRADLE-2888
-        project.android.lintOptions.abortOnError = !extension.getIgnoreErrors()
+    private static void setupTasks(final Task lintTask, final Project project,
+                                   final StaticCodeAnalysisExtension extension) {
+        Task resolveTask = project.tasks.create('resolveAndroidLint', ResolveAndroidLintTask)
+        Task cleanupTask = project.tasks.create('cleanupAndroidLint', CleanupAndroidLintTask)
 
-        // Change output location for consistency with other plugins
-        project.android.lintOptions.xmlOutput = project.file("${project.buildDir}/reports/android/lint-results.xml")
-
-        configureLintRules(project, extension, lintTask)
+        lintTask.dependsOn resolveTask
+        lintTask.finalizedBy cleanupTask
 
         // Tasks should be skipped if disabled by extension
-        lintTask.onlyIf { extension.getAndroidLint() }
-        lintTask.dependsOn.find { it in ResolveAndroidLintTask }.onlyIf { extension.getAndroidLint() }
-        lintTask.finalizedBy.getDependencies(lintTask)
-            .find { it in CleanupAndroidLintTask }.onlyIf { extension.getAndroidLint() }
+        lintTask.onlyIf { extension.androidLint }
+        resolveTask.onlyIf { extension.androidLint }
+        cleanupTask.onlyIf { extension.androidLint }
+    }
+
+    @SuppressWarnings(['NoDef', 'VariableTypeRequired']) // can't specify a type without depending on Android
+    @CompileStatic(TypeCheckingMode.SKIP)
+    private void configureLintOptions(final Project project, final StaticCodeAnalysisExtension extension,
+                                      final File configSource, final Task lintTask) {
+        def lintOptions = project.android.lintOptions
+
+        lintOptions.with {
+            // TODO : This won't fail on warnings, just like Checkstyle.
+            // See https://issues.gradle.org/browse/GRADLE-2888
+            abortOnError = !extension.ignoreErrors
+
+            // Change output location for consistency with other plugins
+            xmlOutput = project.file("${project.buildDir}/reports/android/lint-results.xml")
+
+            // Update global config
+            lintConfig configSource
+        }
+
+        // Make sure the task has the updated global config
+        lintTask.lintOptions = lintOptions
+    }
+
+    @SuppressWarnings('CatchThrowable') // yes, we REALLY want to be that generic
+    private void configureLintTask(final Project project, final StaticCodeAnalysisExtension extension,
+                                    final Task lintTask) {
+        File config = obtainLintRules(project, extension, lintTask)
+
+        configureLintOptions(project, extension, config, lintTask)
 
         try {
             configureLintInputsAndOutputs(project, lintTask)
 
             // Allow to cache task result on Gradle 3+!
             if (GradleVersion.current() >= CACHEABLE_TASK_GRADLE_VERSION) {
-                lintTask.getOutputs().cacheIf(Specs.SATISFIES_ALL)
+                lintTask.outputs.cacheIf(Specs.SATISFIES_ALL)
             }
         } catch (Throwable e) {
             // Something went wrong!
@@ -89,43 +113,39 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
         }
     }
 
-    @SuppressWarnings('UnnecessaryGetter')
-    @CompileStatic(TypeCheckingMode.SKIP)
-    private void configureLintRules(final Project project, final StaticCodeAnalysisExtension config,
+    private File obtainLintRules(final Project project, final StaticCodeAnalysisExtension config,
                                     final Task lintTask) {
-        boolean remoteLocation = RemoteConfigLocator.isRemoteLocation(config.getAndroidLintConfig())
+        boolean remoteLocation = RemoteConfigLocator.isRemoteLocation(config.androidLintConfig)
         File configSource
 
         if (remoteLocation) {
             String downloadTaskName = 'downloadAndroidLintConfig'
-            configSource = configLocator.makeDownloadFileTask(project, config.getAndroidLintConfig(),
+            configSource = configLocator.makeDownloadFileTask(project, config.androidLintConfig,
                 String.format('android-lint-%s.xml', project.name), downloadTaskName)
 
             lintTask.dependsOn project.tasks.findByName(downloadTaskName)
         } else {
-            configSource = new File(config.getAndroidLintConfig())
+            configSource = new File(config.androidLintConfig)
         }
 
-        // Update global config
-        project.android.lintOptions.lintConfig configSource
-
-        // Make sure the task has the updated global config
-        lintTask.lintOptions = project.android.lintOptions
+        configSource
     }
 
     @SuppressWarnings(['NoDef', 'VariableTypeRequired']) // can't specify a type without depending on Android
     @CompileStatic(TypeCheckingMode.SKIP)
     private static void configureLintInputsAndOutputs(final Project project, final Task lintTask) {
+        def lintOptions = project.android.lintOptions
+
         /*
          * Android doesn't define inputs nor outputs for lint tasks, so they will rerun each time.
          * This is an experimental best effort to what I believe it should look like...
          * See: https://code.google.com/p/android/issues/detail?id=209497
          */
-        boolean xmlEnabled = project.android.lintOptions.xmlReport
-        File xmlOutput = project.android.lintOptions.xmlOutput
+        boolean xmlEnabled = lintOptions.xmlReport
+        File xmlOutput = lintOptions.xmlOutput
 
-        boolean htmlEnabled = project.android.lintOptions.htmlReport
-        File htmlOutput = project.android.lintOptions.htmlOutput
+        boolean htmlEnabled = lintOptions.htmlReport
+        File htmlOutput = lintOptions.htmlOutput
 
         DomainObjectSet<?> variants = getVariants(project)
 
@@ -185,7 +205,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
             return configuration.buildType.useJack
         }
 
-        // default is false, plugin is too old to know anything about jack
+        // default is false, plugin is too old or too new to know anything about jack
         false
     }
 

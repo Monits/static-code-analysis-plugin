@@ -14,7 +14,7 @@
     <ruleset-ref path='rulesets/design.xml'/>
     <ruleset-ref path='rulesets/dry.xml'>
         <rule-config name='DuplicateStringLiteral'>
-            <property name='ignoreStrings' value='NoDef'/>
+            <property name='ignoreStrings' value='NoDef,VariableTypeRequired'/>
         </rule-config>
     </ruleset-ref>
 <!--    <ruleset-ref path='rulesets/enhanced.xml'/> -->
