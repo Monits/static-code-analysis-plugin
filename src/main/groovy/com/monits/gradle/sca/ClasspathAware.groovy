@@ -88,8 +88,8 @@ trait ClasspathAware {
             // is it an Android plugin?
             if (proj.plugins.hasPlugin('com.android.application') || proj.plugins.hasPlugin('com.android.library')) {
                 // TODO : is it okay to always use debug?
-                dependantModuleClasses = project.files(pathToCompiledClasses(proj, DEBUG_SOURCESET))
-                    .plus(dependantModuleClasses) // Using += produces a runtime exception
+                dependantModuleClasses = project.files(pathToCompiledClasses(proj, DEBUG_SOURCESET)) +
+                    dependantModuleClasses // Using += produces a runtime exception
             } else if (proj.plugins.hasPlugin('java')) {
                 // TODO : is it okay to always use all sourcesets?
                 proj.convention.getPlugin(JavaPluginConvention).sourceSets.all { SourceSet ss ->
