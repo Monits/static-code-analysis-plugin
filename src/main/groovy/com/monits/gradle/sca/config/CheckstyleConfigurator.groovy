@@ -57,23 +57,23 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
         }
     }
 
-    @CompileStatic(TypeCheckingMode.SKIP)
     @Override
     void applyAndroidConfig(Project project, StaticCodeAnalysisExtension extension) {
         setupPlugin(project, extension)
 
-        setupTasksPerSourceSet(project, extension, project.android.sourceSets) { task, sourceSet ->
-            source sourceSet.java.srcDirs
-            exclude '**/gen/**'
+        setupTasksPerSourceSet(project, extension,
+                project['android']['sourceSets'] as NamedDomainObjectContainer) { Checkstyle task, sourceSet ->
+            task.source sourceSet['java']['srcDirs']
+            task.exclude '**/gen/**'
 
             // Make sure the config is resolvable... AGP 3 decided to play with this...
-            Configuration config = project.configurations[sourceSet.packageConfigurationName]
+            Configuration config = project.configurations[sourceSet['packageConfigurationName'] as String]
             if (GradleVersion.current() >= GRADLE3_3 && config.state == Configuration.State.UNRESOLVED
                     && !config.canBeResolved) {
                 config.canBeResolved = true
             }
 
-            classpath = config
+            task.classpath = config
         }
     }
 

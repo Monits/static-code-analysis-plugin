@@ -65,25 +65,24 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
     }
 
     @SuppressWarnings(['NoDef', 'VariableTypeRequired']) // can't specify a type without depending on Android
-    @CompileStatic(TypeCheckingMode.SKIP)
-    private void configureLintOptions(final Project project, final StaticCodeAnalysisExtension extension,
-                                      final File configSource, final Task lintTask) {
-        def lintOptions = project.android.lintOptions
+    private static void configureLintOptions(final Project project, final StaticCodeAnalysisExtension extension,
+                                             final File configSource, final Task lintTask) {
+        def lintOptions = project['android']['lintOptions']
 
-        lintOptions.with {
+        lintOptions.with { it ->
             // TODO : This won't fail on warnings, just like Checkstyle.
             // See https://issues.gradle.org/browse/GRADLE-2888
-            abortOnError = !extension.ignoreErrors
+            it['abortOnError'] = !extension.ignoreErrors
 
             // Change output location for consistency with other plugins
-            xmlOutput = project.file("${project.buildDir}/reports/android/lint-results.xml")
+            it['xmlOutput'] = project.file("${project.buildDir}/reports/android/lint-results.xml")
 
             // Update global config
-            lintConfig configSource
+            it['lintConfig'] = configSource
         }
 
         // Make sure the task has the updated global config
-        lintTask.lintOptions = lintOptions
+        lintTask['lintOptions'] = lintOptions
     }
 
     @SuppressWarnings('CatchThrowable') // yes, we REALLY want to be that generic
@@ -209,13 +208,12 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
         false
     }
 
-    @CompileStatic(TypeCheckingMode.SKIP)
     private static DomainObjectSet<?> getVariants(final Project project) {
-        if (project.android.hasProperty('libraryVariants')) {
-            return project.android.libraryVariants
+        if (project['android'].hasProperty('libraryVariants')) {
+            return project['android']['libraryVariants'] as DomainObjectSet
         }
 
-        project.android.applicationVariants
+        project['android']['applicationVariants'] as DomainObjectSet
     }
 
     /*

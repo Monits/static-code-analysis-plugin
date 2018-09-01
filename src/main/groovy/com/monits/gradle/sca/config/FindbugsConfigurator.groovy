@@ -52,28 +52,28 @@ class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
         setupTasksPerSourceSet(project, extension, sourceSets)
     }
 
-    @CompileStatic(TypeCheckingMode.SKIP)
     @Override
     void applyAndroidConfig(final Project project, final StaticCodeAnalysisExtension extension) {
         setupPlugin(project, extension)
 
-        setupTasksPerSourceSet(project, extension, project.android.sourceSets) { FindBugs findbugsTask, sourceSet ->
+        setupTasksPerSourceSet(project, extension,
+                project['android']['sourceSets'] as NamedDomainObjectContainer) { FindBugs findbugsTask, sourceSet ->
             /*
              * Android doesn't expose name of the task compiling the sourceset, and names vary
              * widely from version to version of the plugin, plus needs to take flavors into account.
              * This is inefficient, but safer and simpler.
             */
-            dependsOn project.tasks.withType(JavaCompile)
+            findbugsTask.dependsOn project.tasks.withType(JavaCompile)
 
             // Filter analyzed classes to just include those that are in the sourceset
-            if (sourceSet.java.sourceFiles.empty) {
-                classes = project.files() // empty file collection
+            if ((sourceSet['java']['sourceFiles'] as Collection).empty) {
+                findbugsTask.classes = project.files() // empty file collection
             } else {
-                classes = getProjectClassTree(project, sourceSet.name)
+                findbugsTask.classes = getProjectClassTree(project, sourceSet['name'] as String)
             }
 
-            source sourceSet.java.srcDirs
-            exclude '**/gen/**'
+            findbugsTask.source sourceSet['java']['srcDirs']
+            findbugsTask.exclude '**/gen/**'
 
             setupAndroidClasspathAwareTask(findbugsTask, project)
         }

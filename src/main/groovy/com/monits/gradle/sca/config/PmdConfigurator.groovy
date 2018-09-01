@@ -64,22 +64,22 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
         }
     }
 
-    @CompileStatic(TypeCheckingMode.SKIP)
     @Override
     void applyAndroidConfig(final Project project, final StaticCodeAnalysisExtension extension) {
         setupPlugin(project, extension)
 
         //noinspection GroovyAssignabilityCheck
-        setupTasksPerSourceSet(project, extension, project.android.sourceSets) { Pmd pmdTask, sourceSet ->
+        setupTasksPerSourceSet(project, extension,
+                project['android']['sourceSets'] as NamedDomainObjectContainer) { Pmd pmdTask, sourceSet ->
             /*
              * Android doesn't expose name of the task compiling the sourceset, and names vary
              * widely from version to version of the plugin, plus needs to take flavors into account.
              * This is inefficient, but safer and simpler.
             */
-            dependsOn project.tasks.withType(JavaCompile)
+            pmdTask.dependsOn project.tasks.withType(JavaCompile)
 
-            source sourceSet.java.srcDirs
-            exclude '**/gen/**'
+            pmdTask.source sourceSet['java']['srcDirs']
+            pmdTask.exclude '**/gen/**'
 
             boolean supportsClasspath = GRADLE_VERSION_PMD_CLASSPATH_SUPPORT <= GradleVersion.current()
 
