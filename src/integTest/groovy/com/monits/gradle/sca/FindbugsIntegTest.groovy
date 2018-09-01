@@ -259,12 +259,12 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         result.task(':libb' + taskName()).outcome == SUCCESS
 
         // The report must exist, and not complain on missing classes from liba
-        TestFile finbugsReport = file('libb/' + reportFileName(null))
-        finbugsReport.exists()
-        finbugsReport.assertContents(not(containsString('<MissingClass>liba.ClassA</MissingClass>')))
+        TestFile findbugsReport = file('libb/' + reportFileName(null))
+        findbugsReport.exists()
+        findbugsReport.assertContents(not(containsString('<MissingClass>liba.ClassA</MissingClass>')))
 
         // make sure nothing is reported
-        finbugsReport.assertContents(containsString('<Errors errors="0" missingClasses="0">'))
+        findbugsReport.assertContents(containsString('<Errors errors="0" missingClasses="0">'))
 
         where:
         androidVersion << AndroidLintIntegTest.ANDROID_PLUGIN_VERSIONS
