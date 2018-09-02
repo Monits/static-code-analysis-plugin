@@ -10,7 +10,7 @@ repositories {
 
 group = 'com.monits'
 
-version = '2.6.8'
+version = '2.6.9'
 
 apply plugin: 'groovy'
 apply from: 'gradle/license.gradle'
