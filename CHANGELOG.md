@@ -4,7 +4,7 @@
 ### 2.6.8 (unreleased)
 
 Improvements:
- * Upgraded PMD to 6.6.0
+ * Upgraded PMD to 6.7.0
  * Upgraded Checkstyle to 8.12
  * Upgraded to Gradle 4.10
  * The plugin configuration time has been greatly improved. Improvements of up to 4X have been measured
