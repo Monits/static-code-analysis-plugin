@@ -99,7 +99,7 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
                                                final NamedDomainObjectContainer<?> sourceSets,
                                                final Closure<?> configuration = null) {
         // Create a phony checkstyle task that just executes all real checkstyle tasks
-        Task checkstyleRootTask = project.tasks.findByName(CHECKSTYLE) ?: project.task(CHECKSTYLE)
+        Task checkstyleRootTask = project.tasks.maybeCreate(CHECKSTYLE)
 
         sourceSets.all { sourceSet ->
             Namer<Object> namer = sourceSets.namer as Namer<Object>

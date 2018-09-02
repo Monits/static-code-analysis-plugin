@@ -89,16 +89,15 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
         }
     }
 
-    @SuppressWarnings('UnnecessaryGetter')
     private static void setupPlugin(final Project project, final StaticCodeAnalysisExtension extension) {
         project.plugins.apply PMD
 
         project.extensions.configure(PmdExtension) { PmdExtension e ->
             e.toolVersion = ToolVersions.pmdVersion
-            e.ignoreFailures = extension.getIgnoreErrors()
+            e.ignoreFailures = extension.ignoreErrors
         }
 
-        if (!ToolVersions.isLatestPmdVersion()) {
+        if (!ToolVersions.latestPmdVersion) {
             project.logger.warn('Using an outdated PMD version. ' + ToolVersions.pmdUpdateInstructions)
         }
     }
@@ -108,7 +107,7 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
                                                final NamedDomainObjectContainer<?> sourceSets,
                                                final Closure<?> configuration = null) {
         // Create a phony pmd task that just executes all real pmd tasks
-        Task pmdRootTask = project.tasks.findByName(PMD) ?: project.task(PMD)
+        Task pmdRootTask = project.tasks.maybeCreate(PMD)
         sourceSets.all { sourceSet ->
             Namer<Object> namer = sourceSets.namer as Namer<Object>
             String sourceSetName = namer.determineName(sourceSet)

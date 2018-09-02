@@ -90,7 +90,6 @@ class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
         }
     }
 
-    @SuppressWarnings('UnnecessaryGetter')
     private static void setupPlugin(final Project project, final StaticCodeAnalysisExtension extension) {
         project.plugins.apply FINDBUGS
 
@@ -107,17 +106,16 @@ class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
             it.with {
                 toolVersion = ToolVersions.findbugsVersion
                 effort = 'max'
-                ignoreFailures = extension.getIgnoreErrors()
+                ignoreFailures = extension.ignoreErrors
             }
         }
     }
 
-    @SuppressWarnings('UnnecessaryGetter')
     private void setupTasksPerSourceSet(final Project project, final StaticCodeAnalysisExtension extension,
                                                final NamedDomainObjectContainer<?> sourceSets,
                                                final Closure<?> configuration = null) {
         // Create a phony findbugs task that just executes all real findbugs tasks
-        Task findbugsRootTask = project.tasks.findByName(FINDBUGS) ?: project.task(FINDBUGS)
+        Task findbugsRootTask = project.tasks.maybeCreate(FINDBUGS)
         sourceSets.all { sourceSet ->
             Namer<Object> namer = sourceSets.namer as Namer<Object>
             String sourceSetName = namer.determineName(sourceSet)
@@ -128,14 +126,14 @@ class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
             String downloadTaskName
 
             // findbugs exclude is optional
-            if (config.getFindbugsExclude()) {
-                remoteLocation = RemoteConfigLocator.isRemoteLocation(config.getFindbugsExclude())
+            if (config.findbugsExclude) {
+                remoteLocation = RemoteConfigLocator.isRemoteLocation(config.findbugsExclude)
                 downloadTaskName = generateTaskName('downloadFindbugsExcludeFilter', sourceSetName)
                 if (remoteLocation) {
-                    filterSource = configLocator.makeDownloadFileTask(project, config.getFindbugsExclude(),
+                    filterSource = configLocator.makeDownloadFileTask(project, config.findbugsExclude,
                             String.format('excludeFilter-%s.xml', sourceSetName), downloadTaskName)
                 } else {
-                    filterSource = new File(config.getFindbugsExclude())
+                    filterSource = new File(config.findbugsExclude)
                 }
             }
 
