@@ -52,7 +52,12 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     private final static String FINDBUGS_DEFAULT_ANDROID_SUPPRESSION_FILTER =
         DEFAULTS_LOCATION + 'findbugs/findbugs-exclusions-android.xml'
     private final static String ANDROID_DEFAULT_RULES = DEFAULTS_LOCATION + 'android/android-lint.xml'
-    private final static String COMPILE_ONLY = 'compileOnly'
+
+    private final static String CONF_COMPILE_ONLY = 'compileOnly'
+    private final static String CONF_COMPILE = 'compile'
+    private final static String CONF_SCACONFIG = 'scaconfig'
+    private final static String CONF_SCACONFIG_MODULES = 'scaconfigModules'
+    private final static String CONF_ANDROID_LINT = 'androidLint'
 
     private final static GradleVersion GRADLE_3_2 = GradleVersion.version('3.2')
     private final static String JAVA_PLUGIN_ID = 'java'
@@ -73,7 +78,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         configureExtensionRule()
 
         project.afterEvaluate {
-            addDepsToScaconfig 'compile'
+            addDepsToScaconfig CONF_COMPILE
             addDepsToScaconfig 'testCompile'
             addDepsToScaconfig 'api'
             addDepsToScaconfig 'implementation'
@@ -109,27 +114,27 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         // Wait until the default configuration is available
         project.configurations.matching { Configuration config -> config.name == Dependency.DEFAULT_CONFIGURATION }
             .all { Configuration config ->
-                if (project.configurations.findByName(COMPILE_ONLY) == null) {
+                if (project.configurations.findByName(CONF_COMPILE_ONLY) == null) {
                     project.configurations.with { ConfigurationContainer cc ->
-                        Configuration compileOnly = cc.create(COMPILE_ONLY) { Configuration conf ->
+                        Configuration compileOnly = cc.create(CONF_COMPILE_ONLY) { Configuration conf ->
                             conf.description = 'Compile only dependencies'
                             conf.dependencies.all { Dependency dep ->
                                 project.configurations.getByName('default').exclude group:dep.group, module:dep.name
                             }
                         }
-                        cc.findByName('compile').extendsFrom compileOnly
+                        cc.findByName(CONF_COMPILE).extendsFrom compileOnly
                     }
                 }
             }
 
         project.configurations.with { ConfigurationContainer cc ->
-            cc.create('scaconfig') { Configuration conf -> // Custom configuration for static code analysis
+            cc.create(CONF_SCACONFIG) { Configuration conf -> // Custom configuration for static code analysis
                 conf.description = 'Configuration used for Static Code Analysis'
             }
-            cc.create('scaconfigModules') { Configuration conf -> // Custom configuration for static code analysis
+            cc.create(CONF_SCACONFIG_MODULES) { Configuration conf -> // Custom configuration for static code analysis
                 conf.description = 'Configuration used for Static Code Analysis containing only module dependencies'
             }
-            cc.create('androidLint') { Configuration conf -> // Configuration used for android linters
+            cc.create(CONF_ANDROID_LINT) { Configuration conf -> // Configuration used for android linters
                 conf.transitive = false
                 conf.description = 'Extra Android lint rules to be used'
             }
@@ -141,21 +146,22 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     private void addFindbugsAnnotationDependencies() {
         // Wait until the configurations are available
         project.configurations.matching { Configuration config ->
-            config.name in [COMPILE_ONLY, 'testCompileOnly', 'androidTestCompileOnly']
+            config.name in [CONF_COMPILE_ONLY, 'testCompileOnly', 'androidTestCompileOnly']
         }.all { Configuration config ->
             project.dependencies { DependencyHandler dh ->
                 dh.add(config.name,
-                    'com.google.code.findbugs:annotations:' + ToolVersions.findbugsVersion) { ModuleDependency dep ->
-                        /*
-                         * This jar both includes and depends on jcip and jsr-305. One is enough
-                         * See https://github.com/findbugsproject/findbugs/issues/94
-                         */
-                        dep.transitive = false
-                    }
+                        'com.google.code.findbugs:annotations:' + ToolVersions.findbugsVersion) { ModuleDependency d ->
+                    /*
+                     * This jar both includes and depends on jcip and jsr-305. One is enough
+                     * See https://github.com/findbugsproject/findbugs/issues/94
+                     */
+                    d.transitive = false
+                }
             }
         }
     }
 
+    @SuppressWarnings('DuplicateStringLiteral')
     private void configureExtensionRule() {
         ((IConventionAware) extension).conventionMapping.with {
             map('ignoreErrors') { true }
@@ -169,14 +175,14 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
                     return CHECKSTYLE_DEFAULT_RULES
                 }
 
-                if (ToolVersions.isCheckstyleCacheSupported()) {
+                if (ToolVersions.checkstyleCacheSupported) {
                     return CHECKSTYLE_CACHE_RULES
                 }
 
                 CHECKSTYLE_BACKWARDS_RULES
             }
             map('pmdRules') {
-                if (ToolVersions.isLatestPmdVersion()) {
+                if (ToolVersions.latestPmdVersion) {
                     return [PMD_DEFAULT_RULES]
                 }
 
@@ -197,7 +203,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             ((IConventionAware) extension).conventionMapping.with {
                 map('findbugsExclude') { FINDBUGS_DEFAULT_ANDROID_SUPPRESSION_FILTER }
                 map('pmdRules') {
-                    if (ToolVersions.isLatestPmdVersion()) {
+                    if (ToolVersions.latestPmdVersion) {
                         return [PMD_DEFAULT_RULES, PMD_DEFAULT_ANDROID_RULES]
                     }
 
@@ -236,7 +242,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         // support lazy dependency configuration
         config.allDependencies.all {
             if (it in ProjectDependency) {
-                project.dependencies.add('scaconfigModules', it)
+                project.dependencies.add(CONF_SCACONFIG_MODULES, it)
 
                 // support lazy configuration creation
                 (it as ProjectDependency).dependencyProject.configurations.all { Configuration c ->
@@ -249,7 +255,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
                     }
                 }
             } else {
-                project.dependencies.add('scaconfig', it)
+                project.dependencies.add(CONF_SCACONFIG, it)
             }
         }
     }

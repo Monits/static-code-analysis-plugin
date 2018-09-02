@@ -33,8 +33,10 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
     private static final GradleVersion CACHEABLE_TASK_GRADLE_VERSION = GradleVersion.version('3.0')
     private static final String USE_JACK_PROPERTY_NAME = 'useJack'
     private static final String JACK_OPTIONS_PROPERTY_NAME = 'jackOptions'
+    private static final String ANDROID = 'android'
+    private static final String LINT_OPTIONS = 'lintOptions'
 
-    private final RemoteConfigLocator configLocator = new RemoteConfigLocator('android')
+    private final RemoteConfigLocator configLocator = new RemoteConfigLocator(ANDROID)
 
     @Override
     void applyConfig(final Project project, final StaticCodeAnalysisExtension extension) {
@@ -67,7 +69,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
     @SuppressWarnings(['NoDef', 'VariableTypeRequired']) // can't specify a type without depending on Android
     private static void configureLintOptions(final Project project, final StaticCodeAnalysisExtension extension,
                                              final File configSource, final Task lintTask) {
-        def lintOptions = project['android']['lintOptions']
+        def lintOptions = project[ANDROID][LINT_OPTIONS]
 
         lintOptions.with { it ->
             // TODO : This won't fail on warnings, just like Checkstyle.
@@ -82,7 +84,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
         }
 
         // Make sure the task has the updated global config
-        lintTask['lintOptions'] = lintOptions
+        lintTask[LINT_OPTIONS] = lintOptions
     }
 
     @SuppressWarnings('CatchThrowable') // yes, we REALLY want to be that generic
@@ -208,12 +210,13 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
         false
     }
 
+    @SuppressWarnings('DuplicateStringLiteral')
     private static DomainObjectSet<?> getVariants(final Project project) {
-        if (project['android'].hasProperty('libraryVariants')) {
-            return project['android']['libraryVariants'] as DomainObjectSet
+        if (project[ANDROID].hasProperty('libraryVariants')) {
+            return project[ANDROID]['libraryVariants'] as DomainObjectSet
         }
 
-        project['android']['applicationVariants'] as DomainObjectSet
+        project[ANDROID]['applicationVariants'] as DomainObjectSet
     }
 
     /*

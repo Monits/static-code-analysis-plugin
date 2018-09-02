@@ -52,6 +52,7 @@ class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
         setupTasksPerSourceSet(project, extension, sourceSets)
     }
 
+    @SuppressWarnings('DuplicateStringLiteral')
     @Override
     void applyAndroidConfig(final Project project, final StaticCodeAnalysisExtension extension) {
         setupPlugin(project, extension)
