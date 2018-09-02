@@ -41,7 +41,6 @@ import org.gradle.util.GUtil
 class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
     private static final String FINDBUGS = 'findbugs'
     private static final String FINBUGS_PLUGINS_CONFIGURATION = 'findbugsPlugins'
-    private static final String ANT_WILDCARD = '**'
 
     private final RemoteConfigLocator configLocator = new RemoteConfigLocator(FINDBUGS)
 
@@ -67,26 +66,16 @@ class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
             dependsOn project.tasks.withType(JavaCompile)
 
             // Filter analyzed classes to just include those that are in the sourceset
-            String srcDirPath = sourceSet.java.srcDirs.first().absolutePath
-            Collection<String> sourceSetClassesPaths = sourceSet.java.sourceFiles
-                .findAll { File f -> !f.directory }
-                .collectMany { File f ->
-                    String relativePath = f.absolutePath - srcDirPath
-                    String pathWithoutExtension = relativePath.take(relativePath.lastIndexOf('.'))
-                    // allow both top level and inner classes
-                    [ANT_WILDCARD + pathWithoutExtension + '.class', ANT_WILDCARD + pathWithoutExtension + '$*.class']
-                }
-
-            if (sourceSetClassesPaths.empty) {
+            if (sourceSet.java.sourceFiles.empty) {
                 classes = project.files() // empty file collection
             } else {
-                classes = getProjectClassTree(project, sourceSet.name).include(sourceSetClassesPaths)
+                classes = getProjectClassTree(project, sourceSet.name)
             }
 
             source sourceSet.java.srcDirs
             exclude '**/gen/**'
 
-            setupAndroidClasspathAwareTask(findbugsTask, project, sourceSetClassesPaths)
+            setupAndroidClasspathAwareTask(findbugsTask, project)
         }
     }
 
