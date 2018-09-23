@@ -100,6 +100,7 @@
     <issue id="ExtraTranslation" severity="error" />
     <issue id="MissingTranslation" severity="error">
         <ignore path="**/strings_by_country.xml" />
+        <ignore path="**/deeplinks.xml" />
     </issue>
     <issue id="RtlHardcoded" severity="ignore" />
     <issue id="RtlSymmetry" severity="ignore" />
