@@ -1,0 +1,6 @@
+// have multimodule composition work
+dependencies {
+    subprojects.forEach {
+        runtime project(it.path)
+    }
+}

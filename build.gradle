@@ -2,6 +2,7 @@ plugins {
     id 'com.github.hierynomus.license' version '0.14.0'
     id 'com.jfrog.bintray' version '1.8.4'
     id 'com.gradle.plugin-publish' version '0.10.0'
+    id 'groovy'
 }
 
 repositories {
@@ -12,13 +13,13 @@ group = 'com.monits'
 
 version = '2.6.9'
 
-apply plugin: 'groovy'
 apply from: 'gradle/license.gradle'
 apply from: 'gradle/publish.gradle'
 apply from: 'gradle/perfTest.gradle'
 apply from: 'gradle/integTest.gradle'
 apply from: 'gradle/idea.gradle'
 apply from: 'gradle/staticCodeAnalysis.gradle'
+apply plugin: 'build.no-resolution-at-configuration'
 
 dependencies {
     compileOnly gradleApi()
