@@ -1,6 +1,11 @@
 ## History
 
 # v2.6
+### 2.6.9
+
+Improvements:
+ * Upgraded to Gradle 4.10.2
+
 ### 2.6.8
 
 Improvements:
