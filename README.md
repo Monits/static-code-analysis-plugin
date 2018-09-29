@@ -66,9 +66,9 @@ buildscript {
 apply plugin: 'com.monits.staticCodeAnalysis'
 ```
 
-The plugin is compatible with Gradle 2.3+, Gradle 3.0+ and Gradle 4.0+. We are commited to supporting at least the last 2 major gradle versions.
+The plugin is compatible with Gradle 2.3+, Gradle 3.+ and Gradle 4.+. We are commited to supporting at least the last 2 major gradle versions.
 
-It supports all versions of the Android plugin from 1.1.0 onwards, up to 3.0.0-beta4.
+It supports all versions of the Android plugin from 1.1.0 onwards, up to 3.2.0
 
 
 ## DSL

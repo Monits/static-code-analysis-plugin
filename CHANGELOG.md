@@ -5,6 +5,7 @@
 
 Improvements:
  * Upgraded to Gradle 4.10.2
+ * All lint tasks (ie: lintDebug and lintRelease) are now cacheable and can be up-to-date
 
 ### 2.6.8
 
