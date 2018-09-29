@@ -27,16 +27,22 @@ final class AndroidHelper {
     private static final String ANDROID_ENABLE_CACHE_PROPERTY = 'android.enableBuildCache'
     private static final String ANDROID_CACHE_LOCATION = 'android.buildCacheDir'
     private static final String ANDROID_DEPENDENCY_PATTERN = /com\.android\.tools\.build\/gradle\/([^\/]+)/
-    private static final VersionNumber BUILD_CACHE_ANDROID_GRADLE_VERSION = VersionNumber.parse('2.3.0')
-    private static final VersionNumber REPORT_PER_VARIANT_ANDROID_GRADLE_VERSION = VersionNumber.parse('2.0.0')
+    private static final String VERSION_2_3_0 = '2.3.0'
+
+    private static final VersionNumber BUILD_CACHE_ANDROID_GRADLE_VERSION = VersionNumber.parse(VERSION_2_3_0)
+    private static final VersionNumber REPORT_PER_VARIANT_ANDROID_GRADLE_VERSION_MIN = VersionNumber.parse('2.0.0')
+    private static final VersionNumber REPORT_PER_VARIANT_ANDROID_GRADLE_VERSION_MAX = VersionNumber.parse('2.2.9')
+    private static final VersionNumber LINT_HAS_VARIANT_INFO = VersionNumber.parse('1.5.0')
+    private static final VersionNumber USES_REPORTS_DIR = VersionNumber.parse(VERSION_2_3_0)
 
     /**
-     * Checks if the current Android Plugin produces a report per variant or not.
+     * Checks if the current Android Plugin produces a global report that matches a debuggable variant or not.
      * @param project The project to analyze.
      * @return True if a report per variant is expected, false otherwise
      */
-    static boolean lintReportPerVariant(final Project project) {
-        getCurrentVersion(project) >= REPORT_PER_VARIANT_ANDROID_GRADLE_VERSION
+    static boolean globalLintIsVariant(final Project project) {
+        getCurrentVersion(project) >= REPORT_PER_VARIANT_ANDROID_GRADLE_VERSION_MIN &&
+            getCurrentVersion(project) <= REPORT_PER_VARIANT_ANDROID_GRADLE_VERSION_MAX
     }
 
     /**
@@ -51,6 +57,30 @@ final class AndroidHelper {
         getCurrentVersion(project) >= BUILD_CACHE_ANDROID_GRADLE_VERSION &&
             (!project.hasProperty(ANDROID_ENABLE_CACHE_PROPERTY) ||
                 project.property(ANDROID_ENABLE_CACHE_PROPERTY) == 'true')
+    }
+
+    /**
+     * Checks if the current Android build has variant info on the lint task.
+     *
+     * @param project The project to analyze
+     * @return True if the AGP version in use provides variant info on the lint task, false otherwise
+     */
+    static boolean lintTaskHasVariantInfo(final Project project) {
+        getCurrentVersion(project) >= LINT_HAS_VARIANT_INFO
+    }
+
+    /**
+     * Retrieves the location were lint reports are output by AGP.
+     *
+     * @param project The project to analyze
+     * @return The directory in which AGP outputs lint reports
+     */
+    static String getLintReportDir(final Project project) {
+        if (getCurrentVersion(project) >= USES_REPORTS_DIR) {
+            return "${project.buildDir}/reports/"
+        }
+
+        "${project.buildDir}/outputs/"
     }
 
     /**

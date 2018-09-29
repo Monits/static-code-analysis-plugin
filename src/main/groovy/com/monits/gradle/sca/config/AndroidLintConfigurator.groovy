@@ -23,6 +23,7 @@ import org.gradle.api.DomainObjectSet
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.specs.Specs
+import org.gradle.api.tasks.Copy
 import org.gradle.util.GradleVersion
 
 /**
@@ -35,6 +36,9 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
     private static final String JACK_OPTIONS_PROPERTY_NAME = 'jackOptions'
     private static final String ANDROID = 'android'
     private static final String LINT_OPTIONS = 'lintOptions'
+    private static final String GLOBAL_LINT_TASK_NAME = 'lint'
+    private static final String XML = 'xml'
+    private static final String HTML = 'html'
 
     private final RemoteConfigLocator configLocator = new RemoteConfigLocator(ANDROID)
 
@@ -45,17 +49,38 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
 
     @Override
     void applyAndroidConfig(final Project project, final StaticCodeAnalysisExtension extension) {
-        project.tasks.matching { Task it -> it.name == 'lint' } .all { Task t ->
+        Class<? extends Task> lintTask = getLintTaskClass(project)
+        project.tasks.withType(lintTask) { Task t ->
             setupTasks(t, project, extension)
 
             configureLintTask(project, extension, t)
         }
     }
 
+    private static Class<? extends Task> getLintTaskClass(final Project project) {
+        try {
+            // AGP 3.0+
+            return getClass().classLoader
+                .loadClass('com.android.build.gradle.tasks.LintBaseTask') as Class<? extends Task>
+        } catch (ClassNotFoundException ignored) {
+            try {
+                // Older versions
+                return getClass().classLoader
+                    .loadClass('com.android.build.gradle.tasks.Lint') as Class<? extends Task>
+            } catch (ClassNotFoundException e) {
+                // Something went wrong!
+                warnUnexpectedException(project, 'Encountered an error trying to configure Android Lint tasks.', e)
+
+                // Best effort, get the global lint task class (needs to be configured!)
+                project.tasks.getByName(GLOBAL_LINT_TASK_NAME).class
+            }
+        }
+    }
+
     private static void setupTasks(final Task lintTask, final Project project,
                                    final StaticCodeAnalysisExtension extension) {
-        Task resolveTask = project.tasks.create('resolveAndroidLint', ResolveAndroidLintTask)
-        Task cleanupTask = project.tasks.create('cleanupAndroidLint', CleanupAndroidLintTask)
+        Task resolveTask = project.tasks.maybeCreate('resolveAndroidLint', ResolveAndroidLintTask)
+        Task cleanupTask = project.tasks.maybeCreate('cleanupAndroidLint', CleanupAndroidLintTask)
 
         lintTask.dependsOn resolveTask
         lintTask.finalizedBy cleanupTask
@@ -71,13 +96,11 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
                                              final File configSource, final Task lintTask) {
         def lintOptions = project[ANDROID][LINT_OPTIONS]
 
+        // update global config
         lintOptions.with { it ->
             // TODO : This won't fail on warnings, just like Checkstyle.
             // See https://issues.gradle.org/browse/GRADLE-2888
             it['abortOnError'] = !extension.ignoreErrors
-
-            // Change output location for consistency with other plugins
-            it['xmlOutput'] = project.file("${project.buildDir}/reports/android/lint-results.xml")
 
             // Update global config
             it['lintConfig'] = configSource
@@ -94,6 +117,15 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
 
         configureLintOptions(project, extension, config, lintTask)
 
+        if (lintTask.name == GLOBAL_LINT_TASK_NAME) {
+            // Change output location for consistency with other plugins
+            // we copy as to not tamper with other lint tasks
+            lintTask.finalizedBy(project.tasks.create('copyLintReport', Copy) { Copy it ->
+                it.from lintTask.outputs.files.filter { File f -> f.name.endsWith('.xml') }
+                it.into project.file("${project.buildDir}/reports/android/lint-results.xml")
+            })
+        }
+
         try {
             configureLintInputsAndOutputs(project, lintTask)
 
@@ -103,15 +135,19 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
             }
         } catch (Throwable e) {
             // Something went wrong!
-            project.logger.warn('Encountered an error trying to set inputs and outputs for Android Lint ' +
-                    'tasks, it will be disabled. Please, report this incident in ' +
-                    'https://github.com/monits/static-code-analysis-plugin/issues', e)
+            warnUnexpectedException(project, 'Encountered an error trying to set inputs and outputs for Android Lint ' +
+                    'tasks, it will be disabled.', e)
 
             // disable up-to-date caching
             lintTask.outputs.upToDateWhen {
                 false
             }
         }
+    }
+
+    private static void warnUnexpectedException(final Project project, final String message, final Throwable e) {
+        project.logger.warn(message + ' Please, report this incident at ' +
+            'https://github.com/monits/static-code-analysis-plugin/issues', e)
     }
 
     private File obtainLintRules(final Project project, final StaticCodeAnalysisExtension config,
@@ -150,27 +186,41 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
 
         DomainObjectSet<?> variants = getVariants(project)
 
-        String defaultReportVariant = null
-        variants.all {
-            def configuration = it.variantData.variantConfiguration
-            String variantName = it.name
-            String variantDirName = configuration.dirName
+        String variantName = AndroidHelper.lintTaskHasVariantInfo(project) ? lintTask.variantName
+            : (lintTask.name.toLowerCase() - GLOBAL_LINT_TASK_NAME)
 
-            lintTask.inputs.with {
-                dir("${project.buildDir}/intermediates/classes/${variantDirName}/")
-                dir("${project.buildDir}/intermediates/assets/${variantDirName}/")
-                dir("${project.buildDir}/intermediates/manifests/full/${variantDirName}/")
-                dir("${project.buildDir}/intermediates/res/merged/${variantDirName}/")
-                dir("${project.buildDir}/intermediates/shaders/${variantDirName}/")
-                dir("${project.buildDir}/intermediates/rs/${variantDirName}/")
+        // Older plugins didn't setup input files, so up-to-date checks were futile
+        if (lintTask.inputs.files.isEmpty()) {
+            variants.matching { it.name == variantName || variantName == null || variantName.empty }.all {
+                def configuration = it.variantData.variantConfiguration
+                String variantDirName = configuration.dirName
+
+                lintTask.inputs.with {
+                    dir("${project.buildDir}/intermediates/classes/${variantDirName}/")
+                    dir("${project.buildDir}/intermediates/assets/${variantDirName}/")
+                    dir("${project.buildDir}/intermediates/manifests/full/${variantDirName}/")
+                    dir("${project.buildDir}/intermediates/res/merged/${variantDirName}/")
+                    dir("${project.buildDir}/intermediates/shaders/${variantDirName}/")
+                    dir("${project.buildDir}/intermediates/rs/${variantDirName}/")
+                }
             }
+        }
 
-            if (!defaultReportVariant && configuration.buildType.isDebuggable() && !usesJack(configuration)) {
-                defaultReportVariant = variantName
+        // And none up to this date setup outputs for up-to-date checks and cache
+        if ((variantName == null || variantName.empty) && AndroidHelper.globalLintIsVariant(project)) {
+            boolean configFound = false
+            variants.all {
+                def configuration = it.variantData.variantConfiguration
+                if (!configFound && configuration.buildType.isDebuggable() && !usesJack(configuration)) {
+                    configFound = true
 
-                addReportAsOutput(lintTask, project, xmlEnabled, xmlOutput, defaultReportVariant, 'xml')
-                addReportAsOutput(lintTask, project, htmlEnabled, htmlOutput, defaultReportVariant, 'html')
+                    addReportAsOutput(lintTask, project, xmlEnabled, xmlOutput, it.name, XML)
+                    addReportAsOutput(lintTask, project, htmlEnabled, htmlOutput, it.name, HTML)
+                }
             }
+        } else {
+            addReportAsOutput(lintTask, project, xmlEnabled, xmlOutput, variantName, XML)
+            addReportAsOutput(lintTask, project, htmlEnabled, htmlOutput, variantName, HTML)
         }
     }
 
@@ -231,11 +281,11 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
             File definiteOutput = output
             if (!output) {
                 // Convention naming changed along the way
-                if (AndroidHelper.lintReportPerVariant(project)) {
+                if (variantName) {
                     definiteOutput = project.file(
-                            "${project.buildDir}/outputs/lint-results-${variantName}.${extension}")
+                        AndroidHelper.getLintReportDir(project) + "lint-results-${variantName}.${extension}")
                 } else {
-                    definiteOutput = project.file("${project.buildDir}/outputs/lint-results.${extension}")
+                    definiteOutput = project.file(AndroidHelper.getLintReportDir(project) + "lint-results.${extension}")
                 }
             }
             task.outputs.file definiteOutput

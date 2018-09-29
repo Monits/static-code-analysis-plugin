@@ -35,7 +35,7 @@ import static org.junit.Assert.assertThat
 class AndroidLintIntegTest extends AbstractIntegTestFixture {
 
     static final List<String> ANDROID_PLUGIN_VERSIONS = (['1.1.3', '1.2.3', '1.3.1', '1.5.0', '2.0.0', '2.1.3'] +
-        (Jvm.current.java8Compatible ? ['2.2.3', '2.3.3', '3.0.1'] : [])).asImmutable()
+        (Jvm.current.java8Compatible ? ['2.2.3', '2.3.3', '3.0.1', '3.2.0'] : [])).asImmutable()
 
     @SuppressWarnings('MethodName')
     @Unroll('AndroidLint should run when using gradle #version')
@@ -113,11 +113,44 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
         BuildResult secondRun = gradleRunner.build()
 
         then:
+        file('build/outputs/').list().each { println it }
+
         firstRun.task(taskName()).outcome == SUCCESS
         secondRun.task(taskName()).outcome == UP_TO_DATE
 
         // Make sure the report exist
         reportFile(VersionNumber.parse(androidVersion) >= VersionNumber.parse('2.0.0') ? 'debug' : null).exists()
+
+        where:
+        androidVersion << ANDROID_PLUGIN_VERSIONS
+        gradleVersion = gradleVersionForAndroid(androidVersion)
+    }
+
+    @SuppressWarnings('MethodName')
+    @Unroll('AndroidLint per variant re-run is up-to-date when using plugin version #androidVersion')
+    void 'rerun is up-to-date for variants'() {
+        given:
+        writeAndroidBuildFile(androidVersion)
+        useSimpleAndroidLintConfig()
+        writeAndroidManifest()
+        goodCode()
+
+        when:
+        GradleRunner gradleRunner = gradleRunner()
+            .withGradleVersion(gradleVersion)
+            // plugin version 1.1.x failed to compile tests if assemble was not called beforehand
+            .withArguments('assemble', 'lintDebug', 'lintRelease', '--stacktrace')
+        BuildResult firstRun = gradleRunner.build()
+        BuildResult secondRun = gradleRunner.build()
+
+        then:
+        file('build/outputs/').list().each { println it }
+
+        firstRun.task(':lintDebug').outcome == SUCCESS
+        secondRun.task(':lintDebug').outcome == UP_TO_DATE
+
+        firstRun.task(':lintRelease').outcome == SUCCESS
+        secondRun.task(':lintRelease').outcome == UP_TO_DATE
 
         where:
         androidVersion << ANDROID_PLUGIN_VERSIONS

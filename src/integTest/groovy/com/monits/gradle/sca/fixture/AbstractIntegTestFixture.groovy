@@ -144,6 +144,9 @@ abstract class AbstractIntegTestFixture extends Specification {
     }
 
     TestFile writeAndroidBuildFile(Map<String, Object> toolsConfig) {
+        String extraRepository = toolsConfig.get(ANDROID_VERSION, DEFAULT_ANDROID_VERSION).startsWith('3') ? 'google()'
+            : ''
+
         buildScriptFile() << """
             |buildscript {
             |    dependencies {
@@ -154,12 +157,13 @@ abstract class AbstractIntegTestFixture extends Specification {
             |
             |    repositories {
             |        jcenter()
-            |        ${toolsConfig.get(ANDROID_VERSION, DEFAULT_ANDROID_VERSION).startsWith('3') ? 'google()' : ''}
+            |        ${extraRepository}
             |    }
             |}
             |
             |repositories {
-            |    mavenCentral()
+            |    jcenter()
+            |    ${extraRepository}
             |}
             |
             |apply plugin: 'com.android.library'
