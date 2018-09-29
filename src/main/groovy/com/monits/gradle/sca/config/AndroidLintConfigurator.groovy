@@ -60,12 +60,12 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
     private static Class<? extends Task> getLintTaskClass(final Project project) {
         try {
             // AGP 3.0+
-            return getClass().classLoader
+            return AndroidLintConfigurator.classLoader
                 .loadClass('com.android.build.gradle.tasks.LintBaseTask') as Class<? extends Task>
         } catch (ClassNotFoundException ignored) {
             try {
                 // Older versions
-                return getClass().classLoader
+                return AndroidLintConfigurator.classLoader
                     .loadClass('com.android.build.gradle.tasks.Lint') as Class<? extends Task>
             } catch (ClassNotFoundException e) {
                 // Something went wrong!
