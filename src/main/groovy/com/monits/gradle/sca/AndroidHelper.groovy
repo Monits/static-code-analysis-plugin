@@ -34,6 +34,7 @@ final class AndroidHelper {
     private static final VersionNumber REPORT_PER_VARIANT_ANDROID_GRADLE_VERSION_MAX = VersionNumber.parse('2.2.9')
     private static final VersionNumber LINT_HAS_VARIANT_INFO = VersionNumber.parse('1.5.0')
     private static final VersionNumber USES_REPORTS_DIR = VersionNumber.parse(VERSION_2_3_0)
+    private static final VersionNumber USES_JAVAC_TASK_OUTPUTS = VersionNumber.parse('3.2.0')
 
     /**
      * Checks if the current Android Plugin produces a global report that matches a debuggable variant or not.
@@ -83,6 +84,14 @@ final class AndroidHelper {
         "${project.buildDir}/outputs/"
     }
 
+    static String getCompileOutputDir(final Project project, final String sourceSetName, final String sourceSetPath) {
+        if (getCurrentVersion(project) >= USES_JAVAC_TASK_OUTPUTS) {
+            return project.buildDir.absolutePath +
+                "/intermediates/javac/${sourceSetName}/compile${sourceSetName.capitalize()}JavaWithJavac/classes/"
+        }
+
+        project.buildDir.absolutePath + '/intermediates/classes/' + sourceSetPath + File.separator
+    }
     /**
      * Retrieves the location of Android's build-cache directory.
      * @param project The project to analyze.

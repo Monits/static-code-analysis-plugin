@@ -113,8 +113,6 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
         BuildResult secondRun = gradleRunner.build()
 
         then:
-        file('build/outputs/').list().each { println it }
-
         firstRun.task(taskName()).outcome == SUCCESS
         secondRun.task(taskName()).outcome == UP_TO_DATE
 
@@ -144,8 +142,6 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
         BuildResult secondRun = gradleRunner.build()
 
         then:
-        file('build/outputs/').list().each { println it }
-
         firstRun.task(':lintDebug').outcome == SUCCESS
         secondRun.task(':lintDebug').outcome == UP_TO_DATE
 

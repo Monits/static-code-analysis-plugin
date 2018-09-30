@@ -188,7 +188,7 @@ trait ClasspathAware {
             }
         }
 
-        project.buildDir.absolutePath + '/intermediates/classes/' + sourceSetOutputPath + File.separator
+        AndroidHelper.getCompileOutputDir(project, sourceSetName, sourceSetOutputPath)
     }
 
     /**
