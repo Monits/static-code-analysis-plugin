@@ -101,6 +101,11 @@ trait ClasspathAware {
         FileCollection mockableAndroidJar = project.files()
         if (mockableAndroidJarTask) {
             mockableAndroidJar += mockableAndroidJarTask.outputs.files
+        } else {
+            // as of 3.2.0+ the mockableAndroidJar task is no more… attempt to access directly
+            mockableAndroidJar += project.files(
+                AndroidHelper.sdkDir + "/platforms/${project['android']['compileSdkVersion']}/android.jar",)
+                //System.getenv('JAVA_HOME') + '/jre/lib/rt.jar')
         }
 
         task.setProperty('classpath',

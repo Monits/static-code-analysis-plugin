@@ -134,6 +134,14 @@ final class AndroidHelper {
     }
 
     /**
+     * Retrieves the current Android SDK install location
+     * @return The current Android SDK install location
+     */
+    static String getSdkDir() {
+        System.getenv('ANDROID_HOME')
+    }
+
+    /**
      * Retrieves the current plugin version, if available.
      * @param project The project on which to analyze the used plugin version.
      * @return The version of the used plugin, or {@see VersionNumber#UNKNOWN} if not known.
