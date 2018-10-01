@@ -86,8 +86,11 @@ final class AndroidHelper {
 
     static String getCompileOutputDir(final Project project, final String sourceSetName, final String sourceSetPath) {
         if (getCurrentVersion(project) >= USES_JAVAC_TASK_OUTPUTS) {
+            String outputDir = sourceSetName == 'androidTest' ? 'debugAndroidTest' :
+                sourceSetName == 'test' ? 'debugUnitTest' :
+                    sourceSetName == 'main' ? 'debug' : sourceSetName
             return project.buildDir.absolutePath +
-                "/intermediates/javac/${sourceSetName}/compile${sourceSetName.capitalize()}JavaWithJavac/classes/"
+                "/intermediates/javac/${outputDir}/compile${outputDir.capitalize()}JavaWithJavac/classes/"
         }
 
         project.buildDir.absolutePath + '/intermediates/classes/' + sourceSetPath + File.separator

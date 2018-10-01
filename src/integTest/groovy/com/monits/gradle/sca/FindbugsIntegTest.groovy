@@ -224,6 +224,28 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
             |    }
             |}
         '''.stripMargin()
+        file('src/test/java/com/monits/ClassATest.java') << '''
+            |package com.monits;
+            |
+            |import android.view.View;
+            |
+            |public class ClassATest {
+            |    public boolean isFoo() {
+            |        return new View(null).callOnClick();
+            |    }
+            |}
+        '''.stripMargin()
+        file('src/androidTest/java/com/monits/ClassAAndroidTest.java') << '''
+            |package com.monits;
+            |
+            |import android.view.View;
+            |
+            |public class ClassAAndroidTest {
+            |    public boolean isFoo() {
+            |        return new View(null).callOnClick();
+            |    }
+            |}
+        '''.stripMargin()
 
         when:
         BuildResult result = gradleRunner()

@@ -111,7 +111,7 @@ trait ClasspathAware {
                 // TODO : is it okay to always use debug?
                 project.files(pathToCompiledClasses(project, DEBUG_SOURCESET)) +
                 // TODO : is it okay to always include test classes?
-                project.files(pathToCompiledClasses(project, 'testDebug')) +
+                project.files(pathToCompiledClasses(project, TEST_SOURCESET)) +
                 dependantModuleClasses
             )
     }
