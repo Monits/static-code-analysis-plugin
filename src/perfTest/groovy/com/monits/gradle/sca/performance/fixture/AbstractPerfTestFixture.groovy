@@ -15,7 +15,6 @@ package com.monits.gradle.sca.performance.fixture
 
 import com.monits.gradle.sca.performance.io.TestFile
 import groovy.transform.CompileStatic
-import groovy.transform.TypeCheckingMode
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.util.GradleVersion
 import org.junit.Rule
@@ -29,7 +28,8 @@ import spock.util.environment.Jvm
 @CompileStatic
 abstract class AbstractPerfTestFixture extends Specification {
     // A sample of gradle versions to be considered in general testing - don't test anything below 2.8, it spams stdout
-    static final List<String> TESTED_GRADLE_VERSIONS = ['2.14.1', '3.5.1', GradleVersion.current().version].asImmutable()
+    static final List<String> TESTED_GRADLE_VERSIONS = ['2.14.1', '3.5.1', GradleVersion.current().version]
+        .asImmutable()
     @SuppressWarnings(['DuplicateStringLiteral', 'UnnecessaryCast'])
     static final List<String> TESTED_GRADLE_VERSIONS_FOR_ANDROID = (['2.14.1', '3.5.1'] +
         (Jvm.current.java8Compatible ? [GradleVersion.current().version] : [] as List<String>))
@@ -53,20 +53,18 @@ abstract class AbstractPerfTestFixture extends Specification {
 
     String pluginClasspathString
 
-    @CompileStatic(TypeCheckingMode.SKIP)
-    @SuppressWarnings('UnnecessaryCollectCall')
     void setup() {
-        // We do it this way to support all versions of gradle in our tests, since we care about backwards comaptibility
-        URL pluginClasspathResource = getClass().classLoader.findResource('plugin-classpath.txt')
+        // We do it this way to support all versions of gradle in our tests, since we care about backwards compatibility
+        URL pluginClasspathResource = getClass().classLoader.getResource('plugin-classpath.txt')
         if (pluginClasspathResource == null) {
             throw new IllegalStateException('Did not find plugin classpath resource, run `testClasses` build task.')
         }
 
         Collection<File> pluginClasspath = pluginClasspathResource.readLines().collect { new File(it) }
         pluginClasspathString = pluginClasspath
-                .collect { it.absolutePath } // get absolute paths
+                *.absolutePath // get absolute paths
                 .findAll { !it.contains(".gradle${File.separator}wrapper${File.separator}dists${File.separator}") }
-                .collect { it.replace('\\', '\\\\') } // escape backslashes in Windows paths
+                *.replace('\\', '\\\\') // escape backslashes in Windows paths
                 .collect { "'$it'" }
                 .join(', ')
     }
