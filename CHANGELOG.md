@@ -6,6 +6,7 @@
 Improvements:
  * Upgraded to Gradle 4.10.2
  * Upgraded PMD to 6.8.0
+ * Upgraded Checkstyle to 8.13
  * All lint tasks (ie: lintDebug and lintRelease) are now cacheable and can be up-to-date
 
 ### 2.6.8
