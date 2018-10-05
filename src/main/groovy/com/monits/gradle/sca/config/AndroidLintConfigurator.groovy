@@ -22,6 +22,7 @@ import groovy.transform.TypeCheckingMode
 import org.gradle.api.DomainObjectSet
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.CopySpec
 import org.gradle.api.specs.Specs
 import org.gradle.api.tasks.Copy
 import org.gradle.util.GradleVersion
@@ -117,15 +118,6 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
 
         configureLintOptions(project, extension, config, lintTask)
 
-        if (lintTask.name == GLOBAL_LINT_TASK_NAME) {
-            // Change output location for consistency with other plugins
-            // we copy as to not tamper with other lint tasks
-            lintTask.finalizedBy(project.tasks.create('copyLintReport', Copy) { Copy it ->
-                it.from lintTask.outputs.files.filter { File f -> f.name.endsWith('.xml') }
-                it.into project.file("${project.buildDir}/reports/android/lint-results.xml")
-            })
-        }
-
         try {
             configureLintInputsAndOutputs(project, lintTask)
 
@@ -142,6 +134,21 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
             lintTask.outputs.upToDateWhen {
                 false
             }
+        }
+
+        if (lintTask.name == GLOBAL_LINT_TASK_NAME) {
+            // Change output location for consistency with other plugins
+            // we copy as to not tamper with other lint tasks
+            Task copyLintReportTask = project.tasks.create('copyLintReport', Copy) { Copy it ->
+                it.from(lintTask.outputs.files.filter { File f -> f.name.endsWith('.xml') }.singleFile.parent)
+                { CopySpec cs ->
+                    cs.include '*.xml'
+                }
+                it.into project.file("${project.buildDir}/reports/android/")
+                it.rename '.*', 'lint-results.xml'
+            }
+            lintTask.finalizedBy copyLintReportTask
+            copyLintReportTask.onlyIf { extension.androidLint }
         }
     }
 
