@@ -11,7 +11,7 @@ repositories {
 
 group = 'com.monits'
 
-version = '2.6.9'
+version = '2.6.10'
 
 apply from: 'gradle/license.gradle'
 apply from: 'gradle/publish.gradle'
