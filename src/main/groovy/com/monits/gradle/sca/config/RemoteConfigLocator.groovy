@@ -48,29 +48,32 @@ class RemoteConfigLocator {
                                        final String localFileName, final String taskName) {
         File destFile = getDestinationFile(project, localFileName)
 
-        DownloadTask download = getDownloadTaskIfExists(project, configLocation)
+        // Make sure it doesn't already exist in the current project
+        if (project.tasks.findByName(taskName) == null) {
+            DownloadTask download = getDownloadTaskIfExists(project, configLocation)
 
-        if (download) {
-            if (download.downloadedFile.absolutePath == destFile.absolutePath) {
-                // Same file, so we create a NOOP task
-                project.task(taskName, dependsOn:download.path)
-            } else {
-                // Already downloading, just wait for it to finish and copy it
-                project.task(taskName, type:Copy) { Copy it ->
-                    it.from download.downloadedFile.parentFile
-                    it.into getDestinationDirectory(project)
-                    it.include download.downloadedFile.name
-                    it.rename download.downloadedFile.name, localFileName
-                    it.dependsOn download.path
+            if (download) {
+                if (download.downloadedFile.absolutePath == destFile.absolutePath) {
+                    // Same file, so we create a NOOP task
+                    project.task(taskName, dependsOn:download.path)
+                } else {
+                    // Already downloading, just wait for it to finish and copy it
+                    project.task(taskName, type:Copy) { Copy it ->
+                        it.from download.downloadedFile.parentFile
+                        it.into getDestinationDirectory(project)
+                        it.include download.downloadedFile.name
+                        it.rename download.downloadedFile.name, localFileName
+                        it.dependsOn download.path
+                    }
                 }
-            }
-        } else {
-            download = project.task(taskName, type:DownloadTask) { DownloadTask it ->
-                it.downloadedFile = destFile
-                it.resourceUri = configLocation
-            } as DownloadTask
+            } else {
+                download = project.task(taskName, type:DownloadTask) { DownloadTask it ->
+                    it.downloadedFile = destFile
+                    it.resourceUri = configLocation
+                } as DownloadTask
 
-            DOWNLOAD_TASKS[configLocation] = download.path
+                DOWNLOAD_TASKS[configLocation] = download.path
+            }
         }
 
         destFile

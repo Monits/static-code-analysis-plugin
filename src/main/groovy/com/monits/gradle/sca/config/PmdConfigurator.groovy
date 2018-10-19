@@ -64,41 +64,40 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
         }
     }
 
-    @CompileStatic(TypeCheckingMode.SKIP)
     @Override
     void applyAndroidConfig(final Project project, final StaticCodeAnalysisExtension extension) {
         setupPlugin(project, extension)
 
         //noinspection GroovyAssignabilityCheck
-        setupTasksPerSourceSet(project, extension, project.android.sourceSets) { Pmd pmdTask, sourceSet ->
+        setupTasksPerSourceSet(project, extension,
+                project['android']['sourceSets'] as NamedDomainObjectContainer) { Pmd pmdTask, sourceSet ->
             /*
              * Android doesn't expose name of the task compiling the sourceset, and names vary
              * widely from version to version of the plugin, plus needs to take flavors into account.
              * This is inefficient, but safer and simpler.
             */
-            dependsOn project.tasks.withType(JavaCompile)
+            pmdTask.dependsOn project.tasks.withType(JavaCompile)
 
-            source sourceSet.java.srcDirs
-            exclude '**/gen/**'
+            pmdTask.source sourceSet['java']['srcDirs']
+            pmdTask.exclude '**/gen/**'
 
             boolean supportsClasspath = GRADLE_VERSION_PMD_CLASSPATH_SUPPORT <= GradleVersion.current()
 
             if (supportsClasspath) {
-                setupAndroidClasspathAwareTask(pmdTask, project, null)
+                setupAndroidClasspathAwareTask(pmdTask, project)
             }
         }
     }
 
-    @SuppressWarnings('UnnecessaryGetter')
     private static void setupPlugin(final Project project, final StaticCodeAnalysisExtension extension) {
         project.plugins.apply PMD
 
         project.extensions.configure(PmdExtension) { PmdExtension e ->
             e.toolVersion = ToolVersions.pmdVersion
-            e.ignoreFailures = extension.getIgnoreErrors()
+            e.ignoreFailures = extension.ignoreErrors
         }
 
-        if (!ToolVersions.isLatestPmdVersion()) {
+        if (!ToolVersions.latestPmdVersion) {
             project.logger.warn('Using an outdated PMD version. ' + ToolVersions.pmdUpdateInstructions)
         }
     }
@@ -108,7 +107,7 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
                                                final NamedDomainObjectContainer<?> sourceSets,
                                                final Closure<?> configuration = null) {
         // Create a phony pmd task that just executes all real pmd tasks
-        Task pmdRootTask = project.tasks.findByName(PMD) ?: project.task(PMD)
+        Task pmdRootTask = project.tasks.maybeCreate(PMD)
         sourceSets.all { sourceSet ->
             Namer<Object> namer = sourceSets.namer as Namer<Object>
             String sourceSetName = namer.determineName(sourceSet)

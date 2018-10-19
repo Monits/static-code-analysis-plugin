@@ -15,7 +15,6 @@ package com.monits.gradle.sca.performance.fixture
 
 import com.monits.gradle.sca.performance.io.TestFile
 import groovy.transform.CompileStatic
-import groovy.transform.TypeCheckingMode
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.util.GradleVersion
 import org.junit.Rule
@@ -29,12 +28,13 @@ import spock.util.environment.Jvm
 @CompileStatic
 abstract class AbstractPerfTestFixture extends Specification {
     // A sample of gradle versions to be considered in general testing - don't test anything below 2.8, it spams stdout
-    static final List<String> TESTED_GRADLE_VERSIONS = ['2.8', '2.14.1', GradleVersion.current().version].asImmutable()
+    static final List<String> TESTED_GRADLE_VERSIONS = ['2.14.1', '3.5.1', GradleVersion.current().version]
+        .asImmutable()
     @SuppressWarnings(['DuplicateStringLiteral', 'UnnecessaryCast'])
-    static final List<String> TESTED_GRADLE_VERSIONS_FOR_ANDROID = (['2.8', '2.14.1'] +
+    static final List<String> TESTED_GRADLE_VERSIONS_FOR_ANDROID = (['2.14.1', '3.5.1'] +
         (Jvm.current.java8Compatible ? [GradleVersion.current().version] : [] as List<String>))
         .takeRight(2).asImmutable()
-    static final String BASELINE_PLUGIN_VERSION = '"com.monits:static-code-analysis-plugin:2.6.4"'
+    static final String BASELINE_PLUGIN_VERSION = '"com.monits:static-code-analysis-plugin:2.6.9"'
 
     static final int NUMBER_OF_CLASSES_TO_ANALYZE = 100
 
@@ -53,20 +53,18 @@ abstract class AbstractPerfTestFixture extends Specification {
 
     String pluginClasspathString
 
-    @CompileStatic(TypeCheckingMode.SKIP)
-    @SuppressWarnings('UnnecessaryCollectCall')
     void setup() {
-        // We do it this way to support all versions of gradle in our tests, since we care about backwards comaptibility
-        URL pluginClasspathResource = getClass().classLoader.findResource('plugin-classpath.txt')
+        // We do it this way to support all versions of gradle in our tests, since we care about backwards compatibility
+        URL pluginClasspathResource = getClass().classLoader.getResource('plugin-classpath.txt')
         if (pluginClasspathResource == null) {
             throw new IllegalStateException('Did not find plugin classpath resource, run `testClasses` build task.')
         }
 
         Collection<File> pluginClasspath = pluginClasspathResource.readLines().collect { new File(it) }
         pluginClasspathString = pluginClasspath
-                .collect { it.absolutePath } // get absolute paths
+                *.absolutePath // get absolute paths
                 .findAll { !it.contains(".gradle${File.separator}wrapper${File.separator}dists${File.separator}") }
-                .collect { it.replace('\\', '\\\\') } // escape backslashes in Windows paths
+                *.replace('\\', '\\\\') // escape backslashes in Windows paths
                 .collect { "'$it'" }
                 .join(', ')
     }
@@ -88,17 +86,17 @@ abstract class AbstractPerfTestFixture extends Specification {
             file("src/main/java/com/monits/Class${it}.java") <<
                 "package com.monits; public class Class${it} { public boolean isFoo(Object arg) { return true; } }"
             file("src/test/java/com/monits/Class${it}Test.java") << """
-                package com.monits;
-
-                import org.junit.Test;
-                import static org.junit.Assert.assertTrue;
-
-                public class Class${it}Test extends Object {
-                    @Test
-                    public void isFoo() {
-                        assertTrue("It's not a foo", new Class${it}().isFoo(null));
-                    }
-                }"""
+                |package com.monits;
+                |
+                |import org.junit.Test;
+                |import static org.junit.Assert.assertTrue;
+                |
+                |public class Class${it}Test extends Object {
+                |    @Test
+                |    public void isFoo() {
+                |        assertTrue("It's not a foo", new Class${it}().isFoo(null));
+                |    }
+                |}""".stripMargin()
         }
     }
 
@@ -110,41 +108,40 @@ abstract class AbstractPerfTestFixture extends Specification {
 
     TestFile writeBuildFile(final Map<String, Object> toolsConfig, final String pluginVersion) {
         buildScriptFile() << """
-            buildscript {
-                repositories {
-                    jcenter()
-                }
-
-                dependencies {
-                    classpath $pluginVersion
-                }
-            }
-
-            repositories {
-                jcenter()
-            }
-
-            apply plugin: 'java'
-            apply plugin: 'com.monits.staticCodeAnalysis'
-
-            dependencies {
-                testCompile 'junit:junit:4.12'
-            }
-
-        """ + staticCodeAnalysisConfig(toolsConfig) as TestFile
+            |buildscript {
+            |    repositories {
+            |        jcenter()
+            |    }
+            |
+            |    dependencies {
+            |        classpath $pluginVersion
+            |    }
+            |}
+            |
+            |repositories {
+            |    jcenter()
+            |}
+            |
+            |apply plugin: 'java'
+            |apply plugin: 'com.monits.staticCodeAnalysis'
+            |
+            |dependencies {
+            |    testCompile 'junit:junit:4.12'
+            |}
+        """.stripMargin() + staticCodeAnalysisConfig(toolsConfig) as TestFile
     }
 
     String staticCodeAnalysisConfig(final Map<String, Object> toolsConfig) {
         """
-            // disable all other checks
-            staticCodeAnalysis {
-                cpd = ${toolsConfig.get('cpd', false)}
-                checkstyle = ${toolsConfig.get('checkstyle', false)}
-                findbugs = ${toolsConfig.get('findbugs', false)}
-                pmd = ${toolsConfig.get('pmd', false)}
-                androidLint = ${toolsConfig.get('androidLint', false)}
-            }
-        """
+            |// disable all other checks
+            |staticCodeAnalysis {
+            |    cpd = ${toolsConfig.get('cpd', false)}
+            |    checkstyle = ${toolsConfig.get('checkstyle', false)}
+            |    findbugs = ${toolsConfig.get('findbugs', false)}
+            |    pmd = ${toolsConfig.get('pmd', false)}
+            |    androidLint = ${toolsConfig.get('androidLint', false)}
+            |}
+        """.stripMargin()
     }
 
     TestFile writeAndroidBuildFile(final String androidVersion,
@@ -157,45 +154,44 @@ abstract class AbstractPerfTestFixture extends Specification {
 
     TestFile writeAndroidBuildFile(final Map<String, Object> toolsConfig, final String pluginVersion) {
         buildScriptFile() << """
-            buildscript {
-                dependencies {
-                    classpath 'com.android.tools.build:gradle:' +
-                        '${toolsConfig.get(ANDROID_VERSION, DEFAULT_ANDROID_VERSION)}'
-                    classpath $pluginVersion
-                }
-
-                repositories {
-                    jcenter()
-                }
-            }
-
-            repositories {
-                jcenter()
-            }
-
-            apply plugin: 'com.android.library'
-            apply plugin: 'com.monits.staticCodeAnalysis'
-
-            dependencies {
-                testCompile 'junit:junit:4.12'
-            }
-
-        """ + staticCodeAnalysisConfig(toolsConfig) +
+            |buildscript {
+            |    dependencies {
+            |        classpath 'com.android.tools.build:gradle:' +
+            |            '${toolsConfig.get(ANDROID_VERSION, DEFAULT_ANDROID_VERSION)}'
+            |        classpath $pluginVersion
+            |    }
+            |
+            |    repositories {
+            |        jcenter()
+            |    }
+            |}
+            |
+            |repositories {
+            |    jcenter()
+            |}
+            |
+            |apply plugin: 'com.android.library'
+            |apply plugin: 'com.monits.staticCodeAnalysis'
+            |
+            |dependencies {
+            |    testCompile 'junit:junit:4.12'
+            |}
+        """.stripMargin() + staticCodeAnalysisConfig(toolsConfig) +
         '''
-            android {
-                compileSdkVersion 25
-                buildToolsVersion "25.0.0"
-            }
-        ''' as TestFile
+            |android {
+            |    compileSdkVersion 25
+            |    buildToolsVersion "25.0.0"
+            |}
+        '''.stripMargin() as TestFile
     }
 
     TestFile writeAndroidManifest(final String packageName) {
         file(ANDROID_MANIFEST_PATH) << """
-            <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-                package="com.monits.staticCodeAnalysis.${packageName}"
-                android:versionCode="1">
-            </manifest>
-        """ as TestFile
+            |<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+            |    package="com.monits.staticCodeAnalysis.${packageName}"
+            |    android:versionCode="1">
+            |</manifest>
+        """.stripMargin() as TestFile
     }
 
     @SuppressWarnings('FactoryMethodName')
@@ -214,14 +210,12 @@ abstract class AbstractPerfTestFixture extends Specification {
         setupAndroidSubProject('libb', LIBB_DIRNAME, androidVersion, pluginVersion)
 
         file(LIBB_DIRNAME + BUILD_GRADLE_FILENAME) << """
-            dependencies {
-                compile project('${LIBA_PATH}')
-            }
-        """
+            |dependencies {
+            |    compile project('${LIBA_PATH}')
+            |}
+        """.stripMargin()
 
-        file('settings.gradle') << """
-            include '${LIBA_PATH}', '${LIBB_PATH}'
-        """
+        file('settings.gradle').text = "include '${LIBA_PATH}', '${LIBB_PATH}'"
         file(BUILD_GRADLE_FILENAME).createNewFile() // empty root build.gradle
 
         1.upto(numberOfClasses) {

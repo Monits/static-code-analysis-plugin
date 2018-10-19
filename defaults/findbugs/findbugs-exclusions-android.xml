@@ -43,6 +43,10 @@
             <Bug pattern="SACM_STATIC_ARRAY_CREATED_IN_METHOD" />
             <Bug pattern="NP_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD" />
             <Bug pattern="URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" />
+            <Bug pattern="RFI_SET_ACCESSIBLE" />
+
+            <!-- These are tests! All we are ever gonna do is use mock libraries, the class under test or unit framework methods!-->
+            <Bug pattern="CE_CLASS_ENVY" />
         </Or>
     </Match>
 

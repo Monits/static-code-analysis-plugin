@@ -1,6 +1,24 @@
 ## History
 
 # v2.6
+### 2.6.10 - UNRELEASED
+
+### 2.6.9
+
+Improvements:
+ * Upgraded to Gradle 4.10.2
+ * Upgraded PMD to 6.8.0
+ * Upgraded Checkstyle to 8.13
+ * All lint tasks (ie: lintDebug and lintRelease) are now cacheable and can be up-to-date
+
+### 2.6.8
+
+Improvements:
+ * Upgraded PMD to 6.7.0
+ * Upgraded Checkstyle to 8.12
+ * Upgraded to Gradle 4.10
+ * The plugin configuration time has been greatly improved. Improvements of up to 4X have been measured
+
 ### 2.6.7
 
 Bug fixes:

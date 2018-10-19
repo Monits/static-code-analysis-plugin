@@ -140,14 +140,14 @@ class CheckstyleIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
     void 'dsl allows to override rules per sourceset'() {
         given:
         writeBuildFile() << '''
-            staticCodeAnalysis {
-                sourceSetConfig {
-                    test {
-                        checkstyleRules = 'test-checkstyle.xml'
-                    }
-                }
-            }
-        '''
+            |staticCodeAnalysis {
+            |    sourceSetConfig {
+            |        test {
+            |            checkstyleRules = 'test-checkstyle.xml'
+            |        }
+            |    }
+            |}
+        '''.stripMargin()
         writeAlmostEmptyCheckstyleConfig('test').renameTo(file('test-checkstyle.xml'))
         goodCode()
 
@@ -186,17 +186,17 @@ class CheckstyleIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
     }
 
     TestFile writeAlmostEmptyCheckstyleConfig(final String sourceSet = null) {
-        file("config/checkstyle/checkstyle${sourceSet ? "-${sourceSet}" : ''}.xml") <<
-                '''<?xml version="1.0" encoding="UTF-8"?>
-            <!DOCTYPE module PUBLIC "-//Puppy Crawl//DTD Check Configuration 1.3//EN"
-                "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
-            <module name="Checker">
-                <property name="severity" value="warning"/>
-                <module name="TreeWalker">
-                    <module name="OneTopLevelClass"/>
-                </module>
-            </module>
-        ''' as TestFile
+        file("config/checkstyle/checkstyle${sourceSet ? "-${sourceSet}" : ''}.xml") << '''\
+            |<?xml version="1.0" encoding="UTF-8"?>
+            |<!DOCTYPE module PUBLIC "-//Puppy Crawl//DTD Check Configuration 1.3//EN"
+            |    "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
+            |<module name="Checker">
+            |    <property name="severity" value="warning"/>
+            |    <module name="TreeWalker">
+            |        <module name="OneTopLevelClass"/>
+            |    </module>
+            |</module>
+        '''.stripMargin() as TestFile
     }
 
     @SuppressWarnings('GStringExpressionWithinString')
@@ -204,9 +204,9 @@ class CheckstyleIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         writeAlmostEmptyCheckstyleConfig()
 
         buildScriptFile() << '''
-            staticCodeAnalysis {
-                checkstyleRules = "${project.rootDir}/config/checkstyle/checkstyle.xml"
-            }
-        '''
+            |staticCodeAnalysis {
+            |    checkstyleRules = "${project.rootDir}/config/checkstyle/checkstyle.xml"
+            |}
+        '''.stripMargin()
     }
 }

@@ -41,7 +41,6 @@ import org.gradle.util.GUtil
 class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
     private static final String FINDBUGS = 'findbugs'
     private static final String FINBUGS_PLUGINS_CONFIGURATION = 'findbugsPlugins'
-    private static final String ANT_WILDCARD = '**'
 
     private final RemoteConfigLocator configLocator = new RemoteConfigLocator(FINDBUGS)
 
@@ -53,44 +52,34 @@ class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
         setupTasksPerSourceSet(project, extension, sourceSets)
     }
 
-    @CompileStatic(TypeCheckingMode.SKIP)
+    @SuppressWarnings('DuplicateStringLiteral')
     @Override
     void applyAndroidConfig(final Project project, final StaticCodeAnalysisExtension extension) {
         setupPlugin(project, extension)
 
-        setupTasksPerSourceSet(project, extension, project.android.sourceSets) { FindBugs findbugsTask, sourceSet ->
+        setupTasksPerSourceSet(project, extension,
+                project['android']['sourceSets'] as NamedDomainObjectContainer) { FindBugs findbugsTask, sourceSet ->
             /*
              * Android doesn't expose name of the task compiling the sourceset, and names vary
              * widely from version to version of the plugin, plus needs to take flavors into account.
              * This is inefficient, but safer and simpler.
             */
-            dependsOn project.tasks.withType(JavaCompile)
+            findbugsTask.dependsOn project.tasks.withType(JavaCompile)
 
             // Filter analyzed classes to just include those that are in the sourceset
-            String srcDirPath = sourceSet.java.srcDirs.first().absolutePath
-            Collection<String> sourceSetClassesPaths = sourceSet.java.sourceFiles
-                .findAll { File f -> !f.directory }
-                .collectMany { File f ->
-                    String relativePath = f.absolutePath - srcDirPath
-                    String pathWithoutExtension = relativePath.take(relativePath.lastIndexOf('.'))
-                    // allow both top level and inner classes
-                    [ANT_WILDCARD + pathWithoutExtension + '.class', ANT_WILDCARD + pathWithoutExtension + '$*.class']
-                }
-
-            if (sourceSetClassesPaths.empty) {
-                classes = project.files() // empty file collection
+            if ((sourceSet['java']['sourceFiles'] as Collection).empty) {
+                findbugsTask.classes = project.files() // empty file collection
             } else {
-                classes = getProjectClassTree(project, sourceSet.name).include(sourceSetClassesPaths)
+                findbugsTask.classes = getProjectClassTree(project, sourceSet['name'] as String)
             }
 
-            source sourceSet.java.srcDirs
-            exclude '**/gen/**'
+            findbugsTask.source sourceSet['java']['srcDirs']
+            findbugsTask.exclude '**/gen/**'
 
-            setupAndroidClasspathAwareTask(findbugsTask, project, sourceSetClassesPaths)
+            setupAndroidClasspathAwareTask(findbugsTask, project)
         }
     }
 
-    @SuppressWarnings('UnnecessaryGetter')
     private static void setupPlugin(final Project project, final StaticCodeAnalysisExtension extension) {
         project.plugins.apply FINDBUGS
 
@@ -107,17 +96,16 @@ class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
             it.with {
                 toolVersion = ToolVersions.findbugsVersion
                 effort = 'max'
-                ignoreFailures = extension.getIgnoreErrors()
+                ignoreFailures = extension.ignoreErrors
             }
         }
     }
 
-    @SuppressWarnings('UnnecessaryGetter')
     private void setupTasksPerSourceSet(final Project project, final StaticCodeAnalysisExtension extension,
                                                final NamedDomainObjectContainer<?> sourceSets,
                                                final Closure<?> configuration = null) {
         // Create a phony findbugs task that just executes all real findbugs tasks
-        Task findbugsRootTask = project.tasks.findByName(FINDBUGS) ?: project.task(FINDBUGS)
+        Task findbugsRootTask = project.tasks.maybeCreate(FINDBUGS)
         sourceSets.all { sourceSet ->
             Namer<Object> namer = sourceSets.namer as Namer<Object>
             String sourceSetName = namer.determineName(sourceSet)
@@ -128,14 +116,14 @@ class FindbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
             String downloadTaskName
 
             // findbugs exclude is optional
-            if (config.getFindbugsExclude()) {
-                remoteLocation = RemoteConfigLocator.isRemoteLocation(config.getFindbugsExclude())
+            if (config.findbugsExclude) {
+                remoteLocation = RemoteConfigLocator.isRemoteLocation(config.findbugsExclude)
                 downloadTaskName = generateTaskName('downloadFindbugsExcludeFilter', sourceSetName)
                 if (remoteLocation) {
-                    filterSource = configLocator.makeDownloadFileTask(project, config.getFindbugsExclude(),
+                    filterSource = configLocator.makeDownloadFileTask(project, config.findbugsExclude,
                             String.format('excludeFilter-%s.xml', sourceSetName), downloadTaskName)
                 } else {
-                    filterSource = new File(config.getFindbugsExclude())
+                    filterSource = new File(config.findbugsExclude)
                 }
             }
 

@@ -1,0 +1,17 @@
+plugins {
+    id 'java-gradle-plugin'
+}
+
+// Java versions
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+gradlePlugin {
+    plugins {
+        register('build.no-resolution-at-configuration') {
+            id = 'build.no-resolution-at-configuration'
+            implementationClass = 'com.monits.scabuild.buildquality.NoResolutionAtConfigurationTimePlugin'
+        }
+    }
+}
+

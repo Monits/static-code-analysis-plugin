@@ -57,23 +57,23 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
         }
     }
 
-    @CompileStatic(TypeCheckingMode.SKIP)
     @Override
     void applyAndroidConfig(Project project, StaticCodeAnalysisExtension extension) {
         setupPlugin(project, extension)
 
-        setupTasksPerSourceSet(project, extension, project.android.sourceSets) { task, sourceSet ->
-            source sourceSet.java.srcDirs
-            exclude '**/gen/**'
+        setupTasksPerSourceSet(project, extension,
+                project['android']['sourceSets'] as NamedDomainObjectContainer) { Checkstyle task, sourceSet ->
+            task.source sourceSet['java']['srcDirs']
+            task.exclude '**/gen/**'
 
             // Make sure the config is resolvable... AGP 3 decided to play with this...
-            Configuration config = project.configurations[sourceSet.packageConfigurationName]
+            Configuration config = project.configurations[sourceSet['packageConfigurationName'] as String]
             if (GradleVersion.current() >= GRADLE3_3 && config.state == Configuration.State.UNRESOLVED
                     && !config.canBeResolved) {
                 config.canBeResolved = true
             }
 
-            classpath = config
+            task.classpath = config
         }
     }
 
@@ -99,7 +99,7 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
                                                final NamedDomainObjectContainer<?> sourceSets,
                                                final Closure<?> configuration = null) {
         // Create a phony checkstyle task that just executes all real checkstyle tasks
-        Task checkstyleRootTask = project.tasks.findByName(CHECKSTYLE) ?: project.task(CHECKSTYLE)
+        Task checkstyleRootTask = project.tasks.maybeCreate(CHECKSTYLE)
 
         sourceSets.all { sourceSet ->
             Namer<Object> namer = sourceSets.namer as Namer<Object>

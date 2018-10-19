@@ -13,9 +13,7 @@ before_cache:
   - rm -rf $HOME/.gradle/daemon/
   - rm -rf $HOME/.gradle/caches/modules-2/modules-2.lock
 
-jdk:
-  - oraclejdk7
-  - oraclejdk8
+jdk: oraclejdk8
 
 env:
   - TEST_SUITE="codenarc integTest"
@@ -33,6 +31,7 @@ android:
     - build-tools-23.0.2
     - build-tools-25.0.0
     - build-tools-26.0.2
+    - build-tools-28.0.2
     - android-23
     - android-25
 

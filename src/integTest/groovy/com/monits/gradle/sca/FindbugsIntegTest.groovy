@@ -67,11 +67,11 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         writeBuildFile()
         // setup a remote config
         buildScriptFile() << '''
-            staticCodeAnalysis {
-                findbugsExclude = 'https://raw.githubusercontent.com/Monits/static-code-analysis-plugin/' +
-                    'staging/defaults/findbugs/findbugs-exclusions-android.xml'
-            }
-        '''
+            |staticCodeAnalysis {
+            |    findbugsExclude = 'https://raw.githubusercontent.com/Monits/static-code-analysis-plugin/' +
+            |        'staging/defaults/findbugs/findbugs-exclusions-android.xml'
+            |}
+        '''.stripMargin()
         goodCode()
 
         when:
@@ -95,11 +95,11 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         writeBuildFile()
         // setup a remote config
         buildScriptFile() << '''
-            staticCodeAnalysis {
-                findbugsExclude = 'https://raw.githubusercontent.com/Monits/static-code-analysis-plugin/' +
-                    'staging/defaults/findbugs/findbugs-exclusions-android.xml'
-            }
-        '''
+            |staticCodeAnalysis {
+            |    findbugsExclude = 'https://raw.githubusercontent.com/Monits/static-code-analysis-plugin/' +
+            |        'staging/defaults/findbugs/findbugs-exclusions-android.xml'
+            |}
+        '''.stripMargin()
         goodCode()
 
         when:
@@ -118,11 +118,11 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         writeBuildFile()
         // setup a remote config
         buildScriptFile() << '''
-            staticCodeAnalysis {
-                findbugsExclude = 'https://raw.githubusercontent.com/Monits/static-code-analysis-plugin/' +
-                    'staging/defaults/findbugs/findbugs-exclusions-android.xml'
-            }
-        '''
+            |staticCodeAnalysis {
+            |    findbugsExclude = 'https://raw.githubusercontent.com/Monits/static-code-analysis-plugin/' +
+            |        'staging/defaults/findbugs/findbugs-exclusions-android.xml'
+            |}
+        '''.stripMargin()
         writeEmptySuppressionFilter('main')
         writeEmptySuppressionFilter('test')
         goodCode()
@@ -145,17 +145,17 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         useEmptySuppressionFilter()
         //noinspection LongLine
         file('src/main/java/com/monits/ClassA.java') << '''
-            package com.monits;
-
-            import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
-            @SuppressFBWarnings(value = "MISSING_FIELD_IN_TO_STRING", justification = "doesn't provide meaningful information")
-            public class ClassA {
-                public boolean isFoo(Object arg) {
-                    return true;
-                }
-            }
-        '''
+            |package com.monits;
+            |
+            |import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+            |
+            |@SuppressFBWarnings(value = "MISSING_FIELD_IN_TO_STRING", justification = "doesn't provide meaningful information")
+            |public class ClassA {
+            |    public boolean isFoo(Object arg) {
+            |        return true;
+            |    }
+            |}
+        '''.stripMargin()
 
         when:
         BuildResult result = gradleRunner()
@@ -176,22 +176,22 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         writeAndroidManifest()
         useEmptySuppressionFilter()
         file('src/main/res/values/strings.xml') << '''\
-            <?xml version="1.0" encoding="utf-8"?>
-            <resources>
-                <string name="greeting">Hey there!</string>
-            </resources>
-        '''.stripIndent()
+            |<?xml version="1.0" encoding="utf-8"?>
+            |<resources>
+            |    <string name="greeting">Hey there!</string>
+            |</resources>
+        '''.stripMargin()
         file('src/main/java/com/monits/ClassA.java') << '''
-            package com.monits;
-
-            import com.monits.staticCodeAnalysis.R;
-
-            public class ClassA {
-                public boolean isFoo() {
-                    return R.string.greeting == 1;
-                }
-            }
-        '''
+            |package com.monits;
+            |
+            |import com.monits.staticCodeAnalysis.R;
+            |
+            |public class ClassA {
+            |    public boolean isFoo() {
+            |        return R.string.greeting == 1;
+            |    }
+            |}
+        '''.stripMargin()
 
         when:
         BuildResult result = gradleRunner()
@@ -214,16 +214,38 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         writeAndroidManifest()
         useEmptySuppressionFilter()
         file('src/main/java/com/monits/ClassA.java') << '''
-            package com.monits;
-
-            import android.view.View;
-
-            public class ClassA {
-                public boolean isFoo() {
-                    return new View(null).callOnClick();
-                }
-            }
-        '''
+            |package com.monits;
+            |
+            |import android.view.View;
+            |
+            |public class ClassA {
+            |    public boolean isFoo() {
+            |        return new View(null).callOnClick();
+            |    }
+            |}
+        '''.stripMargin()
+        file('src/test/java/com/monits/ClassATest.java') << '''
+            |package com.monits;
+            |
+            |import android.view.View;
+            |
+            |public class ClassATest {
+            |    public boolean isFoo() {
+            |        return new View(null).callOnClick();
+            |    }
+            |}
+        '''.stripMargin()
+        file('src/androidTest/java/com/monits/ClassAAndroidTest.java') << '''
+            |package com.monits;
+            |
+            |import android.view.View;
+            |
+            |public class ClassAAndroidTest {
+            |    public boolean isFoo() {
+            |        return new View(null).callOnClick();
+            |    }
+            |}
+        '''.stripMargin()
 
         when:
         BuildResult result = gradleRunner()
@@ -259,12 +281,12 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         result.task(':libb' + taskName()).outcome == SUCCESS
 
         // The report must exist, and not complain on missing classes from liba
-        TestFile finbugsReport = file('libb/' + reportFileName(null))
-        finbugsReport.exists()
-        finbugsReport.assertContents(not(containsString('<MissingClass>liba.ClassA</MissingClass>')))
+        TestFile findbugsReport = file('libb/' + reportFileName(null))
+        findbugsReport.exists()
+        findbugsReport.assertContents(not(containsString('<MissingClass>liba.ClassA</MissingClass>')))
 
         // make sure nothing is reported
-        finbugsReport.assertContents(containsString('<Errors errors="0" missingClasses="0">'))
+        findbugsReport.assertContents(containsString('<Errors errors="0" missingClasses="0">'))
 
         where:
         androidVersion << AndroidLintIntegTest.ANDROID_PLUGIN_VERSIONS
@@ -303,29 +325,29 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
     void 'Dependency AAR classes are available'() {
         given:
         writeAndroidBuildFile(androidVersion) << '''
-            dependencies {
-                compile 'io.card:android-sdk:5.5.1'
-            }
-
-            android {
-                defaultConfig {
-                    minSdkVersion 16
-                }
-            }
-        '''
+            |dependencies {
+            |    compile 'io.card:android-sdk:5.5.1'
+            |}
+            |
+            |android {
+            |    defaultConfig {
+            |        minSdkVersion 16
+            |    }
+            |}
+        '''.stripMargin()
         writeAndroidManifest()
         useEmptySuppressionFilter()
         file('src/main/java/com/monits/ClassA.java') << '''
-            package com.monits;
-
-            import io.card.payment.CardIOActivity;
-
-            public class ClassA {
-                public boolean isFoo() {
-                    return new CardIOActivity().isFinishing();
-                }
-            }
-        '''
+            |package com.monits;
+            |
+            |import io.card.payment.CardIOActivity;
+            |
+            |public class ClassA {
+            |    public boolean isFoo() {
+            |        return new CardIOActivity().isFinishing();
+            |    }
+            |}
+        '''.stripMargin()
 
         when:
         BuildResult result = gradleRunner()
@@ -350,23 +372,23 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
     void 'dsl allows to override rules per sourceset'() {
         given:
         writeBuildFile() << '''
-            staticCodeAnalysis {
-                sourceSetConfig {
-                    test {
-                        findbugsExclude = 'test-findbugsExclude.xml'
-                    }
-                }
-            }
-        '''
+            |staticCodeAnalysis {
+            |    sourceSetConfig {
+            |        test {
+            |            findbugsExclude = 'test-findbugsExclude.xml'
+            |        }
+            |    }
+            |}
+        '''.stripMargin()
         file('test-findbugsExclude.xml') << '''
-            <FindBugsFilter>
-                <Match>
-                    <Or>
-                        <Bug pattern="UNKNOWN_NULLNESS_OF_PARAMETER" />
-                    </Or>
-                </Match>
-            </FindBugsFilter>
-        '''
+            |<FindBugsFilter>
+            |    <Match>
+            |        <Or>
+            |            <Bug pattern="UNKNOWN_NULLNESS_OF_PARAMETER" />
+            |        </Or>
+            |    </Match>
+            |</FindBugsFilter>
+        '''.stripMargin()
         goodCode()
 
         when:
@@ -478,17 +500,17 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         writeEmptySuppressionFilter()
 
         buildScriptFile() << '''
-            staticCodeAnalysis {
-                findbugsExclude = "${project.rootDir}/config/findbugs/excludeFilter.xml"
-            }
-        '''
+            |staticCodeAnalysis {
+            |    findbugsExclude = "${project.rootDir}/config/findbugs/excludeFilter.xml"
+            |}
+        '''.stripMargin()
     }
 
     TestFile writeEmptySuppressionFilter(final String sourceSet = null) {
         suppressionFilter(sourceSet) << '''
-            <FindBugsFilter>
-            </FindBugsFilter>
-        ''' as TestFile
+            |<FindBugsFilter>
+            |</FindBugsFilter>
+        '''.stripMargin() as TestFile
     }
 
     TestFile suppressionFilter(final String sourceSet = null) {
