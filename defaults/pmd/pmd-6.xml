@@ -21,6 +21,9 @@
 
     <!-- The new PMD checks for concatenations, it's ok then! -->
     <!-- <exclude name="GuardLogStatement"/> -->
+
+    <!-- Assume we have few meaningful asserts, making this desired but not required -->
+    <exclude name="JUnitAssertionsShouldIncludeMessage" />
   </rule>
 
   <rule ref="category/java/codestyle.xml">
