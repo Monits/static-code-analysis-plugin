@@ -152,7 +152,7 @@ Since every tool has its own mechanism, you should refer to its documentation:
 - Checkstyle: [Documentation](http://checkstyle.sourceforge.net/config_annotation.html#SuppressWarnings)
 - CPD: [Documentation](https://pmd.github.io/latest/pmd_userdocs_cpd.html#suppression) 
 - Findbugs: [Annotations documentation](http://findbugs.sourceforge.net/manual/annotations.html); @SupressFBWarnings [javadoc](http://findbugs.sourceforge.net/api/edu/umd/cs/findbugs/annotations/SuppressFBWarnings.html) 
-- PMD: [Documentation](https://pmd.github.io/latest/usage/suppressing.html)
+- PMD: [Documentation](https://pmd.github.io/latest/pmd_userdocs_suppressing_warnings.html)
 
 
 # Copyright and License
