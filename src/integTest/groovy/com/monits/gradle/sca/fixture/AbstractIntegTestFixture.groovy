@@ -27,8 +27,8 @@ import spock.util.environment.Jvm
 */
 abstract class AbstractIntegTestFixture extends Specification {
     // A sample of gradle versions to be considered in general testing
-    static final List<String> TESTED_GRADLE_VERSIONS = ['2.3', '2.4', '2.7', '2.8', '2.10', '2.14.1', '3.0', '3.1',
-                                                        '3.3', '4.0']
+    static final List<String> TESTED_GRADLE_VERSIONS = ['2.3', '2.8', '2.10', '2.14.1', '3.0',
+                                                        '3.3', '4.0', '4.10', '5.0']
 
     private static final String ANDROID_1_5_0 = '1.5.0'
     static final String DEFAULT_ANDROID_VERSION = ANDROID_1_5_0

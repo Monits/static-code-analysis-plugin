@@ -3,6 +3,9 @@
 # v2.6
 ### 2.6.10 - UNRELEASED
 
+Improvements:
+ * Upgraded to Gradle 5.1.1
+
 ### 2.6.9
 
 Improvements:
