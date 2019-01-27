@@ -63,8 +63,9 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
         reportFile().exists()
 
         where:
+        // TODO : test newer versions - needs to change AGP version too
         version << ['2.7', '2.10', '2.14.1'] +
-            (Jvm.current.java8Compatible ? ['3.0', '3.1'] : []) // TODO : test newer versions - needs to change AGP version too
+            (Jvm.current.java8Compatible ? ['3.0', '3.1'] : [])
         androidVersion = GradleVersion.version(version) < GradleVersion.version('3.0') ?
             DEFAULT_ANDROID_VERSION : '2.2.0'
     }
