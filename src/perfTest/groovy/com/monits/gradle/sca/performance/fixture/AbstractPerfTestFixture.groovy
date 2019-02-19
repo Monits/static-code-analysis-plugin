@@ -162,6 +162,7 @@ abstract class AbstractPerfTestFixture extends Specification {
             |    }
             |
             |    repositories {
+            |        google()
             |        jcenter()
             |    }
             |}
