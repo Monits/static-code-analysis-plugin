@@ -18,6 +18,7 @@ import com.monits.gradle.sca.performance.categories.JavaScenario
 import com.monits.gradle.sca.performance.metrics.PerformanceRunner
 import org.gradle.util.GradleVersion
 import org.junit.experimental.categories.Category
+import org.junit.Assume
 import spock.lang.Shared
 import spock.lang.Unroll
 
@@ -42,7 +43,10 @@ abstract class AbstractPluginPerfTestFixture extends AbstractPerfTestFixture {
 
         // Generate baseline
         PerformanceRunner baselineRunner = new PerformanceRunner(GradleVersion.version(version))
-        baselineRunner.exercise(gradleRunner().withGradleVersion(version))
+        boolean ret = baselineRunner.exercise(gradleRunner().withGradleVersion(version))
+
+        // Check if the old plugin was incompatible with the current setup
+        Assume.assumeTrue(ret)
 
         // reset build file to use new development version
         writeBuildFile()
@@ -75,7 +79,10 @@ abstract class AbstractPluginPerfTestFixture extends AbstractPerfTestFixture {
 
         // Generate baseline
         PerformanceRunner baselineRunner = new PerformanceRunner(GradleVersion.version(version))
-        baselineRunner.exercise(gradleRunner().withGradleVersion(version))
+        boolean ret = baselineRunner.exercise(gradleRunner().withGradleVersion(version))
+
+        // Check if the old plugin was incompatible with the current setup
+        Assume.assumeTrue(ret)
 
         // reset build file to use new development version
         setupMultimoduleAndroidProject(androidVersionForGradle(version))
