@@ -197,7 +197,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
 
         DomainObjectSet<?> variants = getVariants(project)
 
-        String variantName = AndroidHelper.lintTaskHasVariantInfo(project) && lintTask.name != GLOBAL_LINT_TASK_NAME ?
+        String variantName = lintTask.hasProperty('variantName') ?
             lintTask.variantName : (lintTask.name.toLowerCase() - GLOBAL_LINT_TASK_NAME)
 
         // Older plugins didn't setup input files, so up-to-date checks were futile
