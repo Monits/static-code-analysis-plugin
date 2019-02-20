@@ -6,6 +6,7 @@
 Improvements:
  * Upgraded to Gradle 5.1.1
  * Upgraded Checkstyle to 8.17
+ * Upgraded PMD to 6.11.0
 
 ### 2.6.9
 
