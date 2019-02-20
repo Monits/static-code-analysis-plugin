@@ -5,6 +5,7 @@
 
 Improvements:
  * Upgraded to Gradle 5.1.1
+ * Upgraded Checkstyle to 8.17
 
 ### 2.6.9
 
