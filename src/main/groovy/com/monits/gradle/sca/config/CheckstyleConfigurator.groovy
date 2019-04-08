@@ -29,6 +29,7 @@ import org.gradle.api.plugins.quality.CheckstyleExtension
 import org.gradle.api.plugins.quality.CheckstyleReports
 import org.gradle.api.reporting.ConfigurableReport
 import org.gradle.api.reporting.ReportingExtension
+import org.gradle.api.reporting.SingleFileReport
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.util.GUtil
@@ -42,6 +43,8 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
     private static final String CHECKSTYLE = 'checkstyle'
     private static final GradleVersion GRADLE4 = GradleVersion.version('4.0.0')
     private static final GradleVersion GRADLE3_3 = GradleVersion.version('3.3')
+
+    private static final String HTML_PROPERTY = 'html'
 
     private final RemoteConfigLocator configLocator = new RemoteConfigLocator(CHECKSTYLE)
 
@@ -137,8 +140,9 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
                         reports { CheckstyleReports r ->
                             configureXmlReport(r.xml, project, sourceSetName)
 
-                            if (r.hasProperty('html')) {
-                                r.html.enabled = false // added in gradle 2.10, but unwanted
+                            if (r.hasProperty(HTML_PROPERTY)) { // added in gradle 2.10, but unwanted
+                                // use lazy property access, as the return type for getHtml changed in Gradle 5
+                                (r[HTML_PROPERTY] as SingleFileReport).enabled = false
                             }
                         }
 

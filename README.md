@@ -30,7 +30,7 @@ We are on [the Grade Plugin Portal](https://plugins.gradle.org/plugin/com.monits
 
 ```
 plugins {
-  id 'com.monits.staticCodeAnalysis' version '2.6.9'
+  id 'com.monits.staticCodeAnalysis' version '2.6.10'
 }
 ```
 
@@ -44,7 +44,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath 'com.monits:static-code-analysis-plugin:2.6.9'
+    classpath 'com.monits:static-code-analysis-plugin:2.6.10'
   }
 }
 
@@ -59,7 +59,7 @@ buildscript {
     jcenter()
   }
   dependencies {
-    classpath 'com.monits:static-code-analysis-plugin:2.6.9'
+    classpath 'com.monits:static-code-analysis-plugin:2.6.10'
   }
 }
 
@@ -68,7 +68,7 @@ apply plugin: 'com.monits.staticCodeAnalysis'
 
 The plugin is compatible with Gradle 2.3+, Gradle 3.+ and Gradle 4.+. We are commited to supporting at least the last 2 major gradle versions.
 
-It supports all versions of the Android plugin from 1.1.0 onwards, up to 3.2.0
+It supports all versions of the Android plugin from 1.1.0 onwards. It's been tested up to 3.3.1.
 
 
 ## DSL
@@ -145,14 +145,20 @@ As always feel free to contribute in any shape or form, we look forward to your 
 
 ## Suppressing warnings
 
-This is **not** the trick to break the rules but this **is** the way you should face those **few exceptions** to the rules.
-Since every tool has its own mechanism, you should refer to its documentation:
+If you re seeing things being reported which you think shouldn't it could be one of two things:
+
+1. It's a false-positive. The tool is convinced of a violation that is simply not there. These should be reported to
+the tool's developers in a Github issue.
+2. You have found yourself in a corner case, where the rule, even 'though correct, doesn't really apply to a particular snippet of code.
+These should be **absolute exceptions**, if you find yourself in this scenario all the time, consider modifying the set of applied rules.
+
+Since every tool has its own suppression mechanism, you should refer to its documentation:
 
 - Android Lint: [Documentation](http://tools.android.com/tips/lint/suppressing-lint-warnings)
 - Checkstyle: [Documentation](http://checkstyle.sourceforge.net/config_annotation.html#SuppressWarnings)
 - CPD: [Documentation](https://pmd.github.io/latest/pmd_userdocs_cpd.html#suppression) 
 - Findbugs: [Annotations documentation](http://findbugs.sourceforge.net/manual/annotations.html); @SupressFBWarnings [javadoc](http://findbugs.sourceforge.net/api/edu/umd/cs/findbugs/annotations/SuppressFBWarnings.html) 
-- PMD: [Documentation](https://pmd.github.io/latest/usage/suppressing.html)
+- PMD: [Documentation](https://pmd.github.io/latest/pmd_userdocs_suppressing_warnings.html)
 
 
 # Copyright and License

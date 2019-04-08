@@ -42,7 +42,8 @@ class PerformanceRunner {
         this.version = version
     }
 
-    void exercise(final GradleRunner runner) {
+    @SuppressWarnings('CatchException')
+    boolean exercise(final GradleRunner runner) {
         GradleRunner cleanRunner = GradleRunner.create()
             .withGradleVersion(version.version)
             .withProjectDir(runner.projectDir)
@@ -53,8 +54,12 @@ class PerformanceRunner {
             if (i > 0) {
                 sleep(SLEEP_AFTER_RUN_MS)
             }
-            runner.build()
-            cleanRunner.build()
+            try {
+                runner.build()
+                cleanRunner.build()
+            } catch (Exception e) {
+                return false
+            }
         }
 
         println 'Warm up is done'
@@ -69,6 +74,8 @@ class PerformanceRunner {
             cleanRunner.build()
             println "Iteration ${i + 1} / ${MEASURE_ITERATIONS} is done."
         }
+
+        true
     }
 
     void assertVersionHasNotRegressed(final PerformanceRunner baseline) {

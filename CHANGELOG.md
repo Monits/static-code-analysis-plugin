@@ -1,7 +1,12 @@
 ## History
 
 # v2.6
-### 2.6.10 - UNRELEASED
+### 2.6.10
+
+Improvements:
+ * Upgraded to Gradle 5.1.1
+ * Upgraded Checkstyle to 8.19
+ * Upgraded PMD to 6.13.0
 
 ### 2.6.9
 

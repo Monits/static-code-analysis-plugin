@@ -23,6 +23,7 @@ import org.gradle.api.DomainObjectSet
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.CopySpec
+import org.gradle.api.file.FileCollection
 import org.gradle.api.specs.Specs
 import org.gradle.api.tasks.Copy
 import org.gradle.util.GradleVersion
@@ -137,18 +138,21 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
         }
 
         if (lintTask.name == GLOBAL_LINT_TASK_NAME) {
-            // Change output location for consistency with other plugins
-            // we copy as to not tamper with other lint tasks
-            Task copyLintReportTask = project.tasks.create('copyLintReport', Copy) { Copy it ->
-                it.from(lintTask.outputs.files.filter { File f -> f.name.endsWith('.xml') }.singleFile.parent)
-                { CopySpec cs ->
-                    cs.include '*.xml'
+            FileCollection xmlFiles = lintTask.outputs.files.filter { File f -> f.name.endsWith('.xml') }
+            if (!xmlFiles.empty) {
+                // Change output location for consistency with other plugins
+                // we copy as to not tamper with other lint tasks
+                Task copyLintReportTask = project.tasks.create('copyLintReport', Copy) { Copy it ->
+                    it.from(xmlFiles.singleFile.parent)
+                    { CopySpec cs ->
+                        cs.include '*.xml'
+                    }
+                    it.into project.file("${project.buildDir}/reports/android/")
+                    it.rename '.*', 'lint-results.xml'
                 }
-                it.into project.file("${project.buildDir}/reports/android/")
-                it.rename '.*', 'lint-results.xml'
+                lintTask.finalizedBy copyLintReportTask
+                copyLintReportTask.onlyIf { extension.androidLint }
             }
-            lintTask.finalizedBy copyLintReportTask
-            copyLintReportTask.onlyIf { extension.androidLint }
         }
     }
 
@@ -193,8 +197,8 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
 
         DomainObjectSet<?> variants = getVariants(project)
 
-        String variantName = AndroidHelper.lintTaskHasVariantInfo(project) ? lintTask.variantName
-            : (lintTask.name.toLowerCase() - GLOBAL_LINT_TASK_NAME)
+        String variantName = AndroidHelper.lintTaskHasVariantInfo(project) && lintTask.name != GLOBAL_LINT_TASK_NAME ?
+            lintTask.variantName : (lintTask.name.toLowerCase() - GLOBAL_LINT_TASK_NAME)
 
         // Older plugins didn't setup input files, so up-to-date checks were futile
         if (lintTask.inputs.files.isEmpty()) {
