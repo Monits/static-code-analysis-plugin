@@ -4,6 +4,7 @@
 ### 2.6.11 - UNRELEASED
 
 Improvements:
+ * Upgraded to Gradle 5.4.1
  * Upgraded PMD to 6.15.0
  * Upgraded Checkstyle to 8.21
 
