@@ -16,6 +16,7 @@ package com.monits.gradle.sca.performance.fixture
 import com.monits.gradle.sca.performance.categories.AndroidScenario
 import com.monits.gradle.sca.performance.categories.JavaScenario
 import com.monits.gradle.sca.performance.metrics.PerformanceRunner
+import groovy.transform.CompileDynamic
 import org.gradle.util.GradleVersion
 import org.junit.experimental.categories.Category
 import org.junit.Assume
@@ -25,6 +26,7 @@ import spock.lang.Unroll
 /**
  * Base specification to test a single analysis report.
 */
+@CompileDynamic
 abstract class AbstractPluginPerfTestFixture extends AbstractPerfTestFixture {
 
     @Shared

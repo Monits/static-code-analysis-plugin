@@ -14,6 +14,7 @@
 package com.monits.gradle.sca
 
 import com.monits.gradle.sca.fixture.AbstractPluginIntegTestFixture
+import groovy.transform.CompileDynamic
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.util.GradleVersion
 import spock.lang.Unroll
@@ -25,7 +26,9 @@ import static org.gradle.testkit.runner.TaskOutcome.NO_SOURCE
 /**
  * Integration test of CPD tasks.
  */
+@CompileDynamic
 class CpdIntegTest extends AbstractPluginIntegTestFixture {
+
     @SuppressWarnings('MethodName')
     @Unroll('CPD should run when using gradle #version')
     void 'cpd is run'() {

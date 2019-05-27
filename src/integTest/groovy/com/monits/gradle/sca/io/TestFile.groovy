@@ -13,6 +13,7 @@
  */
 package com.monits.gradle.sca.io
 
+import groovy.transform.CompileStatic
 import org.hamcrest.Matcher
 
 import static org.junit.Assert.assertThat
@@ -20,7 +21,9 @@ import static org.junit.Assert.assertThat
 /**
  * A File with useful utilities to assist unit testing.
 */
+@CompileStatic
 class TestFile extends File {
+
     TestFile(final String pathname) {
         super(pathname)
     }

@@ -13,23 +13,28 @@
  */
 package com.monits.gradle.sca.task
 
+import groovy.transform.CompileDynamic
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.tasks.TaskAction
 
 /**
  * Task to resolve AndroidLint dependencies and move them to the Android Lint Home directory.
 */
+@CompileDynamic // files.each had a signature change
 class ResolveAndroidLintTask extends AndroidLintTask {
 
     @TaskAction
     void run() {
+        Configuration androidLintConfig = project.configurations['androidLint']
+
         // Resolve all artifacts
-        project.configurations.androidLint.resolve()
+        androidLintConfig.resolve()
 
         // Prevent any "undesired" lints from being applied
         changeAllFileExtensions(androidLintHome, '.jar', '.bak')
 
         // Manually copy all artifacts to the corresponding location
-        project.configurations.androidLint.files.each {
+        androidLintConfig.files.each {
             File target = project.file(androidLintHome.absolutePath + File.separator + it.name)
             InputStream input = it.newDataInputStream()
             OutputStream output = target.newDataOutputStream()

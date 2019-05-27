@@ -201,7 +201,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
             lintTask.variantName : (lintTask.name.toLowerCase() - GLOBAL_LINT_TASK_NAME)
 
         // Older plugins didn't setup input files, so up-to-date checks were futile
-        if (lintTask.inputs.files.isEmpty()) {
+        if (lintTask.inputs.files.empty) {
             variants.matching { it.name == variantName || variantName == null || variantName.empty }.all {
                 def configuration = it.variantData.variantConfiguration
                 String variantDirName = configuration.dirName
@@ -222,7 +222,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
             boolean configFound = false
             variants.all {
                 def configuration = it.variantData.variantConfiguration
-                if (!configFound && configuration.buildType.isDebuggable() && !usesJack(configuration)) {
+                if (!configFound && configuration.buildType.debuggable && !usesJack(configuration)) {
                     configFound = true
 
                     addReportAsOutput(lintTask, project, xmlEnabled, xmlOutput, it.name, XML)

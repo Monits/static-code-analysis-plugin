@@ -14,10 +14,12 @@
 package com.monits.gradle.sca.performance
 
 import com.monits.gradle.sca.performance.fixture.AbstractPluginPerfTestFixture
+import groovy.transform.CompileStatic
 
 /**
  * Performance test of CPD tasks.
  */
+@CompileStatic
 class CpdPerfTest extends AbstractPluginPerfTestFixture {
 
     @Override

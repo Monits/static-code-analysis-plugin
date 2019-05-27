@@ -14,6 +14,8 @@
 package com.monits.gradle.sca.fixture
 
 import com.monits.gradle.sca.io.TestFile
+import groovy.transform.CompileDynamic
+import groovy.transform.CompileStatic
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.util.GradleVersion
 import org.gradle.util.VersionNumber
@@ -25,7 +27,9 @@ import spock.util.environment.Jvm
 /**
  * Base specification for integration testing of a gradle plugin.
 */
+@CompileStatic
 abstract class AbstractIntegTestFixture extends Specification {
+
     // A sample of gradle versions to be considered in general testing
     static final List<String> TESTED_GRADLE_VERSIONS = ['2.6', '2.8', '2.10', '2.14.1', '3.0',
                                                         '3.3', '4.0', '4.10', '5.0']
@@ -48,6 +52,7 @@ abstract class AbstractIntegTestFixture extends Specification {
 
     String pluginClasspathString
 
+    @CompileDynamic
     @SuppressWarnings('UnnecessaryCollectCall')
     void setup() {
         // We do it this way to support all versions of gradle in our tests, since we care about backwards comaptibility
@@ -143,6 +148,7 @@ abstract class AbstractIntegTestFixture extends Specification {
         writeAndroidBuildFile(configMap)
     }
 
+    @CompileDynamic
     TestFile writeAndroidBuildFile(Map<String, Object> toolsConfig) {
         String extraRepository = toolsConfig.get(ANDROID_VERSION, DEFAULT_ANDROID_VERSION).startsWith('3') ? 'google()'
             : ''

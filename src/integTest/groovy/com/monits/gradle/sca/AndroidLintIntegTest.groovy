@@ -15,6 +15,7 @@ package com.monits.gradle.sca
 
 import com.monits.gradle.sca.fixture.AbstractIntegTestFixture
 import com.monits.gradle.sca.io.TestFile
+import groovy.transform.CompileDynamic
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.util.GradleVersion
@@ -32,6 +33,7 @@ import static org.junit.Assert.assertThat
 /**
  * Integration test of Android Lint tasks.
  */
+@CompileDynamic
 class AndroidLintIntegTest extends AbstractIntegTestFixture {
 
     static final List<String> ANDROID_PLUGIN_VERSIONS = (['1.1.3', '1.2.3', '1.3.1', '1.5.0', '2.0.0', '2.1.3'] +

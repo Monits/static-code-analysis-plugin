@@ -15,6 +15,7 @@ package com.monits.gradle.sca
 
 import com.monits.gradle.sca.fixture.AbstractPerSourceSetPluginIntegTestFixture
 import com.monits.gradle.sca.io.TestFile
+import groovy.transform.CompileDynamic
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.util.GradleVersion
 import spock.lang.Unroll
@@ -29,7 +30,9 @@ import static org.junit.Assert.assertThat
 /**
  * Integration test of PMD tasks.
  */
+@CompileDynamic
 class PmdIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
+
     @SuppressWarnings('MethodName')
     @Unroll('PMD #pmdVersion should run when using gradle #version')
     void 'pmd is run'() {
