@@ -47,7 +47,7 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
     private final static GradleVersion GRADLE_VERSION_PMD_CLASSPATH_SUPPORT = GradleVersion.version('2.8')
     private final static GradleVersion GRADLE_VERSION_PMD_INCREMENTAL_SUPPORT = GradleVersion.version('5.6.0')
 
-    // Prior to 6.18.0 the cache when nuts with XPath rules, see https://github.com/pmd/pmd/pull/1992
+    // Prior to 6.18.0 the cache went nuts with XPath rules, see https://github.com/pmd/pmd/pull/1992
     private static final VersionNumber PMD_VERSION_INCREMENTAL_SUPPORT = VersionNumber.parse('6.18.0')
 
     private final static String PMD = 'pmd'
@@ -103,7 +103,8 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
             e.ignoreFailures = extension.ignoreErrors
 
             if (GradleVersion.current() >= GRADLE_VERSION_PMD_INCREMENTAL_SUPPORT) {
-                e.incrementalAnalysis.set(VersionNumber.parse(ToolVersions.pmdVersion) >= PMD_VERSION_INCREMENTAL_SUPPORT)
+                e.incrementalAnalysis.set(
+                    VersionNumber.parse(ToolVersions.pmdVersion) >= PMD_VERSION_INCREMENTAL_SUPPORT)
             }
         }
 
