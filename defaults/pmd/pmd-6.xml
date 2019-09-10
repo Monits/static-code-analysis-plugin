@@ -15,8 +15,6 @@
     <exclude name="LooseCoupling" />
     <exclude name="OneDeclarationPerLine" />
 
-    <!-- Duplicate of Checkstyle's UnusedImports, which understands javadoc -->
-    <exclude name="UnusedImports"/>
     <exclude name="UseVarargs"/>
 
     <!-- The new PMD checks for concatenations, it's ok then! -->
