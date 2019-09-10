@@ -4,7 +4,7 @@
 ### 2.6.11 - UNRELEASED
 
 Improvements:
- * Upgraded to Gradle 5.4.1
+ * Upgraded to Gradle 5.6.2
  * Upgraded PMD to 6.17.0
  * Upgraded Checkstyle to 8.23
  * Upgraded fb-contrib to 7.4.6
