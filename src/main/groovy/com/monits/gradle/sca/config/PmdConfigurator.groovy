@@ -35,6 +35,7 @@ import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.util.GUtil
 import org.gradle.util.GradleVersion
+import org.gradle.util.VersionNumber
 
 import java.util.regex.Matcher
 
@@ -44,6 +45,11 @@ import java.util.regex.Matcher
 @CompileStatic
 class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
     private final static GradleVersion GRADLE_VERSION_PMD_CLASSPATH_SUPPORT = GradleVersion.version('2.8')
+    private final static GradleVersion GRADLE_VERSION_PMD_INCREMENTAL_SUPPORT = GradleVersion.version('5.6.0')
+
+    // Prior to 6.18.0 the cache when nuts with XPath rules, see https://github.com/pmd/pmd/pull/1992
+    private static final VersionNumber PMD_VERSION_INCREMENTAL_SUPPORT = VersionNumber.parse('6.18.0')
+
     private final static String PMD = 'pmd'
 
     private final RemoteConfigLocator configLocator = new RemoteConfigLocator(PMD)
@@ -95,6 +101,10 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
         project.extensions.configure(PmdExtension) { PmdExtension e ->
             e.toolVersion = ToolVersions.pmdVersion
             e.ignoreFailures = extension.ignoreErrors
+
+            if (GradleVersion.current() >= GRADLE_VERSION_PMD_INCREMENTAL_SUPPORT) {
+                e.incrementalAnalysis.set(VersionNumber.parse(ToolVersions.pmdVersion) >= PMD_VERSION_INCREMENTAL_SUPPORT)
+            }
         }
 
         if (!ToolVersions.latestPmdVersion) {

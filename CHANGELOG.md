@@ -4,6 +4,7 @@
 ### 2.6.11 - UNRELEASED
 
 Improvements:
+ * PMD's incremental analysis is used by default when using apropriate PMD and Gradle versions
  * Upgraded to Gradle 5.6.2
  * Upgraded PMD to 6.17.0
  * Upgraded Checkstyle to 8.23
