@@ -7,6 +7,7 @@ Improvements:
  * Upgraded to Gradle 5.4.1
  * Upgraded PMD to 6.17.0
  * Upgraded Checkstyle to 8.23
+ * Upgraded fb-contrib to 7.4.6
 
 ### 2.6.10
 
