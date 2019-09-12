@@ -35,6 +35,7 @@ final class AndroidHelper {
     private static final VersionNumber LINT_HAS_VARIANT_INFO = VersionNumber.parse('1.5.0')
     private static final VersionNumber USES_REPORTS_DIR = VersionNumber.parse(VERSION_2_3_0)
     private static final VersionNumber USES_JAVAC_TASK_OUTPUTS = VersionNumber.parse('3.2.0')
+    private static final VersionNumber GARBAGE_INPUTS = VersionNumber.parse('3.5.0')
 
     /**
      * Checks if the current Android Plugin produces a global report that matches a debuggable variant or not.
@@ -68,6 +69,22 @@ final class AndroidHelper {
      */
     static boolean lintTaskHasVariantInfo(final Project project) {
         getCurrentVersion(project) >= LINT_HAS_VARIANT_INFO
+    }
+
+    /**
+     * Checks if the current Android build requires lint tasks' inputs to be added
+     *
+     * @param project The project to analyze
+     * @return True if inputs should be added, false otherwise
+     */
+    static boolean shouldAddLintInputsAndOutputs(final Project project) {
+        /*
+         * Android 3.5.0 started adding dependency strings such as
+         * "annotations.jar (com.google.code.findbugs:annotations:3.0.1)" as inputs, so when caching
+         * the task, it would try to fingerprint those inputs / outputs and fail, producing error messages
+         * and stacktraces
+        */
+        getCurrentVersion(project) != GARBAGE_INPUTS
     }
 
     /**
