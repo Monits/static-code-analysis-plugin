@@ -36,8 +36,9 @@ import static org.junit.Assert.assertThat
 @CompileDynamic
 class AndroidLintIntegTest extends AbstractIntegTestFixture {
 
-    static final List<String> ANDROID_PLUGIN_CACHEABLE_LINT_VERSIONS = (['1.1.3', '1.2.3', '1.3.1', '1.5.0', '2.0.0', '2.1.3'] +
-        (Jvm.current.java8Compatible ? ['2.2.3', '2.3.3', '3.0.1', '3.2.0'] : [])).asImmutable()
+    static final List<String> ANDROID_PLUGIN_CACHEABLE_LINT_VERSIONS =
+        (['1.1.3', '1.2.3', '1.3.1', '1.5.0', '2.0.0', '2.1.3'] +
+            (Jvm.current.java8Compatible ? ['2.2.3', '2.3.3', '3.0.1', '3.2.0'] : [])).asImmutable()
     static final List<String> ANDROID_PLUGIN_VERSIONS = (ANDROID_PLUGIN_CACHEABLE_LINT_VERSIONS +
         (Jvm.current.java8Compatible ? ['3.5.0'] : [])).asImmutable()
 
