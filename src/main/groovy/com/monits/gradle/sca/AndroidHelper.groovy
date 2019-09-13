@@ -14,6 +14,7 @@
 package com.monits.gradle.sca
 
 import groovy.transform.CompileStatic
+
 import java.util.regex.Matcher
 import org.gradle.api.Project
 import org.gradle.util.VersionNumber
@@ -28,6 +29,7 @@ final class AndroidHelper {
     private static final String ANDROID_CACHE_LOCATION = 'android.buildCacheDir'
     private static final String ANDROID_DEPENDENCY_PATTERN = /com\.android\.tools\.build\/gradle\/([^\/]+)/
     private static final String VERSION_2_3_0 = '2.3.0'
+    private static final String VERSION_3_5_0 = '3.5.0'
 
     private static final VersionNumber BUILD_CACHE_ANDROID_GRADLE_VERSION = VersionNumber.parse(VERSION_2_3_0)
     private static final VersionNumber REPORT_PER_VARIANT_ANDROID_GRADLE_VERSION_MIN = VersionNumber.parse('2.0.0')
@@ -35,7 +37,8 @@ final class AndroidHelper {
     private static final VersionNumber LINT_HAS_VARIANT_INFO = VersionNumber.parse('1.5.0')
     private static final VersionNumber USES_REPORTS_DIR = VersionNumber.parse(VERSION_2_3_0)
     private static final VersionNumber USES_JAVAC_TASK_OUTPUTS = VersionNumber.parse('3.2.0')
-    private static final VersionNumber GARBAGE_INPUTS = VersionNumber.parse('3.5.0')
+    private static final VersionNumber FLAT_JAVAC_TASK_OUTPUTS = VersionNumber.parse(VERSION_3_5_0)
+    private static final VersionNumber GARBAGE_INPUTS = VersionNumber.parse(VERSION_3_5_0)
 
     /**
      * Checks if the current Android Plugin produces a global report that matches a debuggable variant or not.
@@ -102,10 +105,17 @@ final class AndroidHelper {
     }
 
     static String getCompileOutputDir(final Project project, final String sourceSetName, final String sourceSetPath) {
-        if (getCurrentVersion(project) >= USES_JAVAC_TASK_OUTPUTS) {
+        VersionNumber currentVersion = getCurrentVersion(project)
+        if (currentVersion >= USES_JAVAC_TASK_OUTPUTS) {
             String outputDir = sourceSetName == 'androidTest' ? 'debugAndroidTest' :
                 sourceSetName == 'test' ? 'debugUnitTest' :
                     sourceSetName == 'main' ? 'debug' : sourceSetName
+
+            if (currentVersion >= FLAT_JAVAC_TASK_OUTPUTS) {
+                return project.buildDir.absolutePath +
+                    "/intermediates/javac/${outputDir}/classes/"
+            }
+
             return project.buildDir.absolutePath +
                 "/intermediates/javac/${outputDir}/compile${outputDir.capitalize()}JavaWithJavac/classes/"
         }
