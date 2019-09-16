@@ -13,8 +13,11 @@
  */
 package com.monits.gradle.sca.performance.categories
 
+import groovy.transform.CompileStatic
+
 /**
  * A category for Android scenario being tested.
 */
+@CompileStatic
 interface AndroidScenario {
 }

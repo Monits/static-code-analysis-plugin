@@ -53,9 +53,11 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
     void applyAndroidConfig(final Project project, final StaticCodeAnalysisExtension extension) {
         Class<? extends Task> lintTask = getLintTaskClass(project)
         project.tasks.withType(lintTask) { Task t ->
-            setupTasks(t, project, extension)
+            if (t.name != 'lintFix') { // The new lintFix task in AGP 3.5.0 should not be altered
+                setupTasks(t, project, extension)
 
-            configureLintTask(project, extension, t)
+                configureLintTask(project, extension, t)
+            }
         }
     }
 
@@ -120,11 +122,20 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
         configureLintOptions(project, extension, config, lintTask)
 
         try {
-            configureLintInputsAndOutputs(project, lintTask)
+            /*
+             * Android 3.5.0 started adding dependency strings such as
+             * "annotations.jar (com.google.code.findbugs:annotations:3.0.1)" as inputs, so when caching
+             * the task, it would try to fingerprint those inputs / outputs and fail, producing error messages
+             * and stacktraces.
+             * See https://issuetracker.google.com/issues/141126614
+             */
+            if (AndroidHelper.shouldAddLintInputsAndOutputs(project)) {
+                configureLintInputsAndOutputs(project, lintTask)
 
-            // Allow to cache task result on Gradle 3+!
-            if (GradleVersion.current() >= CACHEABLE_TASK_GRADLE_VERSION) {
-                lintTask.outputs.cacheIf(Specs.SATISFIES_ALL)
+                // Allow to cache task result on Gradle 3+!
+                if (GradleVersion.current() >= CACHEABLE_TASK_GRADLE_VERSION) {
+                    lintTask.outputs.cacheIf(Specs.SATISFIES_ALL)
+                }
             }
         } catch (Throwable e) {
             // Something went wrong!
@@ -201,7 +212,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
             lintTask.variantName : (lintTask.name.toLowerCase() - GLOBAL_LINT_TASK_NAME)
 
         // Older plugins didn't setup input files, so up-to-date checks were futile
-        if (lintTask.inputs.files.isEmpty()) {
+        if (lintTask.inputs.files.empty) {
             variants.matching { it.name == variantName || variantName == null || variantName.empty }.all {
                 def configuration = it.variantData.variantConfiguration
                 String variantDirName = configuration.dirName
@@ -222,7 +233,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
             boolean configFound = false
             variants.all {
                 def configuration = it.variantData.variantConfiguration
-                if (!configFound && configuration.buildType.isDebuggable() && !usesJack(configuration)) {
+                if (!configFound && configuration.buildType.debuggable && !usesJack(configuration)) {
                     configFound = true
 
                     addReportAsOutput(lintTask, project, xmlEnabled, xmlOutput, it.name, XML)

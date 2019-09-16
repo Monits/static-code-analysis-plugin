@@ -37,7 +37,7 @@ class DataSeries extends ArrayList<BigDecimal> {
             }
         }
 
-        if (isEmpty()) {
+        if (empty) {
             average = null
             max = null
             min = null

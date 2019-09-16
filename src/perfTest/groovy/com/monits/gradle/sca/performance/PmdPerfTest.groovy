@@ -14,10 +14,12 @@
 package com.monits.gradle.sca.performance
 
 import com.monits.gradle.sca.performance.fixture.AbstractPluginPerfTestFixture
+import groovy.transform.CompileStatic
 
 /**
  * Performance test of PMD tasks.
  */
+@CompileStatic
 class PmdPerfTest extends AbstractPluginPerfTestFixture {
 
     @Override

@@ -14,6 +14,7 @@
 package com.monits.gradle.sca.task
 
 import com.monits.gradle.sca.logging.ConsoleRenderer
+import groovy.transform.CompileDynamic
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.Input
@@ -25,6 +26,7 @@ import org.gradle.util.GradleVersion
 /**
  * A task to download a remote file.
 */
+@CompileDynamic
 class DownloadTask extends DefaultTask {
 
     @Input
@@ -57,8 +59,7 @@ class DownloadTask extends DefaultTask {
                 }
             }
 
-            Map<String, Serializable> options =
-                    [src:resourceUri, dest:downloadedFile.absolutePath]
+            Map<String, Serializable> options = [src:resourceUri, dest:downloadedFile.absolutePath]
 
             // Gradle 2.13 includes ant 1.9.6 which supports gzip
             if (GradleVersion.current() > GradleVersion.version('2.13')) {

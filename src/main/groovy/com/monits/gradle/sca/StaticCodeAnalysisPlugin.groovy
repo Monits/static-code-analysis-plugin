@@ -161,7 +161,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         }
     }
 
-    @SuppressWarnings('DuplicateStringLiteral')
+    @SuppressWarnings(['DuplicateStringLiteral', 'UnnecessaryGetter'])
     private void configureExtensionRule() {
         ((IConventionAware) extension).conventionMapping.with {
             map('ignoreErrors') { true }

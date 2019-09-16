@@ -15,6 +15,7 @@ package com.monits.gradle.sca
 
 import com.monits.gradle.sca.fixture.AbstractIntegTestFixture
 import com.monits.gradle.sca.io.TestFile
+import groovy.transform.CompileDynamic
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.util.GradleVersion
@@ -32,10 +33,14 @@ import static org.junit.Assert.assertThat
 /**
  * Integration test of Android Lint tasks.
  */
+@CompileDynamic
 class AndroidLintIntegTest extends AbstractIntegTestFixture {
 
-    static final List<String> ANDROID_PLUGIN_VERSIONS = (['1.1.3', '1.2.3', '1.3.1', '1.5.0', '2.0.0', '2.1.3'] +
-        (Jvm.current.java8Compatible ? ['2.2.3', '2.3.3', '3.0.1', '3.2.0'] : [])).asImmutable()
+    static final List<String> ANDROID_PLUGIN_CACHEABLE_LINT_VERSIONS =
+        (['1.1.3', '1.2.3', '1.3.1', '1.5.0', '2.0.0', '2.1.3'] +
+            (Jvm.current.java8Compatible ? ['2.2.3', '2.3.3', '3.0.1', '3.2.0'] : [])).asImmutable()
+    static final List<String> ANDROID_PLUGIN_VERSIONS = (ANDROID_PLUGIN_CACHEABLE_LINT_VERSIONS +
+        (Jvm.current.java8Compatible ? ['3.5.0'] : [])).asImmutable()
 
     @SuppressWarnings('MethodName')
     @Unroll('AndroidLint should run when using gradle #version')
@@ -121,7 +126,7 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
         reportFile(VersionNumber.parse(androidVersion) >= VersionNumber.parse('2.0.0') ? 'debug' : null).exists()
 
         where:
-        androidVersion << ANDROID_PLUGIN_VERSIONS
+        androidVersion << ANDROID_PLUGIN_CACHEABLE_LINT_VERSIONS
         gradleVersion = gradleVersionForAndroid(androidVersion)
     }
 
@@ -150,7 +155,7 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
         secondRun.task(':lintRelease').outcome == UP_TO_DATE
 
         where:
-        androidVersion << ANDROID_PLUGIN_VERSIONS
+        androidVersion << ANDROID_PLUGIN_CACHEABLE_LINT_VERSIONS
         gradleVersion = gradleVersionForAndroid(androidVersion)
     }
 

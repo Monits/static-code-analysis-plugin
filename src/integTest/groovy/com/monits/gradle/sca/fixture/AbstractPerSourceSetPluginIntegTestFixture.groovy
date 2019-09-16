@@ -14,6 +14,7 @@
 package com.monits.gradle.sca.fixture
 
 import com.monits.gradle.sca.io.TestFile
+import groovy.transform.CompileDynamic
 import org.gradle.testkit.runner.BuildResult
 
 import static org.apache.commons.lang3.StringUtils.capitalize
@@ -24,6 +25,7 @@ import static org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
 /**
  * Base specification to test a single analysis report.
 */
+@CompileDynamic
 abstract class AbstractPerSourceSetPluginIntegTestFixture extends AbstractPluginIntegTestFixture {
 
     static final String MAIN_SOURCESET = 'main'

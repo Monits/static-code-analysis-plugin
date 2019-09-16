@@ -15,8 +15,6 @@
     <exclude name="LooseCoupling" />
     <exclude name="OneDeclarationPerLine" />
 
-    <!-- Duplicate of Checkstyle's UnusedImports, which understands javadoc -->
-    <exclude name="UnusedImports"/>
     <exclude name="UseVarargs"/>
 
     <!-- The new PMD checks for concatenations, it's ok then! -->
@@ -24,6 +22,15 @@
 
     <!-- Assume we have few meaningful asserts, making this desired but not required -->
     <exclude name="JUnitAssertionsShouldIncludeMessage" />
+
+    <!-- Unused Formal Parameter needs special configuration -->
+    <exclude name="UnusedFormalParameter" />
+  </rule>
+
+  <rule ref="category/java/bestpractices.xml/UnusedFormalParameter">
+    <properties>
+      <property name="checkAll" value="true" />
+    </properties>
   </rule>
 
   <rule ref="category/java/codestyle.xml">

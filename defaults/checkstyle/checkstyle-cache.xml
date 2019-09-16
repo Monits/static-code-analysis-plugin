@@ -72,10 +72,6 @@
             <property name="severity" value="error"/>
             <property name="illegalPkgs" value="sun, framework.junit"/>
         </module>
-        <module name="UnusedImports">
-            <property name="severity" value="error"/>
-            <property name="processJavadoc" value="true"/>
-        </module>
         <module name="AnonInnerLength">
             <property name="max" value="40"/>
         </module>

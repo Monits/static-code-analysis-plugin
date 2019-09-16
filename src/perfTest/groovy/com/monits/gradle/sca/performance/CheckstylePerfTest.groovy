@@ -14,10 +14,12 @@
 package com.monits.gradle.sca.performance
 
 import com.monits.gradle.sca.performance.fixture.AbstractPluginPerfTestFixture
+import groovy.transform.CompileStatic
 
 /**
  * Performance test of Checkstyle tasks.
  */
+@CompileStatic
 class CheckstylePerfTest extends AbstractPluginPerfTestFixture {
 
     @Override

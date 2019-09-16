@@ -13,6 +13,7 @@
  */
 package com.monits.gradle.sca.fixture
 
+import groovy.transform.CompileDynamic
 import org.gradle.testkit.runner.BuildResult
 
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
@@ -21,6 +22,7 @@ import static org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
 /**
  * Base specification to test a single analysis report.
 */
+@CompileDynamic
 abstract class AbstractPluginIntegTestFixture extends AbstractIntegTestFixture {
 
     @SuppressWarnings('MethodName')

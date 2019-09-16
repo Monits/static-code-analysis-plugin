@@ -30,7 +30,7 @@ We are on [the Grade Plugin Portal](https://plugins.gradle.org/plugin/com.monits
 
 ```
 plugins {
-  id 'com.monits.staticCodeAnalysis' version '2.6.10'
+  id 'com.monits.staticCodeAnalysis' version '2.6.11'
 }
 ```
 
@@ -44,7 +44,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath 'com.monits:static-code-analysis-plugin:2.6.10'
+    classpath 'com.monits:static-code-analysis-plugin:2.6.11'
   }
 }
 
@@ -59,7 +59,7 @@ buildscript {
     jcenter()
   }
   dependencies {
-    classpath 'com.monits:static-code-analysis-plugin:2.6.10'
+    classpath 'com.monits:static-code-analysis-plugin:2.6.11'
   }
 }
 
@@ -157,7 +157,7 @@ Since every tool has its own suppression mechanism, you should refer to its docu
 - Android Lint: [Documentation](http://tools.android.com/tips/lint/suppressing-lint-warnings)
 - Checkstyle: [Documentation](http://checkstyle.sourceforge.net/config_annotation.html#SuppressWarnings)
 - CPD: [Documentation](https://pmd.github.io/latest/pmd_userdocs_cpd.html#suppression) 
-- Findbugs: [Annotations documentation](http://findbugs.sourceforge.net/manual/annotations.html); @SupressFBWarnings [javadoc](http://findbugs.sourceforge.net/api/edu/umd/cs/findbugs/annotations/SuppressFBWarnings.html) 
+- Findbugs: [Annotations documentation](http://findbugs.sourceforge.net/manual/annotations.html); `@SupressFBWarnings` [javadoc](http://findbugs.sourceforge.net/api/edu/umd/cs/findbugs/annotations/SuppressFBWarnings.html) 
 - PMD: [Documentation](https://pmd.github.io/latest/pmd_userdocs_suppressing_warnings.html)
 
 
