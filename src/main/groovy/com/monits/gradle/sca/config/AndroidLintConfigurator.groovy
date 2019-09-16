@@ -126,7 +126,8 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
              * Android 3.5.0 started adding dependency strings such as
              * "annotations.jar (com.google.code.findbugs:annotations:3.0.1)" as inputs, so when caching
              * the task, it would try to fingerprint those inputs / outputs and fail, producing error messages
-             * and stacktraces
+             * and stacktraces.
+             * See https://issuetracker.google.com/issues/141126614
              */
             if (AndroidHelper.shouldAddLintInputsAndOutputs(project)) {
                 configureLintInputsAndOutputs(project, lintTask)
