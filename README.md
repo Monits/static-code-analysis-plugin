@@ -30,7 +30,7 @@ We are on [the Grade Plugin Portal](https://plugins.gradle.org/plugin/com.monits
 
 ```
 plugins {
-  id 'com.monits.staticCodeAnalysis' version '2.6.10'
+  id 'com.monits.staticCodeAnalysis' version '2.6.11'
 }
 ```
 
@@ -44,7 +44,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath 'com.monits:static-code-analysis-plugin:2.6.10'
+    classpath 'com.monits:static-code-analysis-plugin:2.6.11'
   }
 }
 
@@ -59,7 +59,7 @@ buildscript {
     jcenter()
   }
   dependencies {
-    classpath 'com.monits:static-code-analysis-plugin:2.6.10'
+    classpath 'com.monits:static-code-analysis-plugin:2.6.11'
   }
 }
 

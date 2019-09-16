@@ -1,7 +1,9 @@
 ## History
 
 # v2.6
-### 2.6.11 - UNRELEASED
+### 2.6.12 - UNRELEASED
+
+### 2.6.11
 
 Improvements:
  * PMD's incremental analysis is used by default when using apropriate PMD and Gradle versions
