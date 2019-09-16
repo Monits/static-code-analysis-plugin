@@ -7,7 +7,7 @@ Improvements:
  * PMD's incremental analysis is used by default when using apropriate PMD and Gradle versions
  * Added compatibility for Android Gradle Plugin 3.5.0
  * Upgraded to Gradle 5.6.2
- * Upgraded PMD to 6.17.0
+ * Upgraded PMD to 6.18.0
  * Upgraded Checkstyle to 8.23
  * Upgraded fb-contrib to 7.4.6
 

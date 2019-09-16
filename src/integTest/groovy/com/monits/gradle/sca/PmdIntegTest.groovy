@@ -18,7 +18,6 @@ import com.monits.gradle.sca.io.TestFile
 import groovy.transform.CompileDynamic
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.util.GradleVersion
-import spock.lang.Ignore
 import spock.lang.Unroll
 
 import static org.gradle.testkit.runner.TaskOutcome.FAILED
@@ -311,7 +310,6 @@ class PmdIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         assertThat(result.output, containsString('Running in offline mode. Using a possibly outdated version of'))
     }
 
-    @Ignore // TODO : This test requires PMD 6.18.0 to be released
     @SuppressWarnings('MethodName')
     void 'incremental analysis is enabled'() {
         given:
