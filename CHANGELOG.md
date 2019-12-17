@@ -5,6 +5,8 @@
 
 Improvements:
  * Upgraded PMD to 6.20.0
+ * Upgraded to Gradle 5.6.4
+ * Added compatibility for Android Gradle Plugin 3.5.+
 
 ### 2.6.11
 
