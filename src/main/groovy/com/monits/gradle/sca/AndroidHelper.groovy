@@ -88,7 +88,7 @@ final class AndroidHelper {
          * and stacktraces.
          * See https://issuetracker.google.com/issues/141126614
         */
-        getCurrentVersion(project) != GARBAGE_INPUTS
+        getCurrentVersion(project) < GARBAGE_INPUTS
     }
 
     /**
