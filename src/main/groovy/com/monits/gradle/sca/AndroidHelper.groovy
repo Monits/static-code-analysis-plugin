@@ -88,7 +88,7 @@ final class AndroidHelper {
          * and stacktraces.
          * See https://issuetracker.google.com/issues/141126614
         */
-        getCurrentVersion(project) != GARBAGE_INPUTS
+        getCurrentVersion(project) < GARBAGE_INPUTS
     }
 
     /**
@@ -180,6 +180,9 @@ final class AndroidHelper {
         Matcher matcher = androidDependency =~ ANDROID_DEPENDENCY_PATTERN
 
         if (!matcher.find()) {
+            if (project.parent != null) {
+                return getCurrentVersion(project.parent)
+            }
             return VersionNumber.UNKNOWN
         }
 
