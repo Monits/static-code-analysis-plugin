@@ -1,7 +1,7 @@
 ## History
 
 # v2.6
-### 2.6.12 - UNRELEASED
+### 2.6.12
 
 Improvements:
  * Upgraded PMD to 6.20.0
