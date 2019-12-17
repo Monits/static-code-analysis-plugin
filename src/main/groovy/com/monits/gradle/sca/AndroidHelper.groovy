@@ -180,6 +180,9 @@ final class AndroidHelper {
         Matcher matcher = androidDependency =~ ANDROID_DEPENDENCY_PATTERN
 
         if (!matcher.find()) {
+            if (project.parent != null) {
+                return getCurrentVersion(project.parent)
+            }
             return VersionNumber.UNKNOWN
         }
 
