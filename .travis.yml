@@ -1,6 +1,5 @@
-sudo: required
-dist: precise
-group: edge
+sudo: false
+dist: xenial
 
 language: android
 
