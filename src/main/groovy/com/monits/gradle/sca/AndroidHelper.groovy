@@ -21,7 +21,7 @@ import org.gradle.util.VersionNumber
 
 /**
  * Utility class to help dealing with the Android Gradle Plugin.
-*/
+ */
 @CompileStatic
 final class AndroidHelper {
     private static final String ANDROID_SDK_HOME = 'ANDROID_SDK_HOME'
@@ -170,13 +170,20 @@ final class AndroidHelper {
     }
 
     /**
+     * @return Set of supported Android plugins where SCA must enable its tools.
+     */
+    static Set<String> supportedPlugins = ['com.android.application',
+                                           'com.android.library',
+                                           'com.android.dynamic-feature'] as Set<String>
+
+    /**
      * Retrieves the current plugin version, if available.
      * @param project The project on which to analyze the used plugin version.
      * @return The version of the used plugin, or {@see VersionNumber#UNKNOWN} if not known.
      */
     private static VersionNumber getCurrentVersion(final Project project) {
         File androidDependency = project.buildscript.configurations.getByName('classpath').resolve()
-            .find { it =~ ANDROID_DEPENDENCY_PATTERN }
+                .find { it =~ ANDROID_DEPENDENCY_PATTERN }
         Matcher matcher = androidDependency =~ ANDROID_DEPENDENCY_PATTERN
 
         if (!matcher.find()) {

@@ -280,7 +280,8 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     }
 
     private void withAndroidPlugins(final Action<? extends Plugin> configureAction) {
-        withPlugin('com.android.application', configureAction)
-        withPlugin('com.android.library', configureAction)
+        for (String it : AndroidHelper.supportedPlugins) {
+            withPlugin(it, configureAction)
+        }
     }
 }
