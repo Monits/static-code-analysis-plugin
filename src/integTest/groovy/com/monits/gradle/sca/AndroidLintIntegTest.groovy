@@ -18,8 +18,6 @@ import com.monits.gradle.sca.io.TestFile
 import groovy.transform.CompileDynamic
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
-import org.gradle.util.GradleVersion
-import org.gradle.util.VersionNumber
 import spock.lang.Unroll
 import spock.util.environment.Jvm
 
@@ -36,9 +34,8 @@ import static org.junit.Assert.assertThat
 @CompileDynamic
 class AndroidLintIntegTest extends AbstractIntegTestFixture {
 
-    static final List<String> ANDROID_PLUGIN_CACHEABLE_LINT_VERSIONS =
-        (['1.1.3', '1.2.3', '1.3.1', '1.5.0', '2.0.0', '2.1.3'] +
-            (Jvm.current.java8Compatible ? ['2.2.3', '2.3.3', '3.0.1', '3.2.0'] : [])).asImmutable()
+    // TODO : Check if versions 3.5.1 - 3.6.0 fixed this
+    static final List<String> ANDROID_PLUGIN_CACHEABLE_LINT_VERSIONS = [].asImmutable()
     static final List<String> ANDROID_PLUGIN_VERSIONS = (ANDROID_PLUGIN_CACHEABLE_LINT_VERSIONS +
         (Jvm.current.java8Compatible ? ['3.5.0'] : [])).asImmutable()
 
@@ -46,7 +43,7 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
     @Unroll('AndroidLint should run when using gradle #version')
     void 'androidLint is run'() {
         given:
-        writeAndroidBuildFile(androidVersion)
+        writeAndroidBuildFile(DEFAULT_ANDROID_VERSION)
         useSimpleAndroidLintConfig()
         writeAndroidManifest()
         goodCode()
@@ -57,22 +54,16 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
             .build()
 
         then:
-        if (GradleVersion.version(version) >= GradleVersion.version('2.5')) {
-            // Executed task capture is only available in Gradle 2.5+
-            result.task(taskName()).outcome == SUCCESS
-            result.task(':resolveAndroidLint').outcome == SUCCESS
-            result.task(':cleanupAndroidLint').outcome == SUCCESS
-        }
+        result.task(taskName()).outcome == SUCCESS
+        result.task(':resolveAndroidLint').outcome == SUCCESS
+        result.task(':cleanupAndroidLint').outcome == SUCCESS
 
         // Make sure report exists and was using the expected tool version
         reportFile().exists()
 
         where:
         // TODO : test newer versions - needs to change AGP version too
-        version << ['2.7', '2.10', '2.14.1'] +
-            (Jvm.current.java8Compatible ? ['3.0', '3.1'] : [])
-        androidVersion = GradleVersion.version(version) < GradleVersion.version('3.0') ?
-            DEFAULT_ANDROID_VERSION : '2.2.0'
+        version << TESTED_GRADLE_VERSIONS
     }
 
     @SuppressWarnings('MethodName')
@@ -87,8 +78,7 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
         when:
         BuildResult result = gradleRunner()
                 .withGradleVersion(gradleVersion)
-                // plugin version 1.1.x failed to compile tests if assemble was not called beforehand
-                .withArguments('assemble', 'check', '--stacktrace')
+                .withArguments('check', '--stacktrace')
                 .build()
 
         then:
@@ -113,8 +103,7 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
         when:
         GradleRunner gradleRunner = gradleRunner()
                 .withGradleVersion(gradleVersion)
-                // plugin version 1.1.x failed to compile tests if assemble was not called beforehand
-                .withArguments('assemble', 'check', '--stacktrace')
+                .withArguments('check', '--stacktrace')
         BuildResult firstRun = gradleRunner.build()
         BuildResult secondRun = gradleRunner.build()
 
@@ -123,7 +112,7 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
         secondRun.task(taskName()).outcome == UP_TO_DATE
 
         // Make sure the report exist
-        reportFile(VersionNumber.parse(androidVersion) >= VersionNumber.parse('2.0.0') ? 'debug' : null).exists()
+        reportFile('debug').exists()
 
         where:
         androidVersion << ANDROID_PLUGIN_CACHEABLE_LINT_VERSIONS
@@ -142,8 +131,7 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
         when:
         GradleRunner gradleRunner = gradleRunner()
             .withGradleVersion(gradleVersion)
-            // plugin version 1.1.x failed to compile tests if assemble was not called beforehand
-            .withArguments('assemble', 'lintDebug', 'lintRelease', '--stacktrace')
+            .withArguments('lintDebug', 'lintRelease', '--stacktrace')
         BuildResult firstRun = gradleRunner.build()
         BuildResult secondRun = gradleRunner.build()
 
@@ -170,8 +158,7 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
         when:
         BuildResult result = gradleRunner()
             .withGradleVersion(gradleVersion)
-            // plugin version 1.1.x failed to compile tests if assemble was not called beforehand
-            .withArguments('assemble', 'check', '--stacktrace')
+            .withArguments('check', '--stacktrace')
             .build()
 
         then:

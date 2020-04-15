@@ -20,15 +20,15 @@ import groovy.transform.CompileStatic
  * Performance test of Findbugs tasks.
  */
 @CompileStatic
-class FindbugsPerfTest extends AbstractPluginPerfTestFixture {
+class SpotbugsPerfTest extends AbstractPluginPerfTestFixture {
 
     @Override
     String taskName() {
-        ':findbugs'
+        ':spotbugs'
     }
 
     @Override
     String toolName() {
-        'findbugs'
+        'spotbugs'
     }
 }

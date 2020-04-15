@@ -47,19 +47,12 @@ class CheckstyleIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
             .build()
 
         then:
-        if (GradleVersion.version(version) >= GradleVersion.version('2.5')) {
-            // Executed task capture is only available in Gradle 2.5+
-            result.task(taskName()).outcome == SUCCESS
-        }
-
-        // Execution output is only available in Gradle 2.8+
-        if (GradleVersion.version(version) >= GradleVersion.version('2.8')) {
-            // Check the proper message is logged
-            if (GradleVersion.version(version) < ToolVersions.GRADLE_VERSION_CHECKSTYLE) {
-                assertThat(result.output, containsString('Update the used Gradle version to'))
-            } else if (JavaVersion.current() < JavaVersion.VERSION_1_8) {
-                assertThat(result.output, containsString('Update the used Java version to'))
-            }
+        result.task(taskName()).outcome == SUCCESS
+        // Check the proper message is logged
+        if (GradleVersion.version(version) < ToolVersions.GRADLE_VERSION_CHECKSTYLE) {
+            assertThat(result.output, containsString('Update the used Gradle version to'))
+        } else if (JavaVersion.current() < JavaVersion.VERSION_1_8) {
+            assertThat(result.output, containsString('Update the used Java version to'))
         }
 
         // Make sure report exists and was using the expected tool version

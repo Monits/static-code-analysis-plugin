@@ -17,8 +17,9 @@ import com.monits.gradle.sca.config.AnalysisConfigurator
 import com.monits.gradle.sca.config.AndroidLintConfigurator
 import com.monits.gradle.sca.config.CheckstyleConfigurator
 import com.monits.gradle.sca.config.CpdConfigurator
-import com.monits.gradle.sca.config.FindbugsConfigurator
+
 import com.monits.gradle.sca.config.PmdConfigurator
+import com.monits.gradle.sca.config.SpotbugsConfigurator
 import groovy.transform.CompileStatic
 import org.gradle.api.Action
 import org.gradle.api.Plugin
@@ -47,10 +48,10 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     private final static String PMD_DEFAULT_ANDROID_RULES = DEFAULTS_LOCATION + 'pmd/pmd-android-6.xml'
     private final static String PMD_BACKWARDS_ANDROID_RULES = DEFAULTS_LOCATION + 'pmd/pmd-android.xml'
     private final static String PMD_BACKWARDS_RULES = DEFAULTS_LOCATION + 'pmd/pmd-5.1.3.xml'
-    private final static String FINDBUGS_DEFAULT_SUPPRESSION_FILTER =
-        DEFAULTS_LOCATION + 'findbugs/findbugs-exclusions.xml'
-    private final static String FINDBUGS_DEFAULT_ANDROID_SUPPRESSION_FILTER =
-        DEFAULTS_LOCATION + 'findbugs/findbugs-exclusions-android.xml'
+    private final static String SPOTBUGS_DEFAULT_SUPPRESSION_FILTER =
+        DEFAULTS_LOCATION + 'findbugs/findbugs-exclusions.xml' // TODO
+    private final static String SPOTBUGS_DEFAULT_ANDROID_SUPPRESSION_FILTER =
+        DEFAULTS_LOCATION + 'findbugs/findbugs-exclusions-android.xml' // TODO
     private final static String ANDROID_DEFAULT_RULES = DEFAULTS_LOCATION + 'android/android-lint.xml'
 
     private final static String CONF_COMPILE_ONLY = 'compileOnly'
@@ -74,7 +75,6 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         extension = project.extensions.create(EXTENSION_NAME, StaticCodeAnalysisExtension)
 
         defineConfigurations()
-        addFindbugsAnnotationDependencies()
         configureExtensionRule()
 
         project.afterEvaluate {
@@ -88,9 +88,11 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             // must be done in `afterEvaluate` for compatibility with android plugin [1.0, 1.3)
             withAndroidPlugins AndroidLintConfigurator
 
-            if (extension.findbugs) {
-                withAndroidPlugins FindbugsConfigurator
-                withPlugin(JAVA_PLUGIN_ID, FindbugsConfigurator)
+            if (extension.spotbugs) {
+                addSpotbugsAnnotationDependencies()
+
+                withAndroidPlugins SpotbugsConfigurator
+                withPlugin(JAVA_PLUGIN_ID, SpotbugsConfigurator)
             }
 
             if (extension.checkstyle) {
@@ -141,16 +143,14 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         }
     }
 
-    // This should be done when actually configuring Findbugs, but can't be inside an afterEvaluate
-    // See: https://code.google.com/p/android/issues/detail?id=208474
-    private void addFindbugsAnnotationDependencies() {
+    private void addSpotbugsAnnotationDependencies() {
         // Wait until the configurations are available
         project.configurations.matching { Configuration config ->
             config.name in [CONF_COMPILE_ONLY, 'testCompileOnly', 'androidTestCompileOnly']
         }.all { Configuration config ->
             project.dependencies { DependencyHandler dh ->
                 dh.add(config.name,
-                        'com.google.code.findbugs:annotations:' + ToolVersions.findbugsVersion) { ModuleDependency d ->
+                        'com.google.code.findbugs:annotations:3.0.1') { ModuleDependency d ->
                     /*
                      * This jar both includes and depends on jcip and jsr-305. One is enough
                      * See https://github.com/findbugsproject/findbugs/issues/94
@@ -165,7 +165,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     private void configureExtensionRule() {
         ((IConventionAware) extension).conventionMapping.with {
             map('ignoreErrors') { true }
-            map('findbugs') { true }
+            map('spotbugs') { true }
             map('pmd') { true }
             map('checkstyle') { true }
             map('cpd') { true }
@@ -191,17 +191,17 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
             map('androidLintConfig') { ANDROID_DEFAULT_RULES }
         }
 
-        // default suppression filter for findbugs for Java - order is important, Android plugin applies Java
+        // default suppression filter for spotbugs for Java - order is important, Android plugin applies Java
         withPlugin(JAVA_PLUGIN_ID) {
             ((IConventionAware) extension).conventionMapping.with {
-                map('findbugsExclude') { FINDBUGS_DEFAULT_SUPPRESSION_FILTER }
+                map('spotbugsExclude') { SPOTBUGS_DEFAULT_SUPPRESSION_FILTER }
             }
         }
 
-        // default suppression filter for findbugs for Android + PMD android rules
+        // default suppression filter for spotbugs for Android + PMD android rules
         withAndroidPlugins {
             ((IConventionAware) extension).conventionMapping.with {
-                map('findbugsExclude') { FINDBUGS_DEFAULT_ANDROID_SUPPRESSION_FILTER }
+                map('spotbugsExclude') { SPOTBUGS_DEFAULT_ANDROID_SUPPRESSION_FILTER }
                 map('pmdRules') {
                     if (ToolVersions.latestPmdVersion) {
                         return [PMD_DEFAULT_RULES, PMD_DEFAULT_ANDROID_RULES]
@@ -280,7 +280,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     }
 
     private void withAndroidPlugins(final Action<? extends Plugin> configureAction) {
-        for (String it : AndroidHelper.supportedPlugins) {
+        for (String it : AndroidHelper.SUPPORTED_PLUGINS) {
             withPlugin(it, configureAction)
         }
     }

@@ -60,7 +60,7 @@ abstract class AbstractPluginPerfTestFixture extends AbstractPerfTestFixture {
         then:
         perfRunner.assertVersionHasNotRegressed(baselineRunner)
         // If possible, check we have not regressed against the previous Gradle version either
-        if (prevVersionBaselineJavaRunner) {
+        if (prevVersionBaselineJavaRunner != null) {
             perfRunner.assertVersionHasNotRegressed(prevVersionBaselineJavaRunner)
         }
 
@@ -96,7 +96,7 @@ abstract class AbstractPluginPerfTestFixture extends AbstractPerfTestFixture {
         then:
         perfRunner.assertVersionHasNotRegressed(baselineRunner)
         // If possible, check we have not regressed against the previous Gradle version either
-        if (prevVersionBaselineAndroidRunner) {
+        if (prevVersionBaselineAndroidRunner != null) {
             perfRunner.assertVersionHasNotRegressed(prevVersionBaselineAndroidRunner)
         }
 

@@ -25,7 +25,7 @@ class RulesConfig implements Named {
 
     String checkstyleRules
     List<String> pmdRules
-    String findbugsExclude
+    String spotbugsExclude
 
     private final StaticCodeAnalysisExtension extension
 
@@ -46,7 +46,7 @@ class RulesConfig implements Named {
     }
 
     @SuppressWarnings('UnnecessaryGetter')
-    String getFindbugsExclude() {
-        findbugsExclude ?: extension.getFindbugsExclude()
+    String getSpotbugsExclude() {
+        spotbugsExclude ?: extension.getSpotbugsExclude()
     }
 }

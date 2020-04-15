@@ -15,6 +15,7 @@ package com.monits.gradle.sca
 
 import groovy.transform.CompileStatic
 import org.gradle.api.NamedDomainObjectContainer
+import org.gradle.api.plugins.ExtensionAware
 
 /**
  * Extension to configure the Static code Analysis Plugin.
@@ -23,7 +24,7 @@ import org.gradle.api.NamedDomainObjectContainer
 class StaticCodeAnalysisExtension {
     boolean ignoreErrors
 
-    boolean findbugs
+    boolean spotbugs
     boolean pmd
     boolean checkstyle
     boolean cpd
@@ -31,7 +32,7 @@ class StaticCodeAnalysisExtension {
 
     String checkstyleRules
     List<String> pmdRules
-    String findbugsExclude
+    String spotbugsExclude
     String androidLintConfig
 
     NamedDomainObjectContainer<RulesConfig> sourceSetConfig
@@ -40,5 +41,19 @@ class StaticCodeAnalysisExtension {
     @SuppressWarnings(['GroovyUnusedDeclaration', 'ConfusingMethodName'])
     NamedDomainObjectContainer<RulesConfig> sourceSetConfig(final Closure<?> config) {
         sourceSetConfig.configure config
+    }
+
+    void setFindbugs(final boolean enabled) {
+        // TODO : Nag about deprecation
+        /*
+         * we need to set the property this way, so we get through the Gradle generated proxy
+         * and avoid convention mapping from taking place
+         */
+        setProperty('spotbugs', enabled)
+    }
+
+    boolean getFindbugs() {
+        // TODO : Nag about deprecation
+        getProperty('spotbugs')
     }
 }

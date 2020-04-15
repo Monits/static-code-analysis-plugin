@@ -20,26 +20,23 @@ import org.gradle.util.GradleVersion
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
-import spock.util.environment.Jvm
 
 /**
  * Base specification for integration testing of a gradle plugin.
 */
 @CompileStatic
 abstract class AbstractPerfTestFixture extends Specification {
-    // A sample of gradle versions to be considered in general testing - don't test anything below 2.8, it spams stdout
-    static final List<String> TESTED_GRADLE_VERSIONS = ['3.5.1', '4.10', GradleVersion.current().version]
+    // A sample of gradle versions to be considered in general testing
+    static final List<String> TESTED_GRADLE_VERSIONS = ['5.2', '5.6.4', GradleVersion.current().version]
         .asImmutable()
     @SuppressWarnings(['DuplicateStringLiteral', 'UnnecessaryCast'])
-    static final List<String> TESTED_GRADLE_VERSIONS_FOR_ANDROID = (['2.14.1', '3.5.1'] +
-        (Jvm.current.java8Compatible ? ['4.10', GradleVersion.current().version] : [] as List<String>))
+    static final List<String> TESTED_GRADLE_VERSIONS_FOR_ANDROID = ['5.6.4', GradleVersion.current().version]
         .takeRight(2).asImmutable()
     static final String BASELINE_PLUGIN_VERSION = '"com.monits:static-code-analysis-plugin:2.6.12"'
 
     static final int NUMBER_OF_CLASSES_TO_ANALYZE = 100
 
-    private static final String ANDROID_1_5_0 = '1.5.0'
-    static final String DEFAULT_ANDROID_VERSION = ANDROID_1_5_0
+    static final String DEFAULT_ANDROID_VERSION = '3.4.0'
     protected static final String ANDROID_VERSION = 'androidVersion'
     static final String LIBA_DIRNAME = 'liba/'
     static final String LIBB_DIRNAME = 'libb/'
@@ -110,7 +107,9 @@ abstract class AbstractPerfTestFixture extends Specification {
         buildScriptFile() << """
             |buildscript {
             |    repositories {
-            |        jcenter()
+            |        maven {
+            |           url 'https://plugins.gradle.org/m2/'
+            |        }
             |    }
             |
             |    dependencies {
@@ -137,7 +136,8 @@ abstract class AbstractPerfTestFixture extends Specification {
             |staticCodeAnalysis {
             |    cpd = ${toolsConfig.get('cpd', false)}
             |    checkstyle = ${toolsConfig.get('checkstyle', false)}
-            |    findbugs = ${toolsConfig.get('findbugs', false)}
+            |    // use the old property name, so we can compare with SCA 2.x
+            |    findbugs = ${toolsConfig.get('spotbugs', false)}
             |    pmd = ${toolsConfig.get('pmd', false)}
             |    androidLint = ${toolsConfig.get('androidLint', false)}
             |}
@@ -163,12 +163,16 @@ abstract class AbstractPerfTestFixture extends Specification {
             |
             |    repositories {
             |        google()
+            |        maven {
+            |           url 'https://plugins.gradle.org/m2/'
+            |        }
             |        jcenter()
             |    }
             |}
             |
             |repositories {
             |    jcenter()
+            |    google()
             |}
             |
             |apply plugin: 'com.android.library'
@@ -181,7 +185,6 @@ abstract class AbstractPerfTestFixture extends Specification {
         '''
             |android {
             |    compileSdkVersion 25
-            |    buildToolsVersion "25.0.0"
             |}
         '''.stripMargin() as TestFile
     }
@@ -232,13 +235,9 @@ abstract class AbstractPerfTestFixture extends Specification {
         }
     }
 
-    @SuppressWarnings('DuplicateNumberLiteral')
+    @SuppressWarnings('UnusedMethodParameter')
     String androidVersionForGradle(final String gradleVersion) {
-        GradleVersion currentGradle = GradleVersion.version(gradleVersion)
-
-        currentGradle < GradleVersion.version('3.0') ?
-            DEFAULT_ANDROID_VERSION : currentGradle < GradleVersion.version('5.0') ?
-                '2.3.3' : '3.3.0'
+        DEFAULT_ANDROID_VERSION
     }
 
     private void setupAndroidSubProject(final String packageName, final String dir, final String androidVersion,

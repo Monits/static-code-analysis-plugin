@@ -51,6 +51,7 @@ trait ClasspathAware {
 
     private static final String SCACONFIG = 'scaconfig'
 
+    // FIXME : We should receive the sourceset along the task and use that…
     void setupAndroidClasspathAwareTask(final Task taskToConfigure, final Project project) {
         ClasspathAware cpa = this
 
@@ -84,7 +85,7 @@ trait ClasspathAware {
             Project proj = dependency.dependencyProject
 
             // is it an Android plugin?
-            if (AndroidHelper.supportedPlugins.any { proj.plugins.hasPlugin(it) }) {
+            if (AndroidHelper.SUPPORTED_PLUGINS.any { proj.plugins.hasPlugin(it) }) {
                 // TODO : is it okay to always use debug?
                 dependantModuleClasses = project.files(pathToCompiledClasses(proj, DEBUG_SOURCESET)) +
                         dependantModuleClasses // Using += produces a runtime exception
@@ -110,11 +111,19 @@ trait ClasspathAware {
                 System.getenv('JAVA_HOME') + '/jre/lib/rt.jar')
         }
 
+        // TODO : is it okay to always use debug?
+        FileCollection standaloneRJar = project.files()
+        String pathToStandaloneRJar = AndroidHelper.getStandaloneRJarPath(project, DEBUG_SOURCESET)
+        if (pathToStandaloneRJar != null) {
+            standaloneRJar += project.files(pathToStandaloneRJar)
+        }
+
         task.setProperty('classpath',
                 project.files(project.configurations.getByName(SCACONFIG).files
                     .findAll { File it -> !it.name.endsWith(AAR_EXTENSTION) }) +
                 getJarsForAarDependencies(project) +
                 mockableAndroidJar +
+                standaloneRJar +
                 // TODO : is it okay to always use debug?
                 project.files(pathToCompiledClasses(project, DEBUG_SOURCESET)) +
                 // TODO : is it okay to always include test classes?

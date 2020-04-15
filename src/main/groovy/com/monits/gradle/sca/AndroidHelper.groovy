@@ -24,6 +24,10 @@ import org.gradle.util.VersionNumber
  */
 @CompileStatic
 final class AndroidHelper {
+    public static final Set<String> SUPPORTED_PLUGINS = (['com.android.application',
+                                           'com.android.library',
+                                           'com.android.dynamic-feature'] as Set<String>).asImmutable()
+
     private static final String ANDROID_SDK_HOME = 'ANDROID_SDK_HOME'
     private static final String ANDROID_ENABLE_CACHE_PROPERTY = 'android.enableBuildCache'
     private static final String ANDROID_CACHE_LOCATION = 'android.buildCacheDir'
@@ -39,6 +43,8 @@ final class AndroidHelper {
     private static final VersionNumber USES_JAVAC_TASK_OUTPUTS = VersionNumber.parse('3.2.0')
     private static final VersionNumber FLAT_JAVAC_TASK_OUTPUTS = VersionNumber.parse(VERSION_3_5_0)
     private static final VersionNumber GARBAGE_INPUTS = VersionNumber.parse(VERSION_3_5_0)
+    // FIXME : Check for earlier versions
+    private static final VersionNumber STANDALONE_R_JAR = VersionNumber.parse('3.4.0')
 
     /**
      * Checks if the current Android Plugin produces a global report that matches a debuggable variant or not.
@@ -123,6 +129,17 @@ final class AndroidHelper {
 
         project.buildDir.absolutePath + '/intermediates/classes/' + sourceSetPath + File.separator
     }
+
+    static String getStandaloneRJarPath(final Project project, final String sourceSetName) {
+        VersionNumber currentVersion = getCurrentVersion(project)
+        if (currentVersion < STANDALONE_R_JAR) {
+            return null
+        }
+
+        project.buildDir.absolutePath + '/intermediates/compile_only_not_namespaced_r_class_jar/' +
+            sourceSetName + '/generate' + sourceSetName.capitalize() + 'RFile/R.jar'
+    }
+
     /**
      * Retrieves the location of Android's build-cache directory.
      * @param project The project to analyze.
@@ -170,17 +187,11 @@ final class AndroidHelper {
     }
 
     /**
-     * @return Set of supported Android plugins where SCA must enable its tools.
-     */
-    static Set<String> supportedPlugins = ['com.android.application',
-                                           'com.android.library',
-                                           'com.android.dynamic-feature'] as Set<String>
-
-    /**
      * Retrieves the current plugin version, if available.
      * @param project The project on which to analyze the used plugin version.
      * @return The version of the used plugin, or {@see VersionNumber#UNKNOWN} if not known.
      */
+    // FIXME : Use @Memoized ?
     private static VersionNumber getCurrentVersion(final Project project) {
         File androidDependency = project.buildscript.configurations.getByName('classpath').resolve()
                 .find { it =~ ANDROID_DEPENDENCY_PATTERN }

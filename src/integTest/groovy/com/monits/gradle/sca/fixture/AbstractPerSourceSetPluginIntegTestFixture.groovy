@@ -20,7 +20,7 @@ import org.gradle.testkit.runner.BuildResult
 import static org.apache.commons.lang3.StringUtils.capitalize
 import static org.gradle.testkit.runner.TaskOutcome.FAILED
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
-import static org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
+import static org.gradle.testkit.runner.TaskOutcome.NO_SOURCE
 
 /**
  * Base specification to test a single analysis report.
@@ -51,9 +51,9 @@ abstract class AbstractPerSourceSetPluginIntegTestFixture extends AbstractPlugin
         result.task(LIBB_PATH + taskName(MAIN_SOURCESET)).outcome == SUCCESS
         result.task(LIBB_PATH + taskName(TEST_SOURCESET)).outcome == SUCCESS
 
-        // On empty sourcesets, the task should be UP-TO-DATE
-        result.task(LIBA_PATH + taskName(ANDROID_TEST_SOURCESET)).outcome == UP_TO_DATE
-        result.task(LIBB_PATH + taskName(ANDROID_TEST_SOURCESET)).outcome == UP_TO_DATE
+        // On empty sourcesets, the task should be NO_SOURCE
+        result.task(LIBA_PATH + taskName(ANDROID_TEST_SOURCESET)).outcome == NO_SOURCE
+        result.task(LIBB_PATH + taskName(ANDROID_TEST_SOURCESET)).outcome == NO_SOURCE
 
         // The reports must exist
         file(LIBA_DIRNAME + reportFileName(MAIN_SOURCESET)).exists()

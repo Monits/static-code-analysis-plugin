@@ -7,11 +7,14 @@ plugins {
 
 repositories {
     jcenter()
+    maven {
+        url "https://plugins.gradle.org/m2/"
+    }
 }
 
 group = 'com.monits'
 
-version = '2.7.0-SNAPSHOT'
+version = '3.0.0-SNAPSHOT'
 
 apply from: 'gradle/license.gradle'
 apply from: 'gradle/publish.gradle'
@@ -24,6 +27,8 @@ apply plugin: 'build.no-resolution-at-configuration'
 dependencies {
     compileOnly gradleApi()
     compileOnly localGroovy()
+
+    implementation 'com.github.spotbugs:spotbugs-gradle-plugin:3.0.0'
 }
 
 // Java versions
@@ -31,6 +36,6 @@ project.sourceCompatibility = 1.7
 project.targetCompatibility = 1.7
 
 wrapper {
-    gradleVersion = '5.6.4'
+    gradleVersion = '6.3'
     distributionType = Wrapper.DistributionType.ALL
 }
