@@ -15,13 +15,14 @@ package com.monits.gradle.sca
 
 import groovy.transform.CompileStatic
 import org.gradle.api.NamedDomainObjectContainer
-import org.gradle.api.plugins.ExtensionAware
 
 /**
  * Extension to configure the Static code Analysis Plugin.
 */
 @CompileStatic
 class StaticCodeAnalysisExtension {
+    private static final String SPOTBUGS_PROPERTY_NAME = 'spotbugs'
+
     boolean ignoreErrors
 
     boolean spotbugs
@@ -49,11 +50,11 @@ class StaticCodeAnalysisExtension {
          * we need to set the property this way, so we get through the Gradle generated proxy
          * and avoid convention mapping from taking place
          */
-        setProperty('spotbugs', enabled)
+        setProperty(SPOTBUGS_PROPERTY_NAME, enabled)
     }
 
     boolean getFindbugs() {
         // TODO : Nag about deprecation
-        getProperty('spotbugs')
+        getProperty(SPOTBUGS_PROPERTY_NAME)
     }
 }
