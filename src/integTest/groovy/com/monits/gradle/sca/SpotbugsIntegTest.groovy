@@ -23,6 +23,12 @@ import spock.lang.Unroll
 import static org.gradle.testkit.runner.TaskOutcome.FAILED
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import static org.hamcrest.CoreMatchers.containsString
+import static org.hamcrest.CoreMatchers.is
+import static org.hamcrest.CoreMatchers.is
+import static org.hamcrest.CoreMatchers.is
+import static org.hamcrest.CoreMatchers.is
+import static org.hamcrest.CoreMatchers.is
+import static org.hamcrest.CoreMatchers.is
 import static org.hamcrest.core.IsNot.not
 import static org.junit.Assert.assertThat
 
@@ -483,6 +489,61 @@ class SpotbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         suppressionFilter('main').assertContents(not(containsString('<Source name="~.*Activity.java"/>')))
         suppressionFilter('test').exists()
         suppressionFilter('test').assertContents(not(containsString('<Source name="~.*Activity.java"/>')))
+    }
+
+    @SuppressWarnings('MethodName')
+    void 'old DSL properties still work'() {
+        given:
+        writeBuildFile([:]) // don't enable spotbugs by default
+        buildScriptFile() << '''
+            |staticCodeAnalysis {
+            |   findbugs = true
+            |   findbugsExclude = 'customExclude.xml'
+            |   sourceSetConfig {
+            |       main {
+            |           findbugsExclude = 'customExcludeMain.xml'
+            |       }
+            |   }
+            |}
+            |
+            |afterEvaluate {
+            |    if (staticCodeAnalysis.spotbugs) {
+            |        println 'Spotbugs is enabled'
+            |    }
+            |
+            |    Task spotbugsTask = project.tasks.getByPath(':spotbugsMain')
+            |    spotbugsTask.onlyIf {
+            |        println "Spotbugs main exclude is '${it.excludeFilter.name}'"
+            |        false // don't really run the task
+            |    }
+            |
+            |    Task spotbugsTestTask = project.tasks.getByPath(':spotbugsTest')
+            |    spotbugsTestTask.onlyIf {
+            |        println "Spotbugs test exclude is '${it.excludeFilter.name}'"
+            |        false // don't really run the task
+            |    }
+            |}
+        '''.stripMargin()
+        goodCode()
+
+        when:
+        BuildResult result = gradleRunner()
+            .build()
+
+        then:
+        // The tasks must be configured
+        assertThat('Spotbugs is not enabled',
+            (result.output =~ /Spotbugs is enabled/) as boolean, is(true))
+        assertThat('Per-sourceset exclude is not set',
+            (result.output =~ /Spotbugs main exclude is 'customExcludeMain.xml'/) as boolean, is(true))
+        assertThat('General exclude is not set',
+            (result.output =~ /Spotbugs test exclude is 'customExclude.xml'/) as boolean, is(true))
+
+        // Deprecation warnings must be present
+        assertThat('Findbugs deprecation warning not present',
+            (result.output =~ /Using deprecated 'findbugs' property for Static Code Analysis plugin. /) as boolean, is(true))
+        assertThat('FindbugsExclude deprecation warning not present',
+            (result.output =~ /Using deprecated 'findbugsExclude' property for Static Code Analysis plugin. /) as boolean, is(true))
     }
 
     @Override
