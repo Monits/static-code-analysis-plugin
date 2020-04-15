@@ -18,6 +18,7 @@ import com.monits.gradle.sca.io.TestFile
 import groovy.transform.CompileDynamic
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
+import spock.lang.Ignore
 import spock.lang.Unroll
 import spock.util.environment.Jvm
 
@@ -34,10 +35,9 @@ import static org.junit.Assert.assertThat
 @CompileDynamic
 class AndroidLintIntegTest extends AbstractIntegTestFixture {
 
-    // TODO : Check if versions 3.5.1 - 3.6.0 fixed this
-    static final List<String> ANDROID_PLUGIN_CACHEABLE_LINT_VERSIONS = [].asImmutable()
-    static final List<String> ANDROID_PLUGIN_VERSIONS = (ANDROID_PLUGIN_CACHEABLE_LINT_VERSIONS +
-        (Jvm.current.java8Compatible ? ['3.5.0'] : [])).asImmutable()
+    static final List<String> ANDROID_PLUGIN_CACHEABLE_LINT_VERSIONS = ['3.4.0'].asImmutable()
+    static final List<String> ANDROID_PLUGIN_VERSIONS = (ANDROID_PLUGIN_CACHEABLE_LINT_VERSIONS
+        + ['3.5.3', '3.6.0']).asImmutable()
 
     @SuppressWarnings('MethodName')
     @Unroll('AndroidLint should run when using gradle #version')
@@ -62,7 +62,6 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
         reportFile().exists()
 
         where:
-        // TODO : test newer versions - needs to change AGP version too
         version << TESTED_GRADLE_VERSIONS
     }
 
