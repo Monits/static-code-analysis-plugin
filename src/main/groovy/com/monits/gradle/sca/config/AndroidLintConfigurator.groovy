@@ -14,7 +14,7 @@
 package com.monits.gradle.sca.config
 
 import com.monits.gradle.sca.AndroidHelper
-import com.monits.gradle.sca.StaticCodeAnalysisExtension
+import com.monits.gradle.sca.dsl.StaticCodeAnalysisExtension
 import com.monits.gradle.sca.task.CleanupAndroidLintTask
 import com.monits.gradle.sca.task.ResolveAndroidLintTask
 import groovy.transform.CompileStatic

@@ -13,7 +13,7 @@
  */
 package com.monits.gradle.sca.config
 
-import com.monits.gradle.sca.StaticCodeAnalysisExtension
+import com.monits.gradle.sca.dsl.StaticCodeAnalysisExtension
 import com.monits.gradle.sca.ToolVersions
 import com.monits.gradle.sca.task.CPDTask
 import groovy.transform.CompileStatic

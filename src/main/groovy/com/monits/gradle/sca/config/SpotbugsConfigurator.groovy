@@ -16,8 +16,8 @@ package com.monits.gradle.sca.config
 import com.github.spotbugs.SpotBugsExtension
 import com.github.spotbugs.SpotBugsReports
 import com.monits.gradle.sca.ClasspathAware
-import com.monits.gradle.sca.RulesConfig
-import com.monits.gradle.sca.StaticCodeAnalysisExtension
+import com.monits.gradle.sca.dsl.RulesConfig
+import com.monits.gradle.sca.dsl.StaticCodeAnalysisExtension
 import com.monits.gradle.sca.ToolVersions
 import groovy.transform.CompileStatic
 import org.gradle.api.NamedDomainObjectContainer

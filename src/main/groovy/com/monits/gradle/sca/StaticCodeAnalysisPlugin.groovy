@@ -20,6 +20,8 @@ import com.monits.gradle.sca.config.CpdConfigurator
 
 import com.monits.gradle.sca.config.PmdConfigurator
 import com.monits.gradle.sca.config.SpotbugsConfigurator
+import com.monits.gradle.sca.dsl.RulesConfig
+import com.monits.gradle.sca.dsl.StaticCodeAnalysisExtension
 import groovy.transform.CompileStatic
 import org.gradle.api.Action
 import org.gradle.api.Plugin

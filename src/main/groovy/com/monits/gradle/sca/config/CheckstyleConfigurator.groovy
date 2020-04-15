@@ -13,8 +13,8 @@
  */
 package com.monits.gradle.sca.config
 
-import com.monits.gradle.sca.RulesConfig
-import com.monits.gradle.sca.StaticCodeAnalysisExtension
+import com.monits.gradle.sca.dsl.RulesConfig
+import com.monits.gradle.sca.dsl.StaticCodeAnalysisExtension
 import com.monits.gradle.sca.ToolVersions
 import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
