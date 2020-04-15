@@ -28,6 +28,10 @@ dependencies {
     compileOnly gradleApi()
     compileOnly localGroovy()
 
+    /*
+     * v4 has immutable tasks, and both are compatible with Spotbugs 4,
+     * o keep using this one that's simpler to configures
+     */
     implementation 'com.github.spotbugs:spotbugs-gradle-plugin:3.0.0'
 }
 
