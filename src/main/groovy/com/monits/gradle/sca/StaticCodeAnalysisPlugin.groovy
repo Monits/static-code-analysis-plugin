@@ -49,9 +49,9 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     private final static String PMD_BACKWARDS_ANDROID_RULES = DEFAULTS_LOCATION + 'pmd/pmd-android.xml'
     private final static String PMD_BACKWARDS_RULES = DEFAULTS_LOCATION + 'pmd/pmd-5.1.3.xml'
     private final static String SPOTBUGS_DEFAULT_SUPPRESSION_FILTER =
-        DEFAULTS_LOCATION + 'findbugs/findbugs-exclusions.xml' // TODO
+        DEFAULTS_LOCATION + 'spotbugs/spotbugs-exclusions.xml' // TODO
     private final static String SPOTBUGS_DEFAULT_ANDROID_SUPPRESSION_FILTER =
-        DEFAULTS_LOCATION + 'findbugs/findbugs-exclusions-android.xml' // TODO
+        DEFAULTS_LOCATION + 'spotbugs/spotbugs-exclusions-android.xml' // TODO
     private final static String ANDROID_DEFAULT_RULES = DEFAULTS_LOCATION + 'android/android-lint.xml'
 
     private final static String CONF_COMPILE_ONLY = 'compileOnly'
