@@ -31,7 +31,8 @@ import spock.util.environment.Jvm
 abstract class AbstractIntegTestFixture extends Specification {
 
     // A sample of gradle versions to be considered in general testing
-    static final List<String> TESTED_GRADLE_VERSIONS = ['6.0', GradleVersion.current().version]
+    static final List<String> TESTED_GRADLE_VERSIONS = ['5.6.4', '6.0', GradleVersion.current().version]
+    static final List<String> ANDROID_PLUGIN_VERSIONS = ['3.3.0', '3.4.0','3.5.3', '3.6.0'].asImmutable()
 
     static final String DEFAULT_ANDROID_VERSION = '3.4.0'
     protected static final String ANDROID_VERSION = 'androidVersion'
@@ -43,6 +44,8 @@ abstract class AbstractIntegTestFixture extends Specification {
     static final String BUILD_GRADLE_FILENAME = 'build.gradle'
     private static final String TARGET_ANDROID_VERSION = Jvm.current.java8Compatible ? '25' : '23'
     private static final String DEFAULT_ANDROID_PACKAGE = 'com.monits.staticCodeAnalysis'
+
+    private static final String GRADLE_COMPATIBLE_WITH_AGP_3_3 = '5.6.4'
 
     @Rule
     final TemporaryFolder testProjectDir = new TemporaryFolder()
@@ -225,8 +228,12 @@ abstract class AbstractIntegTestFixture extends Specification {
     String gradleVersionForAndroid(final String androidVersion) {
         VersionNumber androidVersionNumber = VersionNumber.parse(androidVersion)
 
-        if (androidVersionNumber.major == 3 && androidVersionNumber.minor < 3) {
-            throw new IllegalArgumentException("Version $androidVersion is unsupported")
+        if (androidVersionNumber.major == 3) {
+            if (androidVersionNumber.minor < 3) {
+                throw new IllegalArgumentException("Version $androidVersion is unsupported")
+            } else if (androidVersionNumber.minor == 3) {
+                return GRADLE_COMPATIBLE_WITH_AGP_3_3
+            }
         }
 
         GradleVersion.current().version

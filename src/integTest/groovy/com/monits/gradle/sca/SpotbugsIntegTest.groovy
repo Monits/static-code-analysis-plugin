@@ -52,10 +52,7 @@ class SpotbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
             .build()
 
         then:
-        if (GradleVersion.version(version) >= GradleVersion.version('2.5')) {
-            // Executed task capture is only available in Gradle 2.5+
-            result.task(taskName()).outcome == SUCCESS
-        }
+        result.task(taskName()).outcome == SUCCESS
 
         // Make sure report exists and was using the expected tool version
         reportFile().exists()
@@ -178,11 +175,11 @@ class SpotbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         reportFile().assertContents(containsString('<Errors errors="0" missingClasses="0">'))
     }
 
-    // FIXME : This test needs to run for different versions of AGP, the location of generated classes varies
+    @Unroll('Android generated classes are available when using android gradle plugin #androidVersion')
     @SuppressWarnings('MethodName')
     void 'Android generated classes are available'() {
         given:
-        writeAndroidBuildFile(DEFAULT_ANDROID_VERSION)
+        writeAndroidBuildFile(androidVersion)
         writeAndroidManifest()
         useEmptySuppressionFilter()
         file('src/main/res/values/strings.xml') << '''\
@@ -205,8 +202,7 @@ class SpotbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
 
         when:
         BuildResult result = gradleRunner()
-                .withGradleVersion(gradleVersionForAndroid(DEFAULT_ANDROID_VERSION))
-                .forwardOutput()
+                .withGradleVersion(gradleVersion)
                 .build()
 
         then:
@@ -215,6 +211,10 @@ class SpotbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         // The report must exist, and not complain on missing classes from liba
         reportFile().exists()
         reportFile().assertContents(containsString('<Errors errors="0" missingClasses="0">'))
+
+        where:
+        androidVersion << ANDROID_PLUGIN_VERSIONS
+        gradleVersion = gradleVersionForAndroid(androidVersion)
     }
 
     @Unroll('Android classes are available when using android gradle plugin #androidVersion and gradle #gradleVersion')
@@ -264,9 +264,7 @@ class SpotbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
                 .build()
 
         then:
-        if (GradleVersion.version(gradleVersion) >= GradleVersion.version('2.5')) {
-            result.task(taskName()).outcome == SUCCESS
-        }
+        result.task(taskName()).outcome == SUCCESS
 
         // The report must exist, and not complain on missing classes from liba
         reportFile().exists()
@@ -366,9 +364,7 @@ class SpotbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
             .build()
 
         then:
-        if (GradleVersion.version(gradleVersion) >= GradleVersion.version('2.5')) {
-            result.task(taskName()).outcome == SUCCESS
-        }
+        result.task(taskName()).outcome == SUCCESS
 
         // The report must exist, and not complain on missing classes from liba
         reportFile().exists()

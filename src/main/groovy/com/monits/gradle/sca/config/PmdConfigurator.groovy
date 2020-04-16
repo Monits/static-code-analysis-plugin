@@ -44,7 +44,6 @@ import java.util.regex.Matcher
 */
 @CompileStatic
 class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
-    private final static GradleVersion GRADLE_VERSION_PMD_CLASSPATH_SUPPORT = GradleVersion.version('2.8')
     private final static GradleVersion GRADLE_VERSION_PMD_INCREMENTAL_SUPPORT = GradleVersion.version('5.6.0')
 
     // Prior to 6.18.0 the cache went nuts with XPath rules, see https://github.com/pmd/pmd/pull/1992
@@ -60,14 +59,7 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
 
         SourceSetContainer sourceSets = project.convention.getPlugin(JavaPluginConvention).sourceSets
         //noinspection GroovyMissingReturnStatement
-        setupTasksPerSourceSet(project, extension, sourceSets) { Pmd pmdTask, SourceSet sourceSet ->
-            boolean supportsClasspath = GRADLE_VERSION_PMD_CLASSPATH_SUPPORT <= GradleVersion.current()
-
-            if (supportsClasspath) {
-                // This is the default in Gradle 3.+, we backport it
-                pmdTask.classpath = sourceSet.output + sourceSet.compileClasspath
-            }
-        }
+        setupTasksPerSourceSet(project, extension, sourceSets)
     }
 
     @Override
@@ -87,11 +79,7 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
             pmdTask.source sourceSet['java']['srcDirs']
             pmdTask.exclude '**/gen/**'
 
-            boolean supportsClasspath = GRADLE_VERSION_PMD_CLASSPATH_SUPPORT <= GradleVersion.current()
-
-            if (supportsClasspath) {
-                setupAndroidClasspathAwareTask(pmdTask, project)
-            }
+            setupAndroidClasspathAwareTask(pmdTask, project)
         }
     }
 
@@ -172,7 +160,9 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
 
                 it.reports { PmdReports r ->
                     r.with {
-                        configureXmlReport(xml, project, sourceSetName)
+                        xml.enabled = true
+                        xml.destination = new File(project.extensions.getByType(ReportingExtension).file(PMD),
+                            "pmd-${sourceSetName}.xml")
                         html.enabled = false
                     }
                 }
@@ -187,19 +177,6 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
         }
 
         project.tasks.findByName('check').dependsOn pmdRootTask
-    }
-
-    /*
-     * Gradle 4.2 deprecated setDestination(Object) in favor of the new setDestination(File) which didn't exist before
-     * Therefore, static compilation against the new method fails on older Gradle versions, but forcing the usage of
-     * the old one produces deprecation warnings on 4.2, so we let the runtime decide which method to use
-    */
-    @CompileStatic(TypeCheckingMode.SKIP)
-    private static void configureXmlReport(final ConfigurableReport report, final Project project,
-            final String sourceSetName) {
-        report.enabled = true
-        report.destination = new File(project.extensions.getByType(ReportingExtension).file(PMD),
-            "pmd-${sourceSetName}.xml")
     }
 
     private static String generateTaskName(final String taskName = PMD, final String sourceSetName,

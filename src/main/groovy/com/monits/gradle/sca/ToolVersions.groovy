@@ -31,7 +31,7 @@ final class ToolVersions {
     private final static String BACKWARDS_CHECKSTYLE_VERSION = '6.7'
     private final static GradleVersion GRADLE_VERSION_CHECKSTYLE = GradleVersion.version('2.7')
 
-    private final static String SPOTBUGS_TOOL_VERSION = '4.0.2'
+    private final static String SPOTBUGS_TOOL_VERSION = '4.0.1'
     private final static String SPOTBUGS_MONITS_VERSION = '0.2.0'
     private final static String SB_CONTRIB_VERSION = '7.4.6'
 

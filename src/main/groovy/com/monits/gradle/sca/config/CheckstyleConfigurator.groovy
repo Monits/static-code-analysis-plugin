@@ -44,8 +44,6 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
     private static final GradleVersion GRADLE4 = GradleVersion.version('4.0.0')
     private static final GradleVersion GRADLE3_3 = GradleVersion.version('3.3')
 
-    private static final String HTML_PROPERTY = 'html'
-
     private final RemoteConfigLocator configLocator = new RemoteConfigLocator(CHECKSTYLE)
 
     @Override
@@ -53,11 +51,7 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
         setupPlugin(project, extension)
 
         SourceSetContainer sourceSets = project.convention.getPlugin(JavaPluginConvention).sourceSets
-        setupTasksPerSourceSet(project, extension, sourceSets) { Checkstyle task, SourceSet sourceSet ->
-            // Backport fix from Gradle 3.3
-            // https://github.com/gradle/gradle/commit/d2479f58330fb2a360f77b719d336205065159b5
-            task.classpath = sourceSet.output + sourceSet.compileClasspath
-        }
+        setupTasksPerSourceSet(project, extension, sourceSets)
     }
 
     @Override
@@ -127,10 +121,10 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
                         }
 
                         /*
-                             * Gradle 4.0 introduced a config property setting by default to config/checkstyle
-                             * After any other checkstyle task downloads a new config there,
-                             * all other would be invalidated so we manually disable it.
-                            */
+                         * Gradle 4.0 introduced a config property setting by default to config/checkstyle
+                         * After any other checkstyle task downloads a new config there,
+                         * all other would be invalidated so we manually disable it.
+                        */
                         if (GradleVersion.current() >= GRADLE4) {
                             configDir = project.<File> provider { null }
                         }
@@ -138,12 +132,10 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
                         configFile = configSource
 
                         reports { CheckstyleReports r ->
-                            configureXmlReport(r.xml, project, sourceSetName)
+                            r.xml.destination = new File(project.extensions.getByType(ReportingExtension).file(CHECKSTYLE),
+                                "checkstyle-${sourceSetName}.xml")
 
-                            if (r.hasProperty(HTML_PROPERTY)) { // added in gradle 2.10, but unwanted
-                                // use lazy property access, as the return type for getHtml changed in Gradle 5
-                                (r[HTML_PROPERTY] as SingleFileReport).enabled = false
-                            }
+                            r.html.enabled = false
                         }
 
                         // Setup cache file location per-sourceset
@@ -162,18 +154,6 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
         }
 
         project.tasks.findByName('check').dependsOn checkstyleRootTask
-    }
-
-    /*
-     * Gradle 4.2 deprecated setDestination(Object) in favor of the new setDestination(File) which didn't exist before
-     * Therefore, static compilation against the new method fails on older Gradle versions, but forcing the usage of
-     * the old one produces deprecation warnings on 4.2, so we let the runtime decide which method to use
-    */
-    @CompileStatic(TypeCheckingMode.SKIP)
-    private static void configureXmlReport(final ConfigurableReport report, final Project project,
-            final String sourceSetName) {
-        report.destination = new File(project.extensions.getByType(ReportingExtension).file(CHECKSTYLE),
-            "checkstyle-${sourceSetName}.xml")
     }
 
     private static String generateTaskName(final String taskName = CHECKSTYLE, final String sourceSetName) {

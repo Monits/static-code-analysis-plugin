@@ -43,8 +43,7 @@ final class AndroidHelper {
     private static final VersionNumber USES_JAVAC_TASK_OUTPUTS = VersionNumber.parse('3.2.0')
     private static final VersionNumber FLAT_JAVAC_TASK_OUTPUTS = VersionNumber.parse(VERSION_3_5_0)
     private static final VersionNumber GARBAGE_INPUTS = VersionNumber.parse(VERSION_3_5_0)
-    // FIXME : Check for earlier versions
-    private static final VersionNumber STANDALONE_R_JAR = VersionNumber.parse('3.4.0')
+    private static final VersionNumber STANDALONE_R_JAR = VersionNumber.parse('3.3.0')
 
     /**
      * Checks if the current Android Plugin produces a global report that matches a debuggable variant or not.
@@ -136,8 +135,16 @@ final class AndroidHelper {
             return null
         }
 
+        if (currentVersion.major == 3) {
+            if (currentVersion.minor <= 4) {
+                return project.buildDir.absolutePath +
+                    '/intermediates/compile_only_not_namespaced_r_class_jar/' +
+                    sourceSetName + '/generate' + sourceSetName.capitalize() + 'RFile/R.jar'
+            }
+        }
+
         project.buildDir.absolutePath + '/intermediates/compile_only_not_namespaced_r_class_jar/' +
-            sourceSetName + '/generate' + sourceSetName.capitalize() + 'RFile/R.jar'
+            sourceSetName + '/R.jar'
     }
 
     /**
