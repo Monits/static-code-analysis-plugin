@@ -21,8 +21,8 @@ env:
   - TEST_SUITE="perfTest --tests *.CheckstylePerfTest.*"
   - TEST_SUITE="perfTest --tests *.CpdPerfTest.*"
   # split findbugs tests as those are slower and timeout
-  - TEST_SUITE="perfTest --tests *.FindbugsPerfTest.* -PperfTestCategory=com.monits.gradle.sca.performance.categories.AndroidScenario"
-  - TEST_SUITE="perfTest --tests *.FindbugsPerfTest.* -PperfTestCategory=com.monits.gradle.sca.performance.categories.JavaScenario"
+  - TEST_SUITE="perfTest --tests *.SpotbugsPerfTest.* -PperfTestCategory=com.monits.gradle.sca.performance.categories.AndroidScenario"
+  - TEST_SUITE="perfTest --tests *.SpotbugsPerfTest.* -PperfTestCategory=com.monits.gradle.sca.performance.categories.JavaScenario"
 
 android:
   components:
