@@ -17,7 +17,6 @@ import com.monits.gradle.sca.dsl.RulesConfig
 import com.monits.gradle.sca.dsl.StaticCodeAnalysisExtension
 import com.monits.gradle.sca.ToolVersions
 import groovy.transform.CompileStatic
-import groovy.transform.TypeCheckingMode
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Namer
 import org.gradle.api.Project
@@ -27,10 +26,7 @@ import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.plugins.quality.Checkstyle
 import org.gradle.api.plugins.quality.CheckstyleExtension
 import org.gradle.api.plugins.quality.CheckstyleReports
-import org.gradle.api.reporting.ConfigurableReport
 import org.gradle.api.reporting.ReportingExtension
-import org.gradle.api.reporting.SingleFileReport
-import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.util.GUtil
 import org.gradle.util.GradleVersion
@@ -125,7 +121,8 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
                         configFile = configSource
 
                         reports { CheckstyleReports r ->
-                            r.xml.destination = new File(project.extensions.getByType(ReportingExtension).file(CHECKSTYLE),
+                            r.xml.destination = new File(
+                                project.extensions.getByType(ReportingExtension).file(CHECKSTYLE),
                                 "checkstyle-${sourceSetName}.xml")
 
                             r.html.enabled = false

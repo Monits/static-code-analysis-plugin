@@ -18,7 +18,6 @@ import com.monits.gradle.sca.dsl.RulesConfig
 import com.monits.gradle.sca.dsl.StaticCodeAnalysisExtension
 import com.monits.gradle.sca.ToolVersions
 import groovy.transform.CompileStatic
-import groovy.transform.TypeCheckingMode
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Namer
@@ -28,9 +27,7 @@ import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.plugins.quality.Pmd
 import org.gradle.api.plugins.quality.PmdExtension
 import org.gradle.api.plugins.quality.PmdReports
-import org.gradle.api.reporting.ConfigurableReport
 import org.gradle.api.reporting.ReportingExtension
-import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.util.GUtil

@@ -481,7 +481,7 @@ class SpotbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         suppressionFilter('test').assertContents(not(containsString('<Source name="~.*Activity.java"/>')))
     }
 
-    @SuppressWarnings('MethodName')
+    @SuppressWarnings(['MethodName', 'LineLength'])
     void 'old DSL properties still work'() {
         given:
         writeBuildFile([:]) // don't enable spotbugs by default
@@ -503,13 +503,13 @@ class SpotbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
             |
             |    Task spotbugsTask = project.tasks.getByPath(':spotbugsMain')
             |    spotbugsTask.onlyIf {
-            |        println "Spotbugs main exclude is '${it.excludeFilter.name}'"
+            |        println "Spotbugs main exclude is '" + it.excludeFilter.name + "'"
             |        false // don't really run the task
             |    }
             |
             |    Task spotbugsTestTask = project.tasks.getByPath(':spotbugsTest')
             |    spotbugsTestTask.onlyIf {
-            |        println "Spotbugs test exclude is '${it.excludeFilter.name}'"
+            |        println "Spotbugs test exclude is '" + it.excludeFilter.name + "'"
             |        false // don't really run the task
             |    }
             |}
@@ -531,9 +531,11 @@ class SpotbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
 
         // Deprecation warnings must be present
         assertThat('Findbugs deprecation warning not present',
-            (result.output =~ /Using deprecated 'findbugs' property for Static Code Analysis plugin. /) as boolean, is(true))
+            (result.output =~ /Using deprecated 'findbugs' property for Static Code Analysis plugin./) as boolean,
+            is(true))
         assertThat('FindbugsExclude deprecation warning not present',
-            (result.output =~ /Using deprecated 'findbugsExclude' property for Static Code Analysis plugin. /) as boolean, is(true))
+            (result.output =~ /Using deprecated 'findbugsExclude' property for Static Code Analysis plugin./) as boolean,
+            is(true))
     }
 
     @Override

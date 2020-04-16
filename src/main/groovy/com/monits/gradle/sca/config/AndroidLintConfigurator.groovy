@@ -26,7 +26,6 @@ import org.gradle.api.file.CopySpec
 import org.gradle.api.file.FileCollection
 import org.gradle.api.specs.Specs
 import org.gradle.api.tasks.Copy
-import org.gradle.util.GradleVersion
 
 /**
  * A configurator for Android Lint tasks.

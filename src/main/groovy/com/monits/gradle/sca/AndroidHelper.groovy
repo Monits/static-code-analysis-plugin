@@ -87,7 +87,7 @@ final class AndroidHelper {
      * @return The directory in which AGP outputs lint reports
      */
     static String getLintReportDir(final Project project) {
-        return "${project.buildDir}/reports/"
+        "${project.buildDir}/reports/"
     }
 
     static String getCompileOutputDir(final Project project, final String sourceSetName, final String sourceSetPath) {
@@ -115,16 +115,15 @@ final class AndroidHelper {
             return null
         }
 
+        String intermediatePath = ''
         if (currentVersion.major == 3) {
             if (currentVersion.minor <= 4) {
-                return project.buildDir.absolutePath +
-                    '/intermediates/compile_only_not_namespaced_r_class_jar/' +
-                    sourceSetName + '/generate' + sourceSetName.capitalize() + 'RFile/R.jar'
+                intermediatePath = '/generate' + sourceSetName.capitalize() + 'RFile'
             }
         }
 
         project.buildDir.absolutePath + '/intermediates/compile_only_not_namespaced_r_class_jar/' +
-            sourceSetName + '/R.jar'
+            sourceSetName + intermediatePath + '/R.jar'
     }
 
     /**

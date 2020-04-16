@@ -33,8 +33,6 @@ import org.gradle.api.artifacts.ModuleDependency
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.internal.IConventionAware
-import org.gradle.api.plugins.JavaPlugin
-import org.gradle.util.GradleVersion
 
 /**
  * Static code analysis plugin for Android and Java projects
