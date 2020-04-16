@@ -45,7 +45,6 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         'https://raw.githubusercontent.com/Monits/static-code-analysis-plugin/staging/defaults/'
     private final static String CHECKSTYLE_DEFAULT_RULES = DEFAULTS_LOCATION + 'checkstyle/checkstyle.xml'
     private final static String CHECKSTYLE_CACHE_RULES = DEFAULTS_LOCATION + 'checkstyle/checkstyle-cache.xml'
-    private final static String CHECKSTYLE_BACKWARDS_RULES = DEFAULTS_LOCATION + 'checkstyle/checkstyle-6.7.xml'
     private final static String PMD_DEFAULT_RULES = DEFAULTS_LOCATION + 'pmd/pmd-6.xml'
     private final static String PMD_DEFAULT_ANDROID_RULES = DEFAULTS_LOCATION + 'pmd/pmd-android-6.xml'
     private final static String PMD_BACKWARDS_ANDROID_RULES = DEFAULTS_LOCATION + 'pmd/pmd-android.xml'
@@ -179,11 +178,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
                     return CHECKSTYLE_DEFAULT_RULES
                 }
 
-                if (ToolVersions.checkstyleCacheSupported) {
-                    return CHECKSTYLE_CACHE_RULES
-                }
-
-                CHECKSTYLE_BACKWARDS_RULES
+                CHECKSTYLE_CACHE_RULES
             }
             map('pmdRules') {
                 if (ToolVersions.latestPmdVersion) {

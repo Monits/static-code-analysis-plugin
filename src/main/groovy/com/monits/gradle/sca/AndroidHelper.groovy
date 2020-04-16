@@ -32,28 +32,13 @@ final class AndroidHelper {
     private static final String ANDROID_ENABLE_CACHE_PROPERTY = 'android.enableBuildCache'
     private static final String ANDROID_CACHE_LOCATION = 'android.buildCacheDir'
     private static final String ANDROID_DEPENDENCY_PATTERN = /com\.android\.tools\.build\/gradle\/([^\/]+)/
-    private static final String VERSION_2_3_0 = '2.3.0'
     private static final String VERSION_3_5_0 = '3.5.0'
 
-    private static final VersionNumber BUILD_CACHE_ANDROID_GRADLE_VERSION = VersionNumber.parse(VERSION_2_3_0)
-    private static final VersionNumber REPORT_PER_VARIANT_ANDROID_GRADLE_VERSION_MIN = VersionNumber.parse('2.0.0')
-    private static final VersionNumber REPORT_PER_VARIANT_ANDROID_GRADLE_VERSION_MAX = VersionNumber.parse('2.2.9')
     private static final VersionNumber LINT_HAS_VARIANT_INFO = VersionNumber.parse('1.5.0')
-    private static final VersionNumber USES_REPORTS_DIR = VersionNumber.parse(VERSION_2_3_0)
     private static final VersionNumber USES_JAVAC_TASK_OUTPUTS = VersionNumber.parse('3.2.0')
     private static final VersionNumber FLAT_JAVAC_TASK_OUTPUTS = VersionNumber.parse(VERSION_3_5_0)
     private static final VersionNumber GARBAGE_INPUTS = VersionNumber.parse(VERSION_3_5_0)
     private static final VersionNumber STANDALONE_R_JAR = VersionNumber.parse('3.3.0')
-
-    /**
-     * Checks if the current Android Plugin produces a global report that matches a debuggable variant or not.
-     * @param project The project to analyze.
-     * @return True if a report per variant is expected, false otherwise
-     */
-    static boolean globalLintIsVariant(final Project project) {
-        getCurrentVersion(project) >= REPORT_PER_VARIANT_ANDROID_GRADLE_VERSION_MIN &&
-            getCurrentVersion(project) <= REPORT_PER_VARIANT_ANDROID_GRADLE_VERSION_MAX
-    }
 
     /**
      * Checks if the current Android build is using the build-cache.
@@ -64,9 +49,8 @@ final class AndroidHelper {
      * @return True if the build is using build-cache, false otherwise
      */
     static boolean usesBuildCache(final Project project) {
-        getCurrentVersion(project) >= BUILD_CACHE_ANDROID_GRADLE_VERSION &&
-            (!project.hasProperty(ANDROID_ENABLE_CACHE_PROPERTY) ||
-                project.property(ANDROID_ENABLE_CACHE_PROPERTY) == 'true')
+        (!project.hasProperty(ANDROID_ENABLE_CACHE_PROPERTY) ||
+            project.property(ANDROID_ENABLE_CACHE_PROPERTY) == 'true')
     }
 
     /**
@@ -103,11 +87,7 @@ final class AndroidHelper {
      * @return The directory in which AGP outputs lint reports
      */
     static String getLintReportDir(final Project project) {
-        if (getCurrentVersion(project) >= USES_REPORTS_DIR) {
-            return "${project.buildDir}/reports/"
-        }
-
-        "${project.buildDir}/outputs/"
+        return "${project.buildDir}/reports/"
     }
 
     static String getCompileOutputDir(final Project project, final String sourceSetName, final String sourceSetPath) {

@@ -33,7 +33,6 @@ import org.gradle.util.GradleVersion
 */
 @CompileStatic
 class AndroidLintConfigurator implements AnalysisConfigurator {
-    private static final GradleVersion CACHEABLE_TASK_GRADLE_VERSION = GradleVersion.version('3.0')
     private static final String USE_JACK_PROPERTY_NAME = 'useJack'
     private static final String JACK_OPTIONS_PROPERTY_NAME = 'jackOptions'
     private static final String ANDROID = 'android'
@@ -133,9 +132,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
                 configureLintInputsAndOutputs(project, lintTask)
 
                 // Allow to cache task result on Gradle 3+!
-                if (GradleVersion.current() >= CACHEABLE_TASK_GRADLE_VERSION) {
-                    lintTask.outputs.cacheIf(Specs.SATISFIES_ALL)
-                }
+                lintTask.outputs.cacheIf(Specs.SATISFIES_ALL)
             }
         } catch (Throwable e) {
             // Something went wrong!

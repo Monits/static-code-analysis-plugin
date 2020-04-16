@@ -28,8 +28,6 @@ final class ToolVersions {
 
     private final static String LATEST_CHECKSTYLE_VERSION = '8.23'
     private final static String LATEST_CHECKSTYLE_VERSION_JAVA_7 = '6.19'
-    private final static String BACKWARDS_CHECKSTYLE_VERSION = '6.7'
-    private final static GradleVersion GRADLE_VERSION_CHECKSTYLE = GradleVersion.version('2.7')
 
     private final static String SPOTBUGS_TOOL_VERSION = '4.0.1'
     private final static String SPOTBUGS_MONITS_VERSION = '0.2.0'
@@ -62,10 +60,6 @@ final class ToolVersions {
     }
 
     static String getCheckstyleVersion() {
-        if (GradleVersion.current() < GRADLE_VERSION_CHECKSTYLE) {
-            return BACKWARDS_CHECKSTYLE_VERSION
-        }
-
         if (JavaVersion.current() < JavaVersion.VERSION_1_8) {
             return LATEST_CHECKSTYLE_VERSION_JAVA_7
         }
@@ -78,15 +72,7 @@ final class ToolVersions {
             (ignoreJre && checkstyleVersion == LATEST_CHECKSTYLE_VERSION_JAVA_7)
     }
 
-    static boolean isCheckstyleCacheSupported() {
-        checkstyleVersion > BACKWARDS_CHECKSTYLE_VERSION
-    }
-
     static String getCheckstyleUpdateInstructions() {
-        if (GradleVersion.current() < GRADLE_VERSION_CHECKSTYLE) {
-            return String.format(UPDATE_INSTRUCTIONS, TOOL_GRADLE, GRADLE_VERSION_CHECKSTYLE.version)
-        }
-
         String.format(UPDATE_INSTRUCTIONS, TOOL_JRE, JavaVersion.VERSION_1_8.majorVersion)
     }
 

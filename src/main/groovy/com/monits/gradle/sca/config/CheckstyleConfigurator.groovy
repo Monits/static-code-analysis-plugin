@@ -41,8 +41,7 @@ import org.gradle.util.GradleVersion
 @CompileStatic
 class CheckstyleConfigurator implements AnalysisConfigurator {
     private static final String CHECKSTYLE = 'checkstyle'
-    private static final GradleVersion GRADLE4 = GradleVersion.version('4.0.0')
-    private static final GradleVersion GRADLE3_3 = GradleVersion.version('3.3')
+    private static final GradleVersion GRADLE7 = GradleVersion.version('7.0.0')
 
     private final RemoteConfigLocator configLocator = new RemoteConfigLocator(CHECKSTYLE)
 
@@ -65,8 +64,7 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
 
             // Make sure the config is resolvable... AGP 3 decided to play with this...
             Configuration config = project.configurations[sourceSet['packageConfigurationName'] as String]
-            if (GradleVersion.current() >= GRADLE3_3 && config.state == Configuration.State.UNRESOLVED
-                    && !config.canBeResolved) {
+            if (config.state == Configuration.State.UNRESOLVED && !config.canBeResolved) {
                 config.canBeResolved = true
             }
 
@@ -120,12 +118,7 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
                             dependsOn project.tasks.findByName(downloadTaskName)
                         }
 
-                        /*
-                         * Gradle 4.0 introduced a config property setting by default to config/checkstyle
-                         * After any other checkstyle task downloads a new config there,
-                         * all other would be invalidated so we manually disable it.
-                        */
-                        if (GradleVersion.current() >= GRADLE4) {
+                        if (GradleVersion.current() < GRADLE7) {
                             configDir = project.<File> provider { null }
                         }
 

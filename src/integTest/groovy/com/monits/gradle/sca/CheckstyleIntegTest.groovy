@@ -49,9 +49,7 @@ class CheckstyleIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         then:
         result.task(taskName()).outcome == SUCCESS
         // Check the proper message is logged
-        if (GradleVersion.version(version) < ToolVersions.GRADLE_VERSION_CHECKSTYLE) {
-            assertThat(result.output, containsString('Update the used Gradle version to'))
-        } else if (JavaVersion.current() < JavaVersion.VERSION_1_8) {
+        if (JavaVersion.current() < JavaVersion.VERSION_1_8) {
             assertThat(result.output, containsString('Update the used Java version to'))
         }
 
@@ -70,8 +68,7 @@ class CheckstyleIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
 
         where:
         version << TESTED_GRADLE_VERSIONS
-        checkstyleVersion = GradleVersion.version(version) < ToolVersions.GRADLE_VERSION_CHECKSTYLE ?
-                ToolVersions.BACKWARDS_CHECKSTYLE_VERSION : (JavaVersion.current() < JavaVersion.VERSION_1_8 ?
+        checkstyleVersion = (JavaVersion.current() < JavaVersion.VERSION_1_8 ?
                 ToolVersions.LATEST_CHECKSTYLE_VERSION_JAVA_7 : ToolVersions.LATEST_CHECKSTYLE_VERSION)
     }
 
