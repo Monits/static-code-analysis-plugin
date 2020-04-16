@@ -66,7 +66,7 @@ buildscript {
 apply plugin: 'com.monits.staticCodeAnalysis'
 ```
 
-## Compatibility
+## Compatibility
 
 Plugin Version | Gradle Version | Android Gradle Plugin Version
 -----|----|-----
@@ -124,6 +124,7 @@ To include custom lint rules, you can simply include the jars as dependencies un
 For instance, you could include [Monits' Android Linters](https://github.com/monits/android-linters) by adding:
 
 ```
+dependencies {
     androidLint 'com.monits:android-linters:1.+'
 }
 ```
@@ -140,7 +141,7 @@ The plugin will add the following tasks:
 * `pmd`, depends on:
   * a `pmdSourcesetname` task per source-set (`pmdMain`, `pmdTest`, so on).
 
-*Prior to version 3.0.0 Findbugs was used instead of Spotbugs. The old `findbugs*` are still available and map to the corresponding `spotbugs*` task*
+*Prior to version 3.0.0 Findbugs was used instead of Spotbugs. The old `findbugs*` tasks are still available and map to the corresponding `spotbugs*` task*
 
 All tasks, are hooked to be run as part of the `check` task of the Java Plugin.
 
