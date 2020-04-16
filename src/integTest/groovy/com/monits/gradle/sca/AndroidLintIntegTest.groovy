@@ -18,7 +18,6 @@ import com.monits.gradle.sca.io.TestFile
 import groovy.transform.CompileDynamic
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
-import org.gradle.testkit.runner.internal.DefaultGradleRunner
 import spock.lang.Unroll
 
 import static org.gradle.testkit.runner.TaskOutcome.FAILED
@@ -97,11 +96,10 @@ class AndroidLintIntegTest extends AbstractIntegTestFixture {
         goodCode()
 
         when:
-        GradleRunner gradleRunner = ((DefaultGradleRunner) gradleRunner()
+        GradleRunner gradleRunner = gradleRunner()
                 .withGradleVersion(gradleVersion)
-                .withArguments('check', '--stacktrace'))
-                // AGP 3.4.0 sometimes runs out of metaspace… this seems to fix it
-                .withJvmArguments('-Dcom.sun.xml.bind.v2.bytecode.ClassTailor.noOptimize=true')
+                .withArguments('check', '--stacktrace')
+
         BuildResult firstRun = gradleRunner.build()
         BuildResult secondRun = gradleRunner.build()
 

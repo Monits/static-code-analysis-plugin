@@ -225,7 +225,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
         }
 
         // And none up to this date setup outputs for up-to-date checks and cache
-        if ((variantName == null || variantName.empty) && AndroidHelper.globalLintIsVariant(project)) {
+        if (variantName == null || variantName.empty) {
             boolean configFound = false
             variants.all {
                 def configuration = it.variantData.variantConfiguration

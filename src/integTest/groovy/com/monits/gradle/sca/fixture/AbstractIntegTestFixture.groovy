@@ -17,6 +17,7 @@ import com.monits.gradle.sca.io.TestFile
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import org.gradle.testkit.runner.GradleRunner
+import org.gradle.testkit.runner.internal.DefaultGradleRunner
 import org.gradle.util.GradleVersion
 import org.gradle.util.VersionNumber
 import org.junit.Rule
@@ -71,9 +72,11 @@ abstract class AbstractIntegTestFixture extends Specification {
     }
 
     GradleRunner gradleRunner() {
-        GradleRunner.create()
+        ((DefaultGradleRunner) GradleRunner.create()
             .withProjectDir(testProjectDir.root)
-            .withArguments('check', '--stacktrace')
+            .withArguments('check', '--stacktrace'))
+            // AGP sometimes runs out of metaspace running lint… this seems to fix it
+            .withJvmArguments('-Dcom.sun.xml.bind.v2.bytecode.ClassTailor.noOptimize=true')
     }
 
     TestFile file(String path) {
