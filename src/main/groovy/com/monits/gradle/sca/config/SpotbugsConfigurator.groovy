@@ -155,13 +155,31 @@ class SpotbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
                 spotbugsTask.configure configuration.rcurry(sourceSet)
             }
 
+            // For backwards compatibility, create equivalent findbugs* task
+            setupPhonyBackwardsCompatibleFindbugsTask(project, spotbugsTask)
+
             spotbugsRootTask.dependsOn spotbugsTask
         }
+
+        // For backwards compatibility, create equivalent findbugs* task
+        setupPhonyBackwardsCompatibleFindbugsTask(project, spotbugsRootTask)
 
         project.tasks.findByName('check').dependsOn spotbugsRootTask
     }
 
     private static String generateTaskName(final String taskName = SPOTBUGS, final String sourceSetName) {
         GUtil.toLowerCamelCase(String.format('%s %s', taskName, sourceSetName))
+    }
+
+    private void setupPhonyBackwardsCompatibleFindbugsTask(final Project project, final Task spotbugsTask) {
+        String taskName = spotbugsTask.name.replace(SPOTBUGS, 'findbugs')
+        Task findbugsTask = project.tasks.maybeCreate(taskName)
+
+        findbugsTask.doFirst { Task t ->
+            t.logger.warn("Using deprecated '${t.path}' task. " +
+                "Please update to use '${spotbugsTask.path}' instead, this task " +
+                'will be removed in the 4.0.0 release.')
+        }
+        findbugsTask.finalizedBy spotbugsTask
     }
 }

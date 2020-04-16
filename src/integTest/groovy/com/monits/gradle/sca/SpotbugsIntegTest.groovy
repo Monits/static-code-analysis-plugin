@@ -538,6 +538,35 @@ class SpotbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
             is(true))
     }
 
+    @SuppressWarnings('MethodName')
+    @Unroll('Old #findbugsTask task should still work')
+    void 'old tasks still work'() {
+        given:
+        writeBuildFile()
+        buildScriptFile()
+        goodCode()
+
+        when:
+        BuildResult result = gradleRunner()
+            .withArguments(findbugsTask, '--stacktrace')
+            .build()
+
+        then:
+        String equivalentSpotbugsTask = findbugsTask.replace('findbugs', 'spotbugs')
+
+        // The equivalent Spotbugs task must have run
+        result.task(':' + equivalentSpotbugsTask).outcome == SUCCESS
+
+        // Deprecation warnings must be present
+        String deprecationMsg = "Using deprecated ':${findbugsTask}' task. " +
+            "Please update to use ':${equivalentSpotbugsTask}' instead"
+        assertThat('Findbugs deprecation warning not present',
+            (result.output =~ deprecationMsg) as boolean, is(true))
+
+        where:
+        findbugsTask << ['findbugsMain', 'findbugsTest', 'findbugs']
+    }
+
     @Override
     String reportFileName(final String sourceSet) {
         "build/reports/spotbugs/spotbugs${sourceSet ? "-${sourceSet}" : '-main'}.xml"
