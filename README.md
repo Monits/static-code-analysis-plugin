@@ -28,7 +28,7 @@ used Gradle version. Just updating Gradle will introduce newer tools.
 
 We are on [the Grade Plugin Portal](https://plugins.gradle.org/plugin/com.monits.staticCodeAnalysis), so you can simply do:
 
-```
+```groovy
 plugins {
   id 'com.monits.staticCodeAnalysis' version '2.6.12'
 }
@@ -36,7 +36,7 @@ plugins {
 
 or, you could also do
 
-```
+```groovy
 buildscript {
   repositories {
     maven {
@@ -53,7 +53,7 @@ apply plugin: 'com.monits.staticCodeAnalysis'
 
 or, directly from jcenter
 
-```
+```groovy
 buildscript {
   repositories {
     jcenter()
@@ -123,7 +123,7 @@ Rules used by PMD, Spotbugs and Checkstyle can be overriden per-sourceset under 
 To include custom lint rules, you can simply include the jars as dependencies under `androidLint`.
 For instance, you could include [Monits' Android Linters](https://github.com/monits/android-linters) by adding:
 
-```
+```groovy
 dependencies {
     androidLint 'com.monits:android-linters:1.+'
 }
