@@ -33,6 +33,7 @@ import org.gradle.api.artifacts.ModuleDependency
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.internal.IConventionAware
+import org.gradle.api.plugins.JavaPlugin
 import org.gradle.util.GradleVersion
 
 /**
@@ -55,17 +56,12 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         DEFAULTS_LOCATION + 'spotbugs/spotbugs-exclusions-android.xml'
     private final static String ANDROID_DEFAULT_RULES = DEFAULTS_LOCATION + 'android/android-lint.xml'
 
-    private final static String CONF_COMPILE_ONLY = 'compileOnly'
     private final static String CONF_COMPILE = 'compile'
     private final static String CONF_SCACONFIG = 'scaconfig'
     private final static String CONF_SCACONFIG_MODULES = 'scaconfigModules'
     private final static String CONF_ANDROID_LINT = 'androidLint'
 
-    private final static GradleVersion GRADLE_3_2 = GradleVersion.version('3.2')
     private final static String JAVA_PLUGIN_ID = 'java'
-
-    private final static String TARGET_CONFIGURATION_PROPERTY = GradleVersion.current() >= GRADLE_3_2 ?
-        'targetConfiguration' : 'configuration'
 
     private StaticCodeAnalysisExtension extension
     private Project project
@@ -114,22 +110,6 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     }
 
     private void defineConfigurations() {
-        // Wait until the default configuration is available
-        project.configurations.matching { Configuration config -> config.name == Dependency.DEFAULT_CONFIGURATION }
-            .all { Configuration config ->
-                if (project.configurations.findByName(CONF_COMPILE_ONLY) == null) {
-                    project.configurations.with { ConfigurationContainer cc ->
-                        Configuration compileOnly = cc.create(CONF_COMPILE_ONLY) { Configuration conf ->
-                            conf.description = 'Compile only dependencies'
-                            conf.dependencies.all { Dependency dep ->
-                                project.configurations.getByName('default').exclude group:dep.group, module:dep.name
-                            }
-                        }
-                        cc.findByName(CONF_COMPILE).extendsFrom compileOnly
-                    }
-                }
-            }
-
         project.configurations.with { ConfigurationContainer cc ->
             cc.create(CONF_SCACONFIG) { Configuration conf -> // Custom configuration for static code analysis
                 conf.description = 'Configuration used for Static Code Analysis'
@@ -149,7 +129,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     private void addSpotbugsAnnotationDependencies() {
         // Wait until the configurations are available
         project.configurations.matching { Configuration config ->
-            config.name in [CONF_COMPILE_ONLY, 'testCompileOnly', 'androidTestCompileOnly']
+            config.name in ['compileOnly', 'testCompileOnly', 'androidTestCompileOnly']
         }.all { Configuration config ->
             project.dependencies { DependencyHandler dh ->
                 dh.add(config.name,
@@ -246,7 +226,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
                 // support lazy configuration creation
                 (it as ProjectDependency).dependencyProject.configurations.all { Configuration c ->
                     // Deal with changing APIs from Gradle...
-                    String targetConfiguration = it[TARGET_CONFIGURATION_PROPERTY] ?: Dependency.DEFAULT_CONFIGURATION
+                    String targetConfiguration = it['targetConfiguration'] ?: Dependency.DEFAULT_CONFIGURATION
 
                     // take transitive dependencies
                     if (c.name == targetConfiguration || c.name == Dependency.ARCHIVES_CONFIGURATION) {
