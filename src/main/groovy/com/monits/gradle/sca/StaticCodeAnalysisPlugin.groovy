@@ -134,9 +134,11 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
         project.configurations.with { ConfigurationContainer cc ->
             cc.create(CONF_SCACONFIG) { Configuration conf -> // Custom configuration for static code analysis
                 conf.description = 'Configuration used for Static Code Analysis'
+                conf.visible = false
             }
             cc.create(CONF_SCACONFIG_MODULES) { Configuration conf -> // Custom configuration for static code analysis
                 conf.description = 'Configuration used for Static Code Analysis containing only module dependencies'
+                conf.visible = false
             }
             cc.create(CONF_ANDROID_LINT) { Configuration conf -> // Configuration used for android linters
                 conf.transitive = false
