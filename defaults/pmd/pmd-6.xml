@@ -143,7 +143,7 @@
 
   <rule ref="category/java/errorprone.xml/AvoidDuplicateLiterals">
     <properties>
-        <property name="maxDuplicateLiterals" value="1" />
+        <property name="maxDuplicateLiterals" value="2" />
         <property name="skipAnnotations" value="true" />
     </properties>
 </rule>
