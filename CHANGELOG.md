@@ -7,13 +7,16 @@ Improvements:
  * Fully compatible with Gradle 6+
  * Fully compatible with AGP 3.6.0+
  * Upgraded PMD to 6.22.0
+ * Upgraded Checkstyle to 8.31.0
  * Findbugs is replaced with Spotbugs 4.0.1
- * Analysis classpath for PMD and Spotbugs has been pruned for better performance
+ * Android Dynamic Feature modules are now supported.
  * fb-contrib is replaced by sb-contrib, and upgraded to 7.4.7
+ * New rules added as we upgraded tools. More cases of overlap between Checkstyle and PMD detected,
+     and moved in favor of PMD for analysis performance / cache.
+ * Analysis classpath for PMD and Spotbugs has been pruned for better performance
 
 Fixes:
  * AGP 3.3 ceased to generate R.java and related classes, opting to generate a compiled jar directly. These are once again taken into consideration.
- * Android Dynamic Feature modules are now supported.
 
 # v2.6
 ### 2.6.12
