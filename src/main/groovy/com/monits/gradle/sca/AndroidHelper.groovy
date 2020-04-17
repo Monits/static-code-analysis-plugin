@@ -115,15 +115,18 @@ final class AndroidHelper {
             return null
         }
 
+        // main sourceset maps to debug
+        String actualSourceSet = sourceSetName != 'main' ?: 'debug'
+
         String intermediatePath = ''
         if (currentVersion.major == 3) {
             if (currentVersion.minor <= 4) {
-                intermediatePath = '/generate' + sourceSetName.capitalize() + 'RFile'
+                intermediatePath = '/generate' + actualSourceSet.capitalize() + 'RFile'
             }
         }
 
         project.buildDir.absolutePath + '/intermediates/compile_only_not_namespaced_r_class_jar/' +
-            sourceSetName + intermediatePath + '/R.jar'
+            actualSourceSet + intermediatePath + '/R.jar'
     }
 
     /**

@@ -144,9 +144,9 @@ class PmdIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         // The classpath must be configured, and not empty
         assertThat('main classes are in classpath',
             (result.output =~ /Auxclasspath is configured for main .*\/javac\/debug\//) as boolean, is(true))
-        // on android we don't discriminate test / compile
+        // on android we don't discriminate test / compiles
         assertThat('test classes are in main classpath',
-            (result.output =~ /Auxclasspath is configured for main .*\/javac\/debugUnitTest\//) as boolean, is(true))
+            (result.output =~ /Auxclasspath is configured for main .*\/javac\/debugUnitTest\//) as boolean, is(false))
         // on android we don't discriminate test / compile
         assertThat('junit is in main classpath',
             (result.output =~ /Auxclasspath is configured for main .*\/junit\//) as boolean, is(true))
