@@ -7,6 +7,9 @@
             <!-- This is supposedly turned off by default, by I'm seeing it here and there... fb-contrib's is better -->
             <Bug pattern="CD_CIRCULAR_DEPENDENCY" />
 
+            <!-- This one is overly aggresive in suggesting using Collection<E> even when an ordered collection is needed and List<E> is actually wanted-->
+            <Bug pattern="OCP_OVERLY_CONCRETE_PARAMETER" />
+
             <!-- We will use PMD since its faster -->
             <Bug pattern="FORBIDDEN_SYSTEM" />
             <Bug pattern="USBR_UNNECESSARY_STORE_BEFORE_RETURN"/>
@@ -27,7 +30,6 @@
             <Bug pattern="NP_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD" />
             <Bug pattern="URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" />
             <Bug pattern="RFI_SET_ACCESSIBLE" />
-            <Bug pattern="OCP_OVERLY_CONCRETE_PARAMETER" />
 
             <!-- These are tests! All we are ever gonna do is use mock libraries, the class under test or unit framework methods!-->
             <Bug pattern="CE_CLASS_ENVY" />
