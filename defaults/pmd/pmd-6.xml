@@ -145,6 +145,9 @@
     <properties>
         <property name="maxDuplicateLiterals" value="2" />
         <property name="skipAnnotations" value="true" />
+
+        <!-- Allow tests to duplicate strings -->
+        <property name="violationSuppressXPath" value="//ClassOrInterfaceDeclaration[matches(@Image, '.*Test.*')]"/>
     </properties>
 </rule>
 
