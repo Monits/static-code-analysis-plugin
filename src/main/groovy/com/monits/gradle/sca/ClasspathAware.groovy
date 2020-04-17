@@ -14,7 +14,6 @@
 package com.monits.gradle.sca
 
 import groovy.transform.CompileStatic
-import groovy.transform.TypeCheckingMode
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.ProjectDependency
@@ -109,9 +108,9 @@ trait ClasspathAware {
 
         // test sourcesets require their main counterparts
         FileCollection otherDependantSourceSet
-        if (sourceSetName.contains('test') ||sourceSetName.contains('androidTest')) {
+        if (sourceSetName.contains(TEST_SOURCESET) || sourceSetName.contains(ANDROID_TEST_SOURCESET)) {
             // testRelease depends on release, androidTestDebug on debug… and test on main
-            String sourceSetSuffix = (sourceSetName - 'test' - 'androidTest').uncapitalize()
+            String sourceSetSuffix = (sourceSetName - TEST_SOURCESET - ANDROID_TEST_SOURCESET).uncapitalize()
             String mainCounterpartSourceSet = sourceSetSuffix.empty ? 'main' : sourceSetSuffix
 
             otherDependantSourceSet = project.files(pathToCompiledClasses(project, mainCounterpartSourceSet))

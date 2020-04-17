@@ -39,6 +39,8 @@ final class AndroidHelper {
     private static final VersionNumber FLAT_JAVAC_TASK_OUTPUTS = VersionNumber.parse(VERSION_3_5_0)
     private static final VersionNumber GARBAGE_INPUTS = VersionNumber.parse(VERSION_3_5_0)
     private static final VersionNumber STANDALONE_R_JAR = VersionNumber.parse('3.3.0')
+    private static final String MAIN_SOURCESET = 'main'
+    private static final String DEBUG_SOURCESET = 'debug'
 
     /**
      * Checks if the current Android build is using the build-cache.
@@ -95,7 +97,7 @@ final class AndroidHelper {
         if (currentVersion >= USES_JAVAC_TASK_OUTPUTS) {
             String outputDir = sourceSetName == 'androidTest' ? 'debugAndroidTest' :
                 sourceSetName == 'test' ? 'debugUnitTest' :
-                    sourceSetName == 'main' ? 'debug' : sourceSetName
+                    sourceSetName == MAIN_SOURCESET ? DEBUG_SOURCESET : sourceSetName
 
             if (currentVersion >= FLAT_JAVAC_TASK_OUTPUTS) {
                 return project.buildDir.absolutePath +
@@ -109,6 +111,7 @@ final class AndroidHelper {
         project.buildDir.absolutePath + '/intermediates/classes/' + sourceSetPath + File.separator
     }
 
+    @SuppressWarnings('ConfusingTernary')
     static String getStandaloneRJarPath(final Project project, final String sourceSetName) {
         VersionNumber currentVersion = getCurrentVersion(project)
         if (currentVersion < STANDALONE_R_JAR) {
@@ -116,7 +119,7 @@ final class AndroidHelper {
         }
 
         // main sourceset maps to debug
-        String actualSourceSet = sourceSetName != 'main' ?: 'debug'
+        String actualSourceSet = sourceSetName != MAIN_SOURCESET ?: DEBUG_SOURCESET
 
         String intermediatePath = ''
         if (currentVersion.major == 3) {
