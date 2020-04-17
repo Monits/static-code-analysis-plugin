@@ -42,7 +42,7 @@ class StaticCodeAnalysisPlugin implements Plugin<Project> {
     private final static String EXTENSION_NAME = 'staticCodeAnalysis'
     private final static String DEFAULTS_LOCATION =
         'https://raw.githubusercontent.com/Monits/static-code-analysis-plugin/staging/defaults/'
-    private final static String CHECKSTYLE_DEFAULT_RULES = DEFAULTS_LOCATION + 'checkstyle/checkstyle.xml'
+    private final static String CHECKSTYLE_DEFAULT_RULES = DEFAULTS_LOCATION + 'checkstyle/checkstyle-8.31.xml'
     private final static String CHECKSTYLE_CACHE_RULES = DEFAULTS_LOCATION + 'checkstyle/checkstyle-cache.xml'
     private final static String PMD_DEFAULT_RULES = DEFAULTS_LOCATION + 'pmd/pmd-6.xml'
     private final static String PMD_DEFAULT_ANDROID_RULES = DEFAULTS_LOCATION + 'pmd/pmd-android-6.xml'
