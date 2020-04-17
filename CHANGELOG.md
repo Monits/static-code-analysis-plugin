@@ -1,5 +1,20 @@
 ## History
 
+# v3.0
+### 3.0.0 - UNRELEASED
+
+Improvements:
+ * Fully compatible with Gradle 6+
+ * Fully compatible with AGP 3.6.0+
+ * Upgraded PMD to 6.22.0
+ * Findbugs is replaced with Spotbugs 4.0.1
+ * Analysis classpath for PMD and Spotbugs has been pruned for better performance
+ * fb-contrib is replaced by sb-contrib, and upgraded to 7.4.7
+
+Fixes:
+ * AGP 3.3 ceased to generate R.java and related classes, opting to generate a compiled jar directly. These are once again taken into consideration.
+ * Android Dynamic Feature modules are now supported.
+
 # v2.6
 ### 2.6.12
 

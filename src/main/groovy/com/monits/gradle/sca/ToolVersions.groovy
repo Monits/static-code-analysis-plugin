@@ -31,7 +31,7 @@ final class ToolVersions {
 
     private final static String SPOTBUGS_TOOL_VERSION = '4.0.1'
     private final static String SPOTBUGS_MONITS_VERSION = '0.2.0'
-    private final static String SB_CONTRIB_VERSION = '7.4.6'
+    private final static String SB_CONTRIB_VERSION = '7.4.7'
 
     private final static String TOOL_GRADLE = 'Gradle'
     private final static String TOOL_JRE = 'Java'
