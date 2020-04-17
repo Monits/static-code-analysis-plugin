@@ -1,5 +1,6 @@
 apply plugin: 'com.jfrog.bintray'
 apply plugin: 'com.gradle.plugin-publish'
+apply plugin: 'maven-publish'
 
 // Generate sources
 task sourcesJar(type: Jar, dependsOn: classes) {
@@ -22,10 +23,24 @@ artifacts {
 ext.bintrayUsername = hasProperty("bintrayUsername") ? bintrayUsername : ""
 ext.bintrayApiKey = hasProperty("bintrayApiKey") ? bintrayApiKey : ""
 
+publishing {
+    publications {
+        MvnPublication(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+            groupId project.group
+            artifactId 'static-code-analysis-plugin'
+            version project.version
+        }
+    }
+}
+
 bintray {
     user = project.ext.bintrayUsername
     key = project.ext.bintrayApiKey
-    publish = true
+    publish = false
+    dryRun = true
     pkg {
         repo = 'monits-android'
         name = 'static-code-analysis-plugin'
@@ -40,7 +55,7 @@ bintray {
             vcsTag = project.version
         }
     }
-    configurations = ['archives']
+    publications = ['MvnPublication']
 }
 
 // Gradle plugin portal
@@ -64,6 +79,4 @@ pluginBundle {
 }
 
 // Helper task to just upload everything everywhere
-task publish() {
-  dependsOn 'bintrayUpload', 'publishPlugins'
-}
+tasks['publish'].finalizedBy 'bintrayUpload', 'publishPlugins'
