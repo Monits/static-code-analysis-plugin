@@ -11,6 +11,8 @@
             <property name="scope" value="public"/>
             <property name="allowMissingPropertyJavadoc" value="true"/>
         </module>
+	<module name="JavadocBlockTagLocation"/>
+	<module name="JavadocContentLocationCheck"/>
         <module name="CommentsIndentation"/>
         <module name="EmptyLineSeparator">
             <property name="allowNoEmptyLineBetweenFields" value="true"/>
@@ -69,10 +71,6 @@
         <module name="AnonInnerLength">
             <property name="max" value="40"/>
         </module>
-        <module name="LineLength">
-            <property name="severity" value="warning"/>
-            <property name="max" value="150"/>
-        </module>
         <module name="MethodLength">
             <property name="max" value="80"/>
         </module>
@@ -128,11 +126,10 @@
             <property name="severity" value="error"/>
         </module>
         <module name="FinalLocalVariable">
-            <!-- The new better way, not usable until we fully migrate (and then, remove FOR_EACH_CLAUSE from FinalParameters) -->
-            <!--            <property name="validateEnhancedForLoopVariable" value="true"/>-->
+            <property name="validateEnhancedForLoopVariable" value="true"/>
         </module>
         <module name="FinalParameters">
-            <property name="tokens" value="METHOD_DEF,CTOR_DEF,LITERAL_CATCH,FOR_EACH_CLAUSE"/>
+            <property name="tokens" value="METHOD_DEF,CTOR_DEF,LITERAL_CATCH"/>
         </module>
         <module name="FinalClass"/>
         <module name="ModifierOrder"/>
@@ -158,6 +155,11 @@
         <module name="SuppressionCommentFilter"/>
     </module>
     
+    <module name="LineLength">
+        <property name="severity" value="warning"/>
+        <property name="max" value="150"/>
+    </module>
+
     <!-- Allow to disable checks with @SuppressWarnings -->
     <module name="SuppressWarningsFilter"/>
     <module name="SuppressionFilter">

@@ -70,12 +70,6 @@
     <exclude name="VariableNamingConventions"/>
 
     <exclude name="TooManyStaticImports"/>
-
-    <!-- braces rules are covered by Checkstyle -->
-    <exclude name="ForLoopsMustUseBraces"/>
-    <exclude name="IfElseStmtsMustUseBraces"/>
-    <exclude name="IfStmtsMustUseBraces"/>
-    <exclude name="WhileLoopsMustUseBraces"/>
   </rule>
 
   <!-- ConfusingTernaryRule should ignore elseif since it creates lots of FPs -->
@@ -97,13 +91,10 @@
     <exclude name="ExcessiveMethodLength" />
     <exclude name="ExcessiveParameterList" />
     <exclude name="ExcessivePublicCount" />
-    <exclude name="ModifiedCyclomaticComplexity" />
     <exclude name="NcssConstructorCount" />
     <exclude name="NcssCount" />
     <exclude name="NcssMethodCount" />
     <exclude name="NcssTypeCount" />
-    <exclude name="NPathComplexity" />
-    <exclude name="StdCyclomaticComplexity" />
     <exclude name="TooManyFields" />
     <exclude name="TooManyMethods" />
     <exclude name="UseObjectForClearerAPI" />
@@ -117,8 +108,8 @@
   </rule>
 
   <rule ref="category/java/errorprone.xml">
+    <!-- Confiugured below -->
     <exclude name="AvoidDuplicateLiterals"/>
-    <exclude name="CloneThrowsCloneNotSupportedException"/>
 
     <!-- old controversial rules -->
     <exclude name="AssignmentInOperand" />
@@ -149,6 +140,13 @@
       <property name="allowCommentedBlocks" value="true"/>
     </properties>
   </rule>
+
+  <rule ref="category/java/errorprone.xml/AvoidDuplicateLiterals">
+    <properties>
+        <property name="maxDuplicateLiterals" value="1" />
+        <property name="skipAnnotations" value="true" />
+    </properties>
+</rule>
 
   <rule ref="category/java/multithreading.xml">
     <exclude name="AvoidUsingVolatile"/>
