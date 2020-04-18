@@ -39,8 +39,7 @@ publishing {
 bintray {
     user = project.ext.bintrayUsername
     key = project.ext.bintrayApiKey
-    publish = false
-    dryRun = true
+    publish = true
     pkg {
         repo = 'monits-android'
         name = 'static-code-analysis-plugin'
