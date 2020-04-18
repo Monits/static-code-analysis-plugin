@@ -1,7 +1,7 @@
 ## History
 
 # v3.0
-### 3.0.0 - UNRELEASED
+### 3.0.0
 
 Improvements:
  * Fully compatible with Gradle 6+
