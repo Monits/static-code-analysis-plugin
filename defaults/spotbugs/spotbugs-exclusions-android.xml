@@ -1,17 +1,28 @@
 <FindBugsFilter>
     <Match>
         <Or>
+            <!-- Android uses it's own annotations, not JSR 305 -->
+            <Bug pattern="UNKNOWN_NULLNESS_OF_PARAMETER" />
+            <Bug pattern="UNKNOWN_NULLNESS_OF_RETURNED_VALUE" />
+
             <!-- This pattern is simply wrong, and asks people to violate equals simmetry -->
             <Bug pattern="EQ_DOESNT_OVERRIDE_EQUALS" />
+
+            <!-- This pattern requests for StandardCharsets that is available in API level 19 -->
+            <Bug pattern="CSI_CHAR_SET_ISSUES_USE_STANDARD_CHARSET_NAME" />
+            <Bug pattern="CSI_CHAR_SET_ISSUES_USE_STANDARD_CHARSET" />
+            
+            <!-- This patterns requests for java.nio.file.Files that is available in API level 19 -->
+            <Bug pattern="IOI_USE_OF_FILE_STREAM_CONSTRUCTORS" /> 
 
             <!-- This is supposedly turned off by default, by I'm seeing it here and there... fb-contrib's is better -->
             <Bug pattern="CD_CIRCULAR_DEPENDENCY" />
 
-            <!-- This one is overly aggresive in suggesting using Collection<E> even when an ordered collection is needed and List<E> is actually wanted-->
-            <Bug pattern="OCP_OVERLY_CONCRETE_PARAMETER" />
+	    <!-- Android's Java doesn't support this yet -->
+	    <Bug pattern="UTWR_USE_TRY_WITH_RESOURCES" />
 
-            <!-- Technically correct, but as long as objects aren't actually serialized into a persisten medium it's bogus, and most often, this is just an Exception requiring being serializable -->
-            <Bug pattern="IMC_IMMATURE_CLASS_BAD_SERIALVERSIONUID" />
+	    <!-- equivalent rule already present in Monits' Findbugs Plugin -->
+	    <Bug pattern="AI_ANNOTATION_ISSUES_NEEDS_NULLABLE" />
 
             <!-- We will use PMD since its faster -->
             <Bug pattern="FORBIDDEN_SYSTEM" />
@@ -36,6 +47,13 @@
 
             <!-- These are tests! All we are ever gonna do is use mock libraries, the class under test or unit framework methods!-->
             <Bug pattern="CE_CLASS_ENVY" />
+        </Or>
+    </Match>
+
+    <Match>
+        <Source name="~.*Activity.java"/>
+        <Or>
+            <Bug pattern="MISSING_TO_STRING_OVERRIDE"/>
         </Or>
     </Match>
 </FindBugsFilter>
