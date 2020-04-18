@@ -7,6 +7,12 @@
             <!-- This is supposedly turned off by default, by I'm seeing it here and there... fb-contrib's is better -->
             <Bug pattern="CD_CIRCULAR_DEPENDENCY" />
 
+            <!-- This one is overly aggresive in suggesting using Collection<E> even when an ordered collection is needed and List<E> is actually wanted-->
+            <Bug pattern="OCP_OVERLY_CONCRETE_PARAMETER" />
+
+            <!-- Technically correct, but as long as objects aren't actually serialized into a persisten medium it's bogus, and most often, this is just an Exception requiring being serializable -->
+            <Bug pattern="IMC_IMMATURE_CLASS_BAD_SERIALVERSIONUID" />
+
             <!-- We will use PMD since its faster -->
             <Bug pattern="FORBIDDEN_SYSTEM" />
             <Bug pattern="USBR_UNNECESSARY_STORE_BEFORE_RETURN"/>
