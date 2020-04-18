@@ -1,17 +1,20 @@
 plugins {
-    id 'com.github.hierynomus.license' version '0.14.0'
-    id 'com.jfrog.bintray' version '1.8.4'
-    id 'com.gradle.plugin-publish' version '0.10.0'
+    id 'com.github.hierynomus.license' version '0.15.0'
+    id 'com.jfrog.bintray' version '1.8.5'
+    id 'com.gradle.plugin-publish' version '0.11.0'
     id 'groovy'
 }
 
 repositories {
     jcenter()
+    maven {
+        url "https://plugins.gradle.org/m2/"
+    }
 }
 
 group = 'com.monits'
 
-version = '2.6.12'
+version = '3.0.0'
 
 apply from: 'gradle/license.gradle'
 apply from: 'gradle/publish.gradle'
@@ -24,6 +27,12 @@ apply plugin: 'build.no-resolution-at-configuration'
 dependencies {
     compileOnly gradleApi()
     compileOnly localGroovy()
+
+    /*
+     * v4 has immutable tasks, and both are compatible with Spotbugs 4,
+     * o keep using this one that's simpler to configures
+     */
+    implementation 'com.github.spotbugs:spotbugs-gradle-plugin:3.0.0'
 }
 
 // Java versions
@@ -31,6 +40,6 @@ project.sourceCompatibility = 1.7
 project.targetCompatibility = 1.7
 
 wrapper {
-    gradleVersion = '5.6.4'
+    gradleVersion = '6.3'
     distributionType = Wrapper.DistributionType.ALL
 }

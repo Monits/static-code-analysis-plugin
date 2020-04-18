@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2017 Monits S.A.
+ * Copyright 2010-2020 Monits S.A.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at
@@ -22,18 +22,16 @@ import org.gradle.util.GradleVersion
 */
 @CompileStatic
 final class ToolVersions {
-    private final static String LATEST_PMD_TOOL_VERSION = '6.20.0'
+    private final static String LATEST_PMD_TOOL_VERSION = '6.22.0'
     private final static String BACKWARDS_PMD_TOOL_VERSION = '5.1.3'
     private final static GradleVersion GRADLE_VERSION_PMD = GradleVersion.version('2.4')
 
-    private final static String LATEST_CHECKSTYLE_VERSION = '8.23'
+    private final static String LATEST_CHECKSTYLE_VERSION = '8.31'
     private final static String LATEST_CHECKSTYLE_VERSION_JAVA_7 = '6.19'
-    private final static String BACKWARDS_CHECKSTYLE_VERSION = '6.7'
-    private final static GradleVersion GRADLE_VERSION_CHECKSTYLE = GradleVersion.version('2.7')
 
-    private final static String FINDBUGS_TOOL_VERSION = '3.0.1'
-    private final static String FINDBUGS_MONITS_VERSION = '0.2.0'
-    private final static String FB_CONTRIB_VERSION = '7.4.6'
+    private final static String SPOTBUGS_TOOL_VERSION = '4.0.1'
+    private final static String SPOTBUGS_MONITS_VERSION = '0.2.0'
+    private final static String SB_CONTRIB_VERSION = '7.4.7'
 
     private final static String TOOL_GRADLE = 'Gradle'
     private final static String TOOL_JRE = 'Java'
@@ -62,10 +60,6 @@ final class ToolVersions {
     }
 
     static String getCheckstyleVersion() {
-        if (GradleVersion.current() < GRADLE_VERSION_CHECKSTYLE) {
-            return BACKWARDS_CHECKSTYLE_VERSION
-        }
-
         if (JavaVersion.current() < JavaVersion.VERSION_1_8) {
             return LATEST_CHECKSTYLE_VERSION_JAVA_7
         }
@@ -78,30 +72,22 @@ final class ToolVersions {
             (ignoreJre && checkstyleVersion == LATEST_CHECKSTYLE_VERSION_JAVA_7)
     }
 
-    static boolean isCheckstyleCacheSupported() {
-        checkstyleVersion > BACKWARDS_CHECKSTYLE_VERSION
-    }
-
     static String getCheckstyleUpdateInstructions() {
-        if (GradleVersion.current() < GRADLE_VERSION_CHECKSTYLE) {
-            return String.format(UPDATE_INSTRUCTIONS, TOOL_GRADLE, GRADLE_VERSION_CHECKSTYLE.version)
-        }
-
         String.format(UPDATE_INSTRUCTIONS, TOOL_JRE, JavaVersion.VERSION_1_8.majorVersion)
     }
 
     @SuppressWarnings('GetterMethodCouldBeProperty')
-    static String getFindbugsVersion() {
-        FINDBUGS_TOOL_VERSION
+    static String getSpotbugsVersion() {
+        SPOTBUGS_TOOL_VERSION
     }
 
     @SuppressWarnings('GetterMethodCouldBeProperty')
-    static String getFbContribVersion() {
-        FB_CONTRIB_VERSION
+    static String getSbContribVersion() {
+        SB_CONTRIB_VERSION
     }
 
     @SuppressWarnings('GetterMethodCouldBeProperty')
-    static String getMonitsFindbugsVersion() {
-        FINDBUGS_MONITS_VERSION
+    static String getMonitsSpotbugsVersion() {
+        SPOTBUGS_MONITS_VERSION
     }
 }

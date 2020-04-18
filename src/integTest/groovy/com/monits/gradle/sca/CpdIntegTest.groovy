@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2017 Monits S.A.
+ * Copyright 2010-2020 Monits S.A.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at
@@ -16,7 +16,6 @@ package com.monits.gradle.sca
 import com.monits.gradle.sca.fixture.AbstractPluginIntegTestFixture
 import groovy.transform.CompileDynamic
 import org.gradle.testkit.runner.BuildResult
-import org.gradle.util.GradleVersion
 import spock.lang.Unroll
 
 import static org.gradle.testkit.runner.TaskOutcome.FAILED
@@ -42,10 +41,7 @@ class CpdIntegTest extends AbstractPluginIntegTestFixture {
             .build()
 
         then:
-        if (GradleVersion.version(version) >= GradleVersion.version('2.5')) {
-            // Executed task capture is only available in Gradle 2.5+
-            result.task(taskName()).outcome == SUCCESS
-        }
+        result.task(taskName()).outcome == SUCCESS
 
         // Make sure report exists
         reportFile().exists()

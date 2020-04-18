@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2017 Monits S.A.
+ * Copyright 2010-2020 Monits S.A.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at
@@ -60,7 +60,7 @@ abstract class AbstractPluginPerfTestFixture extends AbstractPerfTestFixture {
         then:
         perfRunner.assertVersionHasNotRegressed(baselineRunner)
         // If possible, check we have not regressed against the previous Gradle version either
-        if (prevVersionBaselineJavaRunner) {
+        if (prevVersionBaselineJavaRunner != null) {
             perfRunner.assertVersionHasNotRegressed(prevVersionBaselineJavaRunner)
         }
 
@@ -96,7 +96,7 @@ abstract class AbstractPluginPerfTestFixture extends AbstractPerfTestFixture {
         then:
         perfRunner.assertVersionHasNotRegressed(baselineRunner)
         // If possible, check we have not regressed against the previous Gradle version either
-        if (prevVersionBaselineAndroidRunner) {
+        if (prevVersionBaselineAndroidRunner != null) {
             perfRunner.assertVersionHasNotRegressed(prevVersionBaselineAndroidRunner)
         }
 

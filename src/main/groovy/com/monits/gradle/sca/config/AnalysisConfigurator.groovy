@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2017 Monits S.A.
+ * Copyright 2010-2020 Monits S.A.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  */
 package com.monits.gradle.sca.config
 
-import com.monits.gradle.sca.StaticCodeAnalysisExtension
+import com.monits.gradle.sca.dsl.StaticCodeAnalysisExtension
 import org.gradle.api.Project
 
 /**

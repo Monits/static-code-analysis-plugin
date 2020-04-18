@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2017 Monits S.A.
+ * Copyright 2010-2020 Monits S.A.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at
@@ -17,24 +17,24 @@ import com.monits.gradle.sca.fixture.AbstractPerSourceSetPluginIntegTestFixture
 import com.monits.gradle.sca.io.TestFile
 import groovy.transform.CompileDynamic
 import org.gradle.testkit.runner.BuildResult
-import org.gradle.util.GradleVersion
 import spock.lang.Unroll
 
 import static org.gradle.testkit.runner.TaskOutcome.FAILED
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import static org.hamcrest.CoreMatchers.containsString
+import static org.hamcrest.CoreMatchers.is
 import static org.hamcrest.core.IsNot.not
 import static org.junit.Assert.assertThat
 
 /**
- * Integration test of Findbugs tasks.
+ * Integration test of Spotbugs tasks.
  */
 @CompileDynamic
-class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
+class SpotbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
 
     @SuppressWarnings('MethodName')
-    @Unroll('Findbugs #findbugsVersion should run when using gradle #version')
-    void 'findbugs is run'() {
+    @Unroll('Spotbugs #spotbugsVersion should run when using gradle #version')
+    void 'spotbugs is run'() {
         given:
         writeBuildFile()
         useEmptySuppressionFilter()
@@ -46,14 +46,11 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
             .build()
 
         then:
-        if (GradleVersion.version(version) >= GradleVersion.version('2.5')) {
-            // Executed task capture is only available in Gradle 2.5+
-            result.task(taskName()).outcome == SUCCESS
-        }
+        result.task(taskName()).outcome == SUCCESS
 
         // Make sure report exists and was using the expected tool version
         reportFile().exists()
-        reportFile().assertContents(containsString("<BugCollection version=\"$findbugsVersion\""))
+        reportFile().assertContents(containsString("<BugCollection version=\"$spotbugsVersion\""))
 
         // Plugins should be automatically added and enabled
         reportFile().assertContents(containsString('<Plugin id="com.mebigfatguy.fbcontrib" enabled="true"/>'))
@@ -61,18 +58,18 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
 
         where:
         version << TESTED_GRADLE_VERSIONS
-        findbugsVersion = ToolVersions.findbugsVersion
+        spotbugsVersion = ToolVersions.spotbugsVersion
     }
 
     @SuppressWarnings('MethodName')
-    void 'findbugs downloads remote suppression config'() {
+    void 'spotbugs downloads remote suppression config'() {
         given:
         writeBuildFile()
         // setup a remote config
         buildScriptFile() << '''
             |staticCodeAnalysis {
-            |    findbugsExclude = 'https://raw.githubusercontent.com/Monits/static-code-analysis-plugin/' +
-            |        'staging/defaults/findbugs/findbugs-exclusions-android.xml'
+            |    spotbugsExclude = 'https://raw.githubusercontent.com/Monits/static-code-analysis-plugin/' +
+            |        'staging/defaults/spotbugs/spotbugs-exclusions-android.xml'
             |}
         '''.stripMargin()
         goodCode()
@@ -85,10 +82,10 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         result.task(taskName()).outcome == SUCCESS
 
         // The config must exist
-        file('config/findbugs/excludeFilter-main.xml').exists()
-        file('config/findbugs/excludeFilter-test.xml').exists()
+        file('config/spotbugs/excludeFilter-main.xml').exists()
+        file('config/spotbugs/excludeFilter-test.xml').exists()
 
-        // Make sure findbugs report exists
+        // Make sure spotbugs report exists
         reportFile().exists()
     }
 
@@ -99,8 +96,8 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         // setup a remote config
         buildScriptFile() << '''
             |staticCodeAnalysis {
-            |    findbugsExclude = 'https://raw.githubusercontent.com/Monits/static-code-analysis-plugin/' +
-            |        'staging/defaults/findbugs/findbugs-exclusions-android.xml'
+            |    spotbugsExclude = 'https://raw.githubusercontent.com/Monits/static-code-analysis-plugin/' +
+            |        'staging/defaults/spotbugs/spotbugs-exclusions-android.xml'
             |}
         '''.stripMargin()
         goodCode()
@@ -111,7 +108,7 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
                 .buildAndFail()
 
         then:
-        result.task(':downloadFindbugsExcludeFilterMain').outcome == FAILED
+        result.task(':downloadSpotbugsExcludeFilterMain').outcome == FAILED
         assertThat(result.output, containsString('Running in offline mode, but there is no cached version'))
     }
 
@@ -122,8 +119,8 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         // setup a remote config
         buildScriptFile() << '''
             |staticCodeAnalysis {
-            |    findbugsExclude = 'https://raw.githubusercontent.com/Monits/static-code-analysis-plugin/' +
-            |        'staging/defaults/findbugs/findbugs-exclusions-android.xml'
+            |    spotbugsExclude = 'https://raw.githubusercontent.com/Monits/static-code-analysis-plugin/' +
+            |        'staging/defaults/spotbugs/spotbugs-exclusions-android.xml'
             |}
         '''.stripMargin()
         writeEmptySuppressionFilter('main')
@@ -136,13 +133,13 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
                 .build()
 
         then:
-        result.task(':downloadFindbugsExcludeFilterMain').outcome == SUCCESS
-        result.task(':downloadFindbugsExcludeFilterTest').outcome == SUCCESS
+        result.task(':downloadSpotbugsExcludeFilterMain').outcome == SUCCESS
+        result.task(':downloadSpotbugsExcludeFilterTest').outcome == SUCCESS
         assertThat(result.output, containsString('Running in offline mode. Using a possibly outdated version of'))
     }
 
     @SuppressWarnings(['MethodName', 'LineLength'])
-    void 'Findbugs-related annotations are available'() {
+    void 'Spotbugs-related annotations are available'() {
         given:
         writeBuildFile()
         useEmptySuppressionFilter()
@@ -172,10 +169,11 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         reportFile().assertContents(containsString('<Errors errors="0" missingClasses="0">'))
     }
 
+    @Unroll('Android generated classes are available when using android gradle plugin #androidVersion')
     @SuppressWarnings('MethodName')
     void 'Android generated classes are available'() {
         given:
-        writeAndroidBuildFile(DEFAULT_ANDROID_VERSION)
+        writeAndroidBuildFile(androidVersion)
         writeAndroidManifest()
         useEmptySuppressionFilter()
         file('src/main/res/values/strings.xml') << '''\
@@ -198,7 +196,7 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
 
         when:
         BuildResult result = gradleRunner()
-                .withGradleVersion(gradleVersionForAndroid(DEFAULT_ANDROID_VERSION))
+                .withGradleVersion(gradleVersion)
                 .build()
 
         then:
@@ -207,6 +205,10 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         // The report must exist, and not complain on missing classes from liba
         reportFile().exists()
         reportFile().assertContents(containsString('<Errors errors="0" missingClasses="0">'))
+
+        where:
+        androidVersion << ANDROID_PLUGIN_VERSIONS
+        gradleVersion = gradleVersionForAndroid(androidVersion)
     }
 
     @Unroll('Android classes are available when using android gradle plugin #androidVersion and gradle #gradleVersion')
@@ -256,9 +258,7 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
                 .build()
 
         then:
-        if (GradleVersion.version(gradleVersion) >= GradleVersion.version('2.5')) {
-            result.task(taskName()).outcome == SUCCESS
-        }
+        result.task(taskName()).outcome == SUCCESS
 
         // The report must exist, and not complain on missing classes from liba
         reportFile().exists()
@@ -284,12 +284,12 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         result.task(':libb' + taskName()).outcome == SUCCESS
 
         // The report must exist, and not complain on missing classes from liba
-        TestFile findbugsReport = file('libb/' + reportFileName(null))
-        findbugsReport.exists()
-        findbugsReport.assertContents(not(containsString('<MissingClass>liba.ClassA</MissingClass>')))
+        TestFile spotbugsReport = file('libb/' + reportFileName(null))
+        spotbugsReport.exists()
+        spotbugsReport.assertContents(not(containsString('<MissingClass>liba.ClassA</MissingClass>')))
 
         // make sure nothing is reported
-        findbugsReport.assertContents(containsString('<Errors errors="0" missingClasses="0">'))
+        spotbugsReport.assertContents(containsString('<Errors errors="0" missingClasses="0">'))
 
         where:
         androidVersion << AndroidLintIntegTest.ANDROID_PLUGIN_VERSIONS
@@ -358,9 +358,7 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
             .build()
 
         then:
-        if (GradleVersion.version(gradleVersion) >= GradleVersion.version('2.5')) {
-            result.task(taskName()).outcome == SUCCESS
-        }
+        result.task(taskName()).outcome == SUCCESS
 
         // The report must exist, and not complain on missing classes from liba
         reportFile().exists()
@@ -378,12 +376,12 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
             |staticCodeAnalysis {
             |    sourceSetConfig {
             |        test {
-            |            findbugsExclude = 'test-findbugsExclude.xml'
+            |            spotbugsExclude = 'test-spotbugsExclude.xml'
             |        }
             |    }
             |}
         '''.stripMargin()
-        file('test-findbugsExclude.xml') << '''
+        file('test-spotbugsExclude.xml') << '''
             |<FindBugsFilter>
             |    <Match>
             |        <Or>
@@ -401,7 +399,7 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         then:
         result.task(taskName()).outcome == SUCCESS
 
-        // Make sure findbugs reports exist
+        // Make sure spotbugs reports exist
         reportFile().exists()
         reportFile(TEST_SOURCESET).exists()
 
@@ -456,7 +454,7 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         then:
         result.task(taskName()).outcome == SUCCESS
 
-        // Make sure findbugs suppression file exists and has the proper version
+        // Make sure spotbugs suppression file exists and has the proper version
         suppressionFilter('main').exists()
         suppressionFilter('main').assertContents(containsString('<Source name="~.*Activity.java"/>'))
         suppressionFilter('test').exists()
@@ -476,26 +474,112 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         then:
         result.task(taskName()).outcome == SUCCESS
 
-        // Make sure findbugs suppression file exists and has the proper version
+        // Make sure spotbugs suppression file exists and has the proper version
         suppressionFilter('main').exists()
         suppressionFilter('main').assertContents(not(containsString('<Source name="~.*Activity.java"/>')))
         suppressionFilter('test').exists()
         suppressionFilter('test').assertContents(not(containsString('<Source name="~.*Activity.java"/>')))
     }
 
+    @SuppressWarnings(['MethodName', 'LineLength'])
+    void 'old DSL properties still work'() {
+        given:
+        writeBuildFile([:]) // don't enable spotbugs by default
+        buildScriptFile() << '''
+            |staticCodeAnalysis {
+            |   findbugs = true
+            |   findbugsExclude = 'customExclude.xml'
+            |   sourceSetConfig {
+            |       main {
+            |           findbugsExclude = 'customExcludeMain.xml'
+            |       }
+            |   }
+            |}
+            |
+            |afterEvaluate {
+            |    if (staticCodeAnalysis.spotbugs) {
+            |        println 'Spotbugs is enabled'
+            |    }
+            |
+            |    Task spotbugsTask = project.tasks.getByPath(':spotbugsMain')
+            |    spotbugsTask.onlyIf {
+            |        println "Spotbugs main exclude is '" + it.excludeFilter.name + "'"
+            |        false // don't really run the task
+            |    }
+            |
+            |    Task spotbugsTestTask = project.tasks.getByPath(':spotbugsTest')
+            |    spotbugsTestTask.onlyIf {
+            |        println "Spotbugs test exclude is '" + it.excludeFilter.name + "'"
+            |        false // don't really run the task
+            |    }
+            |}
+        '''.stripMargin()
+        goodCode()
+
+        when:
+        BuildResult result = gradleRunner()
+            .build()
+
+        then:
+        // The tasks must be configured
+        assertThat('Spotbugs is not enabled',
+            (result.output =~ /Spotbugs is enabled/) as boolean, is(true))
+        assertThat('Per-sourceset exclude is not set',
+            (result.output =~ /Spotbugs main exclude is 'customExcludeMain.xml'/) as boolean, is(true))
+        assertThat('General exclude is not set',
+            (result.output =~ /Spotbugs test exclude is 'customExclude.xml'/) as boolean, is(true))
+
+        // Deprecation warnings must be present
+        assertThat('Findbugs deprecation warning not present',
+            (result.output =~ /Using deprecated 'findbugs' property for Static Code Analysis plugin./) as boolean,
+            is(true))
+        assertThat('FindbugsExclude deprecation warning not present',
+            (result.output =~ /Using deprecated 'findbugsExclude' property for Static Code Analysis plugin./) as boolean,
+            is(true))
+    }
+
+    @SuppressWarnings('MethodName')
+    @Unroll('Old #findbugsTask task should still work')
+    void 'old tasks still work'() {
+        given:
+        writeBuildFile()
+        buildScriptFile()
+        goodCode()
+
+        when:
+        BuildResult result = gradleRunner()
+            .withArguments(findbugsTask, '--stacktrace')
+            .build()
+
+        then:
+        String equivalentSpotbugsTask = findbugsTask.replace('findbugs', 'spotbugs')
+
+        // The equivalent Spotbugs task must have run
+        result.task(':' + equivalentSpotbugsTask).outcome == SUCCESS
+
+        // Deprecation warnings must be present
+        String deprecationMsg = "Using deprecated ':${findbugsTask}' task. " +
+            "Please update to use ':${equivalentSpotbugsTask}' instead"
+        assertThat('Findbugs deprecation warning not present',
+            (result.output =~ deprecationMsg) as boolean, is(true))
+
+        where:
+        findbugsTask << ['findbugsMain', 'findbugsTest', 'findbugs']
+    }
+
     @Override
     String reportFileName(final String sourceSet) {
-        "build/reports/findbugs/findbugs${sourceSet ? "-${sourceSet}" : '-main'}.xml"
+        "build/reports/spotbugs/spotbugs${sourceSet ? "-${sourceSet}" : '-main'}.xml"
     }
 
     @Override
     String taskName() {
-        ':findbugs'
+        ':spotbugs'
     }
 
     @Override
     String toolName() {
-        'findbugs'
+        'spotbugs'
     }
 
     @SuppressWarnings('GStringExpressionWithinString')
@@ -504,7 +588,7 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
 
         buildScriptFile() << '''
             |staticCodeAnalysis {
-            |    findbugsExclude = "${project.rootDir}/config/findbugs/excludeFilter.xml"
+            |    spotbugsExclude = "${project.rootDir}/config/spotbugs/excludeFilter.xml"
             |}
         '''.stripMargin()
     }
@@ -517,6 +601,6 @@ class FindbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
     }
 
     TestFile suppressionFilter(final String sourceSet = null) {
-        file("config/findbugs/excludeFilter${sourceSet ? "-${sourceSet}" : ''}.xml")
+        file("config/spotbugs/excludeFilter${sourceSet ? "-${sourceSet}" : ''}.xml")
     }
 }

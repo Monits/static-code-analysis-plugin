@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2017 Monits S.A.
+ * Copyright 2010-2020 Monits S.A.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at
@@ -18,7 +18,6 @@ import com.monits.gradle.sca.io.TestFile
 import groovy.transform.CompileDynamic
 import org.gradle.api.JavaVersion
 import org.gradle.testkit.runner.BuildResult
-import org.gradle.util.GradleVersion
 import spock.lang.Unroll
 
 import static org.gradle.testkit.runner.TaskOutcome.FAILED
@@ -47,19 +46,10 @@ class CheckstyleIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
             .build()
 
         then:
-        if (GradleVersion.version(version) >= GradleVersion.version('2.5')) {
-            // Executed task capture is only available in Gradle 2.5+
-            result.task(taskName()).outcome == SUCCESS
-        }
-
-        // Execution output is only available in Gradle 2.8+
-        if (GradleVersion.version(version) >= GradleVersion.version('2.8')) {
-            // Check the proper message is logged
-            if (GradleVersion.version(version) < ToolVersions.GRADLE_VERSION_CHECKSTYLE) {
-                assertThat(result.output, containsString('Update the used Gradle version to'))
-            } else if (JavaVersion.current() < JavaVersion.VERSION_1_8) {
-                assertThat(result.output, containsString('Update the used Java version to'))
-            }
+        result.task(taskName()).outcome == SUCCESS
+        // Check the proper message is logged
+        if (JavaVersion.current() < JavaVersion.VERSION_1_8) {
+            assertThat(result.output, containsString('Update the used Java version to'))
         }
 
         // Make sure report exists and was using the expected tool version
@@ -77,8 +67,7 @@ class CheckstyleIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
 
         where:
         version << TESTED_GRADLE_VERSIONS
-        checkstyleVersion = GradleVersion.version(version) < ToolVersions.GRADLE_VERSION_CHECKSTYLE ?
-                ToolVersions.BACKWARDS_CHECKSTYLE_VERSION : (JavaVersion.current() < JavaVersion.VERSION_1_8 ?
+        checkstyleVersion = (JavaVersion.current() < JavaVersion.VERSION_1_8 ?
                 ToolVersions.LATEST_CHECKSTYLE_VERSION_JAVA_7 : ToolVersions.LATEST_CHECKSTYLE_VERSION)
     }
 

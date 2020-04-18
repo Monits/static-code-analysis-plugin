@@ -10,6 +10,9 @@
     <ruleset-ref path='rulesets/convention.xml'>
         <!-- I don't necessarilly agree, specially when static is recommended just because no fields are used -->
         <exclude name='StaticMethodsBeforeInstanceMethods'/>
+	<exclude name='ImplicitClosureParameter'/>
+	<exclude name='NoDouble'/>
+	<exclude name='NoFloat'/>
     </ruleset-ref>
     <ruleset-ref path='rulesets/design.xml'/>
     <ruleset-ref path='rulesets/dry.xml'>

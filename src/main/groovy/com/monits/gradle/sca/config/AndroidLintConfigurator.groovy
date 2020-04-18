@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2017 Monits S.A.
+ * Copyright 2010-2020 Monits S.A.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at
@@ -14,7 +14,7 @@
 package com.monits.gradle.sca.config
 
 import com.monits.gradle.sca.AndroidHelper
-import com.monits.gradle.sca.StaticCodeAnalysisExtension
+import com.monits.gradle.sca.dsl.StaticCodeAnalysisExtension
 import com.monits.gradle.sca.task.CleanupAndroidLintTask
 import com.monits.gradle.sca.task.ResolveAndroidLintTask
 import groovy.transform.CompileStatic
@@ -26,14 +26,12 @@ import org.gradle.api.file.CopySpec
 import org.gradle.api.file.FileCollection
 import org.gradle.api.specs.Specs
 import org.gradle.api.tasks.Copy
-import org.gradle.util.GradleVersion
 
 /**
  * A configurator for Android Lint tasks.
 */
 @CompileStatic
 class AndroidLintConfigurator implements AnalysisConfigurator {
-    private static final GradleVersion CACHEABLE_TASK_GRADLE_VERSION = GradleVersion.version('3.0')
     private static final String USE_JACK_PROPERTY_NAME = 'useJack'
     private static final String JACK_OPTIONS_PROPERTY_NAME = 'jackOptions'
     private static final String ANDROID = 'android'
@@ -133,9 +131,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
                 configureLintInputsAndOutputs(project, lintTask)
 
                 // Allow to cache task result on Gradle 3+!
-                if (GradleVersion.current() >= CACHEABLE_TASK_GRADLE_VERSION) {
-                    lintTask.outputs.cacheIf(Specs.SATISFIES_ALL)
-                }
+                lintTask.outputs.cacheIf(Specs.SATISFIES_ALL)
             }
         } catch (Throwable e) {
             // Something went wrong!
@@ -229,7 +225,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
         }
 
         // And none up to this date setup outputs for up-to-date checks and cache
-        if ((variantName == null || variantName.empty) && AndroidHelper.globalLintIsVariant(project)) {
+        if (variantName == null || variantName.empty) {
             boolean configFound = false
             variants.all {
                 def configuration = it.variantData.variantConfiguration
@@ -291,12 +287,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
         project[ANDROID]['applicationVariants'] as DomainObjectSet
     }
 
-    /*
-     * The signature of TaskInputs.file(Object) changed, we need to skip @CompileStatic for backwards compatibility
-     * with Gradle 2.x. Remove it once we drop support for 2.x.
-     */
     @SuppressWarnings('ParameterCount')
-    @CompileStatic(TypeCheckingMode.SKIP)
     private static void addReportAsOutput(final Task task, final Project project, final boolean isEnabled,
                                           final File output, final String variantName, final String extension) {
         if (isEnabled) {

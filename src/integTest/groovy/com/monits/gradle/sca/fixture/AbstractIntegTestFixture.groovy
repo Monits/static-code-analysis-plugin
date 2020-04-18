@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2017 Monits S.A.
+ * Copyright 2010-2020 Monits S.A.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at
@@ -17,6 +17,7 @@ import com.monits.gradle.sca.io.TestFile
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import org.gradle.testkit.runner.GradleRunner
+import org.gradle.testkit.runner.internal.DefaultGradleRunner
 import org.gradle.util.GradleVersion
 import org.gradle.util.VersionNumber
 import org.junit.Rule
@@ -31,11 +32,10 @@ import spock.util.environment.Jvm
 abstract class AbstractIntegTestFixture extends Specification {
 
     // A sample of gradle versions to be considered in general testing
-    static final List<String> TESTED_GRADLE_VERSIONS = ['2.6', '2.8', '2.10', '2.14.1', '3.0',
-                                                        '3.3', '4.0', '4.10', '5.0']
+    static final List<String> TESTED_GRADLE_VERSIONS = ['5.2', '5.6.4', '6.0', GradleVersion.current().version]
+    static final List<String> ANDROID_PLUGIN_VERSIONS = ['3.3.0', '3.4.0', '3.5.3', '3.6.0'].asImmutable()
 
-    private static final String ANDROID_1_5_0 = '1.5.0'
-    static final String DEFAULT_ANDROID_VERSION = ANDROID_1_5_0
+    static final String DEFAULT_ANDROID_VERSION = '3.4.0'
     protected static final String ANDROID_VERSION = 'androidVersion'
     static final String LIBA_DIRNAME = 'liba/'
     static final String LIBB_DIRNAME = 'libb/'
@@ -44,8 +44,9 @@ abstract class AbstractIntegTestFixture extends Specification {
     static final String ANDROID_MANIFEST_PATH = 'src/main/AndroidManifest.xml'
     static final String BUILD_GRADLE_FILENAME = 'build.gradle'
     private static final String TARGET_ANDROID_VERSION = Jvm.current.java8Compatible ? '25' : '23'
-    private static final String BUILD_TOOLS_ANDROID_VERSION = Jvm.current.java8Compatible ? '25.0.0' : '23.0.2'
     private static final String DEFAULT_ANDROID_PACKAGE = 'com.monits.staticCodeAnalysis'
+
+    private static final String GRADLE_COMPATIBLE_WITH_AGP_3_3 = '5.6.4'
 
     @Rule
     final TemporaryFolder testProjectDir = new TemporaryFolder()
@@ -71,9 +72,11 @@ abstract class AbstractIntegTestFixture extends Specification {
     }
 
     GradleRunner gradleRunner() {
-        GradleRunner.create()
+        ((DefaultGradleRunner) GradleRunner.create()
             .withProjectDir(testProjectDir.root)
-            .withArguments('check', '--stacktrace')
+            .withArguments('check', '--stacktrace'))
+            // AGP sometimes runs out of metaspace running lint… this seems to fix it
+            .withJvmArguments('-Dcom.sun.xml.bind.v2.bytecode.ClassTailor.noOptimize=true')
     }
 
     TestFile file(String path) {
@@ -134,7 +137,7 @@ abstract class AbstractIntegTestFixture extends Specification {
             |staticCodeAnalysis {
             |    cpd = ${toolsConfig.get('cpd', false)}
             |    checkstyle = ${toolsConfig.get('checkstyle', false)}
-            |    findbugs = ${toolsConfig.get('findbugs', false)}
+            |    spotbugs = ${toolsConfig.get('spotbugs', false)}
             |    pmd = ${toolsConfig.get('pmd', false)}
             |    androidLint = ${toolsConfig.get('androidLint', false)}
             |}
@@ -182,7 +185,6 @@ abstract class AbstractIntegTestFixture extends Specification {
         """
             |android {
             |    compileSdkVersion ${TARGET_ANDROID_VERSION}
-            |    buildToolsVersion "${BUILD_TOOLS_ANDROID_VERSION}"
             |}
         """.stripMargin() as TestFile
     }
@@ -229,13 +231,15 @@ abstract class AbstractIntegTestFixture extends Specification {
     String gradleVersionForAndroid(final String androidVersion) {
         VersionNumber androidVersionNumber = VersionNumber.parse(androidVersion)
 
-        // Version 2.2 and up are the only ones compatible with gradle 3, but gradle 5 is only compatible with AGP 3.3
-        androidVersionNumber < VersionNumber.parse(ANDROID_1_5_0) ? '2.9' :
-            androidVersionNumber.major < 2 ||
-                (androidVersionNumber.major == 2 && androidVersionNumber.minor < 2) ?
-                    '2.14.1' : androidVersionNumber.major < 3 ? '3.5' :
-                        (androidVersionNumber.major == 3 && androidVersionNumber.minor < 3) ?
-                            '4.6' : GradleVersion.current().version
+        if (androidVersionNumber.major == 3) {
+            if (androidVersionNumber.minor < 3) {
+                throw new IllegalArgumentException("Version $androidVersion is unsupported")
+            } else if (androidVersionNumber.minor == 3) {
+                return GRADLE_COMPATIBLE_WITH_AGP_3_3
+            }
+        }
+
+        GradleVersion.current().version
     }
 
     private void setupAndroidSubProject(final String dir, final String androidVersion = DEFAULT_ANDROID_VERSION) {

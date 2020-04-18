@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2017 Monits S.A.
+ * Copyright 2010-2020 Monits S.A.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at
@@ -21,34 +21,26 @@ import org.gradle.util.VersionNumber
 
 /**
  * Utility class to help dealing with the Android Gradle Plugin.
-*/
+ */
 @CompileStatic
 final class AndroidHelper {
+    public static final Set<String> SUPPORTED_PLUGINS = (['com.android.application',
+                                           'com.android.library',
+                                           'com.android.dynamic-feature'] as Set<String>).asImmutable()
+
     private static final String ANDROID_SDK_HOME = 'ANDROID_SDK_HOME'
     private static final String ANDROID_ENABLE_CACHE_PROPERTY = 'android.enableBuildCache'
     private static final String ANDROID_CACHE_LOCATION = 'android.buildCacheDir'
     private static final String ANDROID_DEPENDENCY_PATTERN = /com\.android\.tools\.build\/gradle\/([^\/]+)/
-    private static final String VERSION_2_3_0 = '2.3.0'
     private static final String VERSION_3_5_0 = '3.5.0'
 
-    private static final VersionNumber BUILD_CACHE_ANDROID_GRADLE_VERSION = VersionNumber.parse(VERSION_2_3_0)
-    private static final VersionNumber REPORT_PER_VARIANT_ANDROID_GRADLE_VERSION_MIN = VersionNumber.parse('2.0.0')
-    private static final VersionNumber REPORT_PER_VARIANT_ANDROID_GRADLE_VERSION_MAX = VersionNumber.parse('2.2.9')
     private static final VersionNumber LINT_HAS_VARIANT_INFO = VersionNumber.parse('1.5.0')
-    private static final VersionNumber USES_REPORTS_DIR = VersionNumber.parse(VERSION_2_3_0)
     private static final VersionNumber USES_JAVAC_TASK_OUTPUTS = VersionNumber.parse('3.2.0')
     private static final VersionNumber FLAT_JAVAC_TASK_OUTPUTS = VersionNumber.parse(VERSION_3_5_0)
     private static final VersionNumber GARBAGE_INPUTS = VersionNumber.parse(VERSION_3_5_0)
-
-    /**
-     * Checks if the current Android Plugin produces a global report that matches a debuggable variant or not.
-     * @param project The project to analyze.
-     * @return True if a report per variant is expected, false otherwise
-     */
-    static boolean globalLintIsVariant(final Project project) {
-        getCurrentVersion(project) >= REPORT_PER_VARIANT_ANDROID_GRADLE_VERSION_MIN &&
-            getCurrentVersion(project) <= REPORT_PER_VARIANT_ANDROID_GRADLE_VERSION_MAX
-    }
+    private static final VersionNumber STANDALONE_R_JAR = VersionNumber.parse('3.3.0')
+    private static final String MAIN_SOURCESET = 'main'
+    private static final String DEBUG_SOURCESET = 'debug'
 
     /**
      * Checks if the current Android build is using the build-cache.
@@ -59,9 +51,8 @@ final class AndroidHelper {
      * @return True if the build is using build-cache, false otherwise
      */
     static boolean usesBuildCache(final Project project) {
-        getCurrentVersion(project) >= BUILD_CACHE_ANDROID_GRADLE_VERSION &&
-            (!project.hasProperty(ANDROID_ENABLE_CACHE_PROPERTY) ||
-                project.property(ANDROID_ENABLE_CACHE_PROPERTY) == 'true')
+        (!project.hasProperty(ANDROID_ENABLE_CACHE_PROPERTY) ||
+            project.property(ANDROID_ENABLE_CACHE_PROPERTY) == 'true')
     }
 
     /**
@@ -98,11 +89,7 @@ final class AndroidHelper {
      * @return The directory in which AGP outputs lint reports
      */
     static String getLintReportDir(final Project project) {
-        if (getCurrentVersion(project) >= USES_REPORTS_DIR) {
-            return "${project.buildDir}/reports/"
-        }
-
-        "${project.buildDir}/outputs/"
+        "${project.buildDir}/reports/"
     }
 
     static String getCompileOutputDir(final Project project, final String sourceSetName, final String sourceSetPath) {
@@ -110,7 +97,7 @@ final class AndroidHelper {
         if (currentVersion >= USES_JAVAC_TASK_OUTPUTS) {
             String outputDir = sourceSetName == 'androidTest' ? 'debugAndroidTest' :
                 sourceSetName == 'test' ? 'debugUnitTest' :
-                    sourceSetName == 'main' ? 'debug' : sourceSetName
+                    sourceSetName == MAIN_SOURCESET ? DEBUG_SOURCESET : sourceSetName
 
             if (currentVersion >= FLAT_JAVAC_TASK_OUTPUTS) {
                 return project.buildDir.absolutePath +
@@ -123,6 +110,28 @@ final class AndroidHelper {
 
         project.buildDir.absolutePath + '/intermediates/classes/' + sourceSetPath + File.separator
     }
+
+    @SuppressWarnings('ConfusingTernary')
+    static String getStandaloneRJarPath(final Project project, final String sourceSetName) {
+        VersionNumber currentVersion = getCurrentVersion(project)
+        if (currentVersion < STANDALONE_R_JAR) {
+            return null
+        }
+
+        // main sourceset maps to debug
+        String actualSourceSet = sourceSetName != MAIN_SOURCESET ?: DEBUG_SOURCESET
+
+        String intermediatePath = ''
+        if (currentVersion.major == 3) {
+            if (currentVersion.minor <= 4) {
+                intermediatePath = '/generate' + actualSourceSet.capitalize() + 'RFile'
+            }
+        }
+
+        project.buildDir.absolutePath + '/intermediates/compile_only_not_namespaced_r_class_jar/' +
+            actualSourceSet + intermediatePath + '/R.jar'
+    }
+
     /**
      * Retrieves the location of Android's build-cache directory.
      * @param project The project to analyze.
@@ -174,9 +183,10 @@ final class AndroidHelper {
      * @param project The project on which to analyze the used plugin version.
      * @return The version of the used plugin, or {@see VersionNumber#UNKNOWN} if not known.
      */
+    // FIXME : Use @Memoized ?
     private static VersionNumber getCurrentVersion(final Project project) {
         File androidDependency = project.buildscript.configurations.getByName('classpath').resolve()
-            .find { it =~ ANDROID_DEPENDENCY_PATTERN }
+                .find { it =~ ANDROID_DEPENDENCY_PATTERN }
         Matcher matcher = androidDependency =~ ANDROID_DEPENDENCY_PATTERN
 
         if (!matcher.find()) {

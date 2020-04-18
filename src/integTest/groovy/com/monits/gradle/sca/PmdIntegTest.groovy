@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2017 Monits S.A.
+ * Copyright 2010-2020 Monits S.A.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at
@@ -46,12 +46,9 @@ class PmdIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
             .build()
 
         then:
-        if (GradleVersion.version(version) >= GradleVersion.version('2.5')) {
-            // Executed task capture is only available in Gradle 2.5+
-            result.task(taskName()).outcome == SUCCESS
-            result.task(':pmdMain').outcome == SUCCESS
-            result.task(':pmdTest').outcome == SUCCESS
-        }
+        result.task(taskName()).outcome == SUCCESS
+        result.task(':pmdMain').outcome == SUCCESS
+        result.task(':pmdTest').outcome == SUCCESS
 
         // Make sure report exists and was using the expected tool version
         reportFile('main').exists()
@@ -91,21 +88,20 @@ class PmdIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
 
         when:
         BuildResult result = gradleRunner()
-                .withGradleVersion('2.8')
                 .build()
 
         then:
         // The classpath must be configured, and not empty
         assertThat('main classes are in classpath',
-            (result.output =~ /Auxclasspath is configured for main .*\/classes\/main/) as boolean, is(true))
+            (result.output =~ /Auxclasspath is configured for main .*\/classes(\/java)?\/main/) as boolean, is(true))
         assertThat('test classes are not in main classpath',
-            (result.output =~ /Auxclasspath is configured for main .*\/classes\/test/) as boolean, is(false))
+            (result.output =~ /Auxclasspath is configured for main .*\/classes(\/java)?\/test/) as boolean, is(false))
         assertThat('junit is not in main classpath',
             (result.output =~ /Auxclasspath is configured for main .*\/junit\//) as boolean, is(false))
         assertThat('main classes are in test classpath',
-            (result.output =~ /Auxclasspath is configured for test .*\/classes\/main/) as boolean, is(true))
+            (result.output =~ /Auxclasspath is configured for test .*\/classes(\/java)?\/main/) as boolean, is(true))
         assertThat('test classes are in test classpath',
-            (result.output =~ /Auxclasspath is configured for test .*\/classes\/test/) as boolean, is(true))
+            (result.output =~ /Auxclasspath is configured for test .*\/classes(\/java)?\/test/) as boolean, is(true))
         assertThat('junit is in test classpath',
             (result.output =~ /Auxclasspath is configured for test .*\/junit\//) as boolean, is(true))
 
@@ -142,23 +138,22 @@ class PmdIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
 
         when:
         BuildResult result = gradleRunner()
-            .withGradleVersion('2.8') // property is available since 2.8
             .build()
 
         then:
         // The classpath must be configured, and not empty
         assertThat('main classes are in classpath',
-            (result.output =~ /Auxclasspath is configured for main .*\/debug/) as boolean, is(true))
-        // on android we don't discriminate test / compile
+            (result.output =~ /Auxclasspath is configured for main .*\/javac\/debug\//) as boolean, is(true))
+        // on android we don't discriminate test / compiles
         assertThat('test classes are in main classpath',
-            (result.output =~ /Auxclasspath is configured for main .*\/test\/debug/) as boolean, is(true))
+            (result.output =~ /Auxclasspath is configured for main .*\/javac\/debugUnitTest\//) as boolean, is(false))
         // on android we don't discriminate test / compile
         assertThat('junit is in main classpath',
             (result.output =~ /Auxclasspath is configured for main .*\/junit\//) as boolean, is(true))
         assertThat('main classes are in test classpath',
-            (result.output =~ /Auxclasspath is configured for test .*\/debug/) as boolean, is(true))
+            (result.output =~ /Auxclasspath is configured for test .*\/javac\/debug\//) as boolean, is(true))
         assertThat('test classes are in test classpath',
-            (result.output =~ /Auxclasspath is configured for test .*\/test\/debug/) as boolean, is(true))
+            (result.output =~ /Auxclasspath is configured for test .*\/javac\/debugUnitTest\//) as boolean, is(true))
         assertThat('junit is in test classpath',
             (result.output =~ /Auxclasspath is configured for test .*\/junit\//) as boolean, is(true))
 
