@@ -178,7 +178,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
             configSource = configLocator.makeDownloadFileTask(project, config.androidLintConfig,
                 String.format('android-lint-%s.xml', project.name), downloadTaskName)
 
-            lintTask.dependsOn project.tasks.findByName(downloadTaskName)
+            lintTask.dependsOn project.tasks.named(downloadTaskName)
         } else {
             configSource = new File(config.androidLintConfig)
         }
