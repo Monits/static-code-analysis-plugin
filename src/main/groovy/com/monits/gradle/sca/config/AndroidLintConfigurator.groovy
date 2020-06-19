@@ -24,8 +24,10 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.CopySpec
 import org.gradle.api.file.FileCollection
+import org.gradle.api.internal.provider.ProviderInternal
 import org.gradle.api.specs.Specs
 import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.TaskProvider
 
 /**
  * A configurator for Android Lint tasks.
@@ -50,11 +52,19 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
     @Override
     void applyAndroidConfig(final Project project, final StaticCodeAnalysisExtension extension) {
         Class<? extends Task> lintTask = getLintTaskClass(project)
-        project.tasks.withType(lintTask).configureEach { Task t ->
-            if (t.name != 'lintFix') { // The new lintFix task in AGP 3.5.0 should not be altered
-                setupTasks(t, project, extension)
 
-                configureLintTask(project, extension, t)
+        // Lazily setup all lint tasks without requiring them to be created
+        project.tasks.names.each { String taskName ->
+            if (taskName != 'lintFix') { // The new lintFix task in AGP 3.5.0 should not be altered
+                TaskProvider<Task> tp = project.tasks.named(taskName)
+                if (tp instanceof ProviderInternal) {
+                    // explicit getter call - see GROOVY-7149
+                    if (lintTask.isAssignableFrom(tp.getType())) {
+                        setupTasks(tp.get(), project, extension) // TODO remove tp.get()
+
+                        configureLintTask(project, extension, tp.get()) // TODO remove tp.get()
+                    }
+                }
             }
         }
     }
