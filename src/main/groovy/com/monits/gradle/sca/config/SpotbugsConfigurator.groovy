@@ -28,9 +28,12 @@ import org.gradle.api.artifacts.ModuleDependency
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.reporting.ReportingExtension
 import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.compile.JavaCompile
+import org.gradle.language.base.plugins.LifecycleBasePlugin
 import org.gradle.util.GUtil
 import com.github.spotbugs.SpotBugsTask
+import static com.monits.gradle.sca.utils.TaskUtils.registerTask
 
 /**
  * A configurator for Spotbugs tasks
@@ -105,7 +108,7 @@ class SpotbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
                                                final NamedDomainObjectContainer<?> sourceSets,
                                                final Closure<?> configuration = null) {
         // Create a phony spotbugs task that just executes all real spotbugs tasks
-        Task spotbugsRootTask = project.tasks.maybeCreate(SPOTBUGS)
+        TaskProvider<Task> spotbugsRootTask = registerTask(project, SPOTBUGS)
         sourceSets.all { sourceSet ->
             Namer<Object> namer = sourceSets.namer as Namer<Object>
             String sourceSetName = namer.determineName(sourceSet)
@@ -127,12 +130,13 @@ class SpotbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
                 }
             }
 
-            Task spotbugsTask = project.tasks.maybeCreate(generateTaskName(sourceSetName), SpotBugsTask)
-                .configure { SpotBugsTask it ->
+            TaskProvider<SpotBugsTask> spotbugsTask = registerTask(project,
+                generateTaskName(sourceSetName), SpotBugsTask)
+            spotbugsTask.configure { SpotBugsTask it ->
                     it.with {
                         // most defaults are good enough
                         if (remoteLocation) {
-                            dependsOn project.tasks.findByName(downloadTaskName)
+                            dependsOn project.tasks.named(downloadTaskName)
                         }
 
                         if (filterSource) {
@@ -148,6 +152,8 @@ class SpotbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
                             }
                         }
                     }
+
+                    it // make the closure return the task to avoid compiler errors
                 }
 
             if (configuration) {
@@ -158,28 +164,35 @@ class SpotbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
             // For backwards compatibility, create equivalent findbugs* task
             setupPhonyBackwardsCompatibleFindbugsTask(project, spotbugsTask)
 
-            spotbugsRootTask.dependsOn spotbugsTask
+            spotbugsRootTask.configure { Task it ->
+                it.dependsOn spotbugsTask
+            }
         }
 
         // For backwards compatibility, create equivalent findbugs* task
         setupPhonyBackwardsCompatibleFindbugsTask(project, spotbugsRootTask)
 
-        project.tasks.findByName('check').dependsOn spotbugsRootTask
+        project.tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME).configure { Task it ->
+            it.dependsOn spotbugsRootTask
+        }
     }
 
     private static String generateTaskName(final String taskName = SPOTBUGS, final String sourceSetName) {
         GUtil.toLowerCamelCase(String.format('%s %s', taskName, sourceSetName))
     }
 
-    private void setupPhonyBackwardsCompatibleFindbugsTask(final Project project, final Task spotbugsTask) {
+    private void setupPhonyBackwardsCompatibleFindbugsTask(final Project project,
+                                                           final TaskProvider<? extends Task> spotbugsTask) {
         String taskName = spotbugsTask.name.replace(SPOTBUGS, 'findbugs')
-        Task findbugsTask = project.tasks.maybeCreate(taskName)
+        TaskProvider<Task> findbugsTask = registerTask(project, taskName)
 
-        findbugsTask.doFirst { Task t ->
-            t.logger.warn("Using deprecated '${t.path}' task. " +
-                "Please update to use '${spotbugsTask.path}' instead, this task " +
-                'will be removed in the 4.0.0 release.')
+        findbugsTask.configure { Task it ->
+            it.doFirst { Task t ->
+                t.logger.warn("Using deprecated '${t.path}' task. " +
+                    "Please update to use '${spotbugsTask.get().path}' instead, this task " +
+                    'will be removed in the 4.0.0 release.')
+            }
+            it.finalizedBy spotbugsTask
         }
-        findbugsTask.finalizedBy spotbugsTask
     }
 }
