@@ -78,8 +78,9 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
 
             pmdTask.source sourceSet['java']['srcDirs']
             pmdTask.exclude '**/gen/**'
-
-            setupAndroidClasspathAwareTask(pmdTask, project, sourceSet['name'] as String)
+        } { TaskProvider<Pmd> pmdTask, sourceSet ->
+            // TODO : do not call get()
+            setupAndroidClasspathAwareTask(pmdTask.get(), project, sourceSet['name'] as String)
         }
     }
 
@@ -104,7 +105,8 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
     @SuppressWarnings(['UnnecessaryGetter', 'DuplicateStringLiteral'])
     private void setupTasksPerSourceSet(final Project project, final StaticCodeAnalysisExtension extension,
                                                final NamedDomainObjectContainer<?> sourceSets,
-                                               final Closure<?> configuration = null) {
+                                               final Closure<?> configuration = null,
+                                               final Closure<?> register = null) {
         // Create a phony pmd task that just executes all real pmd tasks
         TaskProvider<Task> pmdRootTask = registerTask(project, PMD)
         sourceSets.all { sourceSet ->
@@ -169,6 +171,11 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
                 }
 
                 it // make the closure return the task to avoid compiler errors
+            }
+
+            if (register) {
+                // Allow registering related tasks
+                register.call(pmdTask, sourceSet)
             }
 
             if (configuration) {

@@ -77,8 +77,9 @@ class SpotbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
 
             task.source sourceSet['java']['srcDirs']
             task.exclude '**/gen/**'
-
-            setupAndroidClasspathAwareTask(task, project, sourceSet['name'] as String)
+        } { TaskProvider<SpotBugsTask> task, sourceSet ->
+            // TODO : Do not call get()
+            setupAndroidClasspathAwareTask(task.get(), project, sourceSet['name'] as String)
         }
     }
 
@@ -106,7 +107,8 @@ class SpotbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
 
     private void setupTasksPerSourceSet(final Project project, final StaticCodeAnalysisExtension extension,
                                                final NamedDomainObjectContainer<?> sourceSets,
-                                               final Closure<?> configuration = null) {
+                                               final Closure<?> configuration = null,
+                                               final Closure<?> register = null) {
         // Create a phony spotbugs task that just executes all real spotbugs tasks
         TaskProvider<Task> spotbugsRootTask = registerTask(project, SPOTBUGS)
         sourceSets.all { sourceSet ->
@@ -133,28 +135,33 @@ class SpotbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
             TaskProvider<SpotBugsTask> spotbugsTask = registerTask(project,
                 generateTaskName(sourceSetName), SpotBugsTask)
             spotbugsTask.configure { SpotBugsTask it ->
-                    it.with {
-                        // most defaults are good enough
-                        if (remoteLocation) {
-                            dependsOn project.tasks.named(downloadTaskName)
-                        }
-
-                        if (filterSource) {
-                            excludeFilter = filterSource
-                        }
-
-                        reports { SpotBugsReports r ->
-                            r.xml.with {
-                                destination = new File(
-                                    project.extensions.getByType(ReportingExtension).file(SPOTBUGS),
-                                    "spotbugs-${sourceSetName}.xml")
-                                withMessages = true
-                            }
-                        }
+                it.with {
+                    // most defaults are good enough
+                    if (remoteLocation) {
+                        dependsOn project.tasks.named(downloadTaskName)
                     }
 
-                    it // make the closure return the task to avoid compiler errors
+                    if (filterSource) {
+                        excludeFilter = filterSource
+                    }
+
+                    reports { SpotBugsReports r ->
+                        r.xml.with {
+                            destination = new File(
+                                project.extensions.getByType(ReportingExtension).file(SPOTBUGS),
+                                "spotbugs-${sourceSetName}.xml")
+                            withMessages = true
+                        }
+                    }
                 }
+
+                it // make the closure return the task to avoid compiler errors
+            }
+
+            if (register) {
+                // Allow registering related tasks
+                register.call(spotbugsTask, sourceSet)
+            }
 
             if (configuration) {
                 // Add the sourceset as second parameter for configuration closure
