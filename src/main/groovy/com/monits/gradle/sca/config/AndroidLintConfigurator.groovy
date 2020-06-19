@@ -81,6 +81,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
 
     private static void setupTasks(final Task lintTask, final Project project,
                                    final StaticCodeAnalysisExtension extension) {
+        // This method is called once a lint task is created and configured, so we can be eager
         Task resolveTask = project.tasks.maybeCreate('resolveAndroidLint', ResolveAndroidLintTask)
         Task cleanupTask = project.tasks.maybeCreate('cleanupAndroidLint', CleanupAndroidLintTask)
 
