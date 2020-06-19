@@ -50,7 +50,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
     @Override
     void applyAndroidConfig(final Project project, final StaticCodeAnalysisExtension extension) {
         Class<? extends Task> lintTask = getLintTaskClass(project)
-        project.tasks.withType(lintTask) { Task t ->
+        project.tasks.withType(lintTask).configureEach { Task t ->
             if (t.name != 'lintFix') { // The new lintFix task in AGP 3.5.0 should not be altered
                 setupTasks(t, project, extension)
 
