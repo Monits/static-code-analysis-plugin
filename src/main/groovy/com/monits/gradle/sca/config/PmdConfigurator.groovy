@@ -29,10 +29,13 @@ import org.gradle.api.plugins.quality.PmdExtension
 import org.gradle.api.plugins.quality.PmdReports
 import org.gradle.api.reporting.ReportingExtension
 import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.compile.JavaCompile
+import org.gradle.language.base.plugins.LifecycleBasePlugin
 import org.gradle.util.GUtil
 import org.gradle.util.GradleVersion
 import org.gradle.util.VersionNumber
+import static com.monits.gradle.sca.utils.TaskUtils.registerTask
 
 import java.util.regex.Matcher
 
@@ -103,13 +106,13 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
                                                final NamedDomainObjectContainer<?> sourceSets,
                                                final Closure<?> configuration = null) {
         // Create a phony pmd task that just executes all real pmd tasks
-        Task pmdRootTask = project.tasks.maybeCreate(PMD)
+        TaskProvider<Task> pmdRootTask = registerTask(project, PMD)
         sourceSets.all { sourceSet ->
             Namer<Object> namer = sourceSets.namer as Namer<Object>
             String sourceSetName = namer.determineName(sourceSet)
             RulesConfig config = extension.sourceSetConfig.maybeCreate(sourceSetName)
 
-            List<Task> downloadTasks = []
+            List<TaskProvider<Task>> downloadTasks = []
             List<String> rulesets = []
 
             for (String ruleset : config.getPmdRules()) {
@@ -138,7 +141,7 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
                             suffix = attempts
                         }
                     }
-                    downloadTasks.add(project.tasks.findByName(downloadTaskName))
+                    downloadTasks.add(project.tasks.named(downloadTaskName))
                 } else {
                     configSource = project.file(ruleset)
                 }
@@ -147,7 +150,8 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
                 rulesets.add(configSource.absolutePath)
             }
 
-            Task pmdTask = project.tasks.maybeCreate(generateTaskName(sourceSetName), Pmd).configure { Pmd it ->
+            TaskProvider<Pmd> pmdTask = registerTask(project, generateTaskName(sourceSetName), Pmd)
+            pmdTask.configure { Pmd it ->
                 // most defaults are good enough
                 if (!downloadTasks.empty) {
                     it.dependsOn downloadTasks
@@ -163,6 +167,8 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
                         html.enabled = false
                     }
                 }
+
+                it // make the closure return the task to avoid compiler errors
             }
 
             if (configuration) {
@@ -170,10 +176,14 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
                 pmdTask.configure configuration.rcurry(sourceSet)
             }
 
-            pmdRootTask.dependsOn pmdTask
+            pmdRootTask.configure { Task it ->
+                it.dependsOn pmdTask
+            }
         }
 
-        project.tasks.findByName('check').dependsOn pmdRootTask
+        project.tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME).configure { Task it ->
+            it.dependsOn pmdRootTask
+        }
     }
 
     private static String generateTaskName(final String taskName = PMD, final String sourceSetName,
