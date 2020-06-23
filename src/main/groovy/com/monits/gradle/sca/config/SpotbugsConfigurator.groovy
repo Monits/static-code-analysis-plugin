@@ -78,8 +78,7 @@ class SpotbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
             task.source sourceSet['java']['srcDirs']
             task.exclude '**/gen/**'
         } { TaskProvider<SpotBugsTask> task, sourceSet ->
-            // TODO : Do not call get()
-            setupAndroidClasspathAwareTask(task.get(), project, sourceSet['name'] as String)
+            setupAndroidClasspathAwareTask(task, project, sourceSet['name'] as String)
         }
     }
 

@@ -79,8 +79,7 @@ class PmdConfigurator implements AnalysisConfigurator, ClasspathAware {
             pmdTask.source sourceSet['java']['srcDirs']
             pmdTask.exclude '**/gen/**'
         } { TaskProvider<Pmd> pmdTask, sourceSet ->
-            // TODO : do not call get()
-            setupAndroidClasspathAwareTask(pmdTask.get(), project, sourceSet['name'] as String)
+            setupAndroidClasspathAwareTask(pmdTask, project, sourceSet['name'] as String)
         }
     }
 
