@@ -176,22 +176,21 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
             // Change output location for consistency with other plugins
             // we copy as to not tamper with other lint tasks
             TaskProvider<Copy> copyLintReportTask = project.tasks.register('copyLintReport', Copy)
+            copyLintReportTask.configure { Copy it ->
+                FileCollection xmlFiles = lintTask.get().outputs.files.filter { File f -> f.name.endsWith('.xml') }
+
+                it.from(xmlFiles.singleFile.parent) { CopySpec cs ->
+                    cs.include '*.xml'
+                }
+                it.into project.file("${project.buildDir}/reports/android/")
+                it.rename '.*', 'lint-results.xml'
+
+                it.onlyIf { extension.androidLint }
+            }
 
             lintTask.configure { Task t ->
                 FileCollection xmlFiles = t.outputs.files.filter { File f -> f.name.endsWith('.xml') }
                 if (!xmlFiles.empty) {
-                    copyLintReportTask.configure { Copy it ->
-                        it.from(xmlFiles.singleFile.parent) { CopySpec cs ->
-                            cs.include '*.xml'
-                        }
-                        it.into project.file("${project.buildDir}/reports/android/")
-                        it.rename '.*', 'lint-results.xml'
-
-                        it.onlyIf { extension.androidLint }
-
-                        it // Return the task to avoid compile-time errors
-                    }
-
                     t.finalizedBy copyLintReportTask
                 }
             }
