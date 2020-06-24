@@ -28,18 +28,14 @@ dependencies {
     compileOnly gradleApi()
     compileOnly localGroovy()
 
-    /*
-     * v4 has immutable tasks, and both are compatible with Spotbugs 4,
-     * o keep using this one that's simpler to configures
-     */
-    implementation 'com.github.spotbugs:spotbugs-gradle-plugin:3.0.0'
+    implementation 'gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.4.3'
 }
 
 // Java versions
-project.sourceCompatibility = 1.7
-project.targetCompatibility = 1.7
+project.sourceCompatibility = JavaVersion.VERSION_1_8
+project.targetCompatibility = JavaVersion.VERSION_1_8
 
 wrapper {
-    gradleVersion = '6.5'
+    gradleVersion = '6.3'
     distributionType = Wrapper.DistributionType.ALL
 }

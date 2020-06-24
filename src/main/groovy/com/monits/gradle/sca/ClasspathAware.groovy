@@ -114,7 +114,8 @@ trait ClasspathAware {
             otherDependantSourceSet = project.files()
         }
 
-        task.setProperty('classpath',
+        String propertyName = task.hasProperty('classpath') ? 'classpath' : 'auxClassPaths'
+        task.setProperty(propertyName,
                 project.files(pathToCompiledClasses(project, sourceSetName)) +
                 otherDependantSourceSet +
                 standaloneRJar +

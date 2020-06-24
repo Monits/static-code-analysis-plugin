@@ -13,8 +13,7 @@
  */
 package com.monits.gradle.sca.config
 
-import com.github.spotbugs.SpotBugsExtension
-import com.github.spotbugs.SpotBugsReports
+import com.github.spotbugs.snom.SpotBugsExtension
 import com.monits.gradle.sca.ClasspathAware
 import com.monits.gradle.sca.dsl.RulesConfig
 import com.monits.gradle.sca.dsl.StaticCodeAnalysisExtension
@@ -25,6 +24,7 @@ import org.gradle.api.Namer
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.ModuleDependency
+import org.gradle.api.file.FileCollection
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.reporting.ReportingExtension
 import org.gradle.api.tasks.SourceSetContainer
@@ -32,7 +32,7 @@ import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.language.base.plugins.LifecycleBasePlugin
 import org.gradle.util.GUtil
-import com.github.spotbugs.SpotBugsTask
+import com.github.spotbugs.snom.SpotBugsTask
 import static com.monits.gradle.sca.utils.TaskUtils.registerTask
 
 /**
@@ -75,8 +75,7 @@ class SpotbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
                 task.classes = getProjectClassTree(project, sourceSet['name'] as String)
             }
 
-            task.source sourceSet['java']['srcDirs']
-            task.exclude '**/gen/**'
+            task.sourceDirs = project.files(sourceSet['java']['srcDirs'])
         } { TaskProvider<SpotBugsTask> task, sourceSet ->
             setupAndroidClasspathAwareTask(task, project, sourceSet['name'] as String)
         }
@@ -97,9 +96,9 @@ class SpotbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
 
         project.extensions.configure(SpotBugsExtension) { SpotBugsExtension it ->
             it.with {
-                toolVersion = ToolVersions.spotbugsVersion
+                toolVersion.set(ToolVersions.spotbugsVersion)
                 effort = 'max'
-                ignoreFailures = extension.ignoreErrors
+                ignoreFailures.set(extension.ignoreErrors)
             }
         }
     }
@@ -141,17 +140,12 @@ class SpotbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
                     }
 
                     if (filterSource) {
-                        excludeFilter = filterSource
+                        excludeFilter.set(filterSource)
                     }
 
-                    reports { SpotBugsReports r ->
-                        r.xml.with {
-                            destination = new File(
-                                project.extensions.getByType(ReportingExtension).file(SPOTBUGS),
-                                "spotbugs-${sourceSetName}.xml")
-                            withMessages = true
-                        }
-                    }
+                    reports.create('xml').destination = new File(
+                        project.extensions.getByType(ReportingExtension).file(SPOTBUGS),
+                        "spotbugs-${sourceSetName}.xml")
                 }
 
                 it // make the closure return the task to avoid compiler errors

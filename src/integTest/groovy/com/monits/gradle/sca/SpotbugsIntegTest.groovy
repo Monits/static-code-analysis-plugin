@@ -17,6 +17,8 @@ import com.monits.gradle.sca.fixture.AbstractPerSourceSetPluginIntegTestFixture
 import com.monits.gradle.sca.io.TestFile
 import groovy.transform.CompileDynamic
 import org.gradle.testkit.runner.BuildResult
+import org.gradle.util.VersionNumber
+import org.junit.Assume
 import spock.lang.Unroll
 
 import static org.gradle.testkit.runner.TaskOutcome.FAILED
@@ -39,6 +41,9 @@ class SpotbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         writeBuildFile()
         useEmptySuppressionFilter()
         goodCode()
+
+        // Check if the spotbugs plugin is incompatible with the current setup
+        Assume.assumeTrue(VersionNumber.parse(version) >= VersionNumber.parse('5.6'))
 
         when:
         BuildResult result = gradleRunner()
@@ -503,13 +508,13 @@ class SpotbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
             |
             |    Task spotbugsTask = project.tasks.getByPath(':spotbugsMain')
             |    spotbugsTask.onlyIf {
-            |        println "Spotbugs main exclude is '" + it.excludeFilter.name + "'"
+            |        println "Spotbugs main exclude is '" + it.excludeFilter.asFile.get().name + "'"
             |        false // don't really run the task
             |    }
             |
             |    Task spotbugsTestTask = project.tasks.getByPath(':spotbugsTest')
             |    spotbugsTestTask.onlyIf {
-            |        println "Spotbugs test exclude is '" + it.excludeFilter.name + "'"
+            |        println "Spotbugs test exclude is '" + it.excludeFilter.asFile.get().name + "'"
             |        false // don't really run the task
             |    }
             |}
