@@ -136,8 +136,7 @@ abstract class AbstractPerfTestFixture extends Specification {
             |staticCodeAnalysis {
             |    cpd = ${toolsConfig.get('cpd', false)}
             |    checkstyle = ${toolsConfig.get('checkstyle', false)}
-            |    // use the old property name, so we can compare with SCA 2.x
-            |    findbugs = ${toolsConfig.get('spotbugs', false)}
+            |    spotbugs = ${toolsConfig.get('spotbugs', false)}
             |    pmd = ${toolsConfig.get('pmd', false)}
             |    androidLint = ${toolsConfig.get('androidLint', false)}
             |}

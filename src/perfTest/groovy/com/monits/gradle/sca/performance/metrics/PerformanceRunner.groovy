@@ -30,7 +30,7 @@ class PerformanceRunner {
     private static final int MEASURE_ITERATIONS = 10
 
     private static final long SLEEP_AFTER_RUN_MS = 500L
-    private static final long SLEEP_AFTER_WARM_UP_MS = 5000L
+    private static final long SLEEP_AFTER_WARM_UP_MS = 1000L
 
     private static final int PERCENT = 100
 

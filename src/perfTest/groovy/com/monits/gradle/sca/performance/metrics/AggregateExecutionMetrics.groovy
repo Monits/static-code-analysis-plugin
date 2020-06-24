@@ -33,4 +33,10 @@ class AggregateExecutionMetrics {
     List<Throwable> getFailures() {
         metrics*.exception.findAll()
     }
+
+    @Override
+    String toString() {
+        return "AggregateExecutionMetrics{ raw: " +
+            "${totalTime}, dataseries: ${totalTime.toString()} }"
+    }
 }
