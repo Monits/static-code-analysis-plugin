@@ -17,10 +17,11 @@ jdk: oraclejdk8
 env:
   - TEST_SUITE="codenarc integTest"
   # analyze each tool independently
+  - TEST_SUITE="perfTest --tests *.ConfigurationPerfTest.*"
   - TEST_SUITE="perfTest --tests *.PmdPerfTest.*"
   - TEST_SUITE="perfTest --tests *.CheckstylePerfTest.*"
   - TEST_SUITE="perfTest --tests *.CpdPerfTest.*"
-  # split findbugs tests as those are slower and timeout
+  # split spotbugs tests as those are slower and timeout
   - TEST_SUITE="perfTest --tests *.SpotbugsPerfTest.* -PperfTestCategory=com.monits.gradle.sca.performance.categories.AndroidScenario"
   - TEST_SUITE="perfTest --tests *.SpotbugsPerfTest.* -PperfTestCategory=com.monits.gradle.sca.performance.categories.JavaScenario"
 
