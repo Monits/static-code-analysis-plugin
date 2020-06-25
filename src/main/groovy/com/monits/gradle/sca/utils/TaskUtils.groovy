@@ -31,7 +31,8 @@ final class TaskUtils {
         registerTask(project, taskName, Task)
     }
 
-    static <T extends Task> TaskProvider<T> registerTask(final Project project, final String taskName, Class<T> taskType) {
+    static <T extends Task> TaskProvider<T> registerTask(final Project project,
+                                                         final String taskName, Class<T> taskType) {
         if (project.tasks.names.contains(taskName)) {
             project.tasks.named(taskName, taskType)
         } else {

@@ -36,7 +36,6 @@ class AggregateExecutionMetrics {
 
     @Override
     String toString() {
-        return "AggregateExecutionMetrics{ raw: " +
-            "${totalTime}, dataseries: ${totalTime.toString()} }"
+        "AggregateExecutionMetrics{ raw: ${totalTime}, dataseries: ${totalTime.toString()} }"
     }
 }

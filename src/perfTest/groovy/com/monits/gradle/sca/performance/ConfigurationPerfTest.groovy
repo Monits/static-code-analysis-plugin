@@ -37,7 +37,7 @@ class ConfigurationPerfTest extends AbstractPluginPerfTestFixture {
     // For this test we don't want to run check task
     @Override
     GradleRunner gradleRunner() {
-        return super.gradleRunner().withArguments('help', '--stacktrace')
+        super.gradleRunner().withArguments('help', '--stacktrace')
     }
 
     // For this test we want to enable all task types
@@ -55,6 +55,7 @@ class ConfigurationPerfTest extends AbstractPluginPerfTestFixture {
         writeAndroidBuildFile(configMap, pluginVersion)
     }
 
+    @SuppressWarnings('FactoryMethodName')
     private Map<String, Object> buildAllToolsMap() {
         Map<String, Object> configMap = [:]
         configMap.put('androidLint', Boolean.TRUE)

@@ -27,6 +27,7 @@ import org.gradle.api.file.FileCollection
 import org.gradle.api.internal.provider.ProviderInternal
 import org.gradle.api.specs.Specs
 import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.TaskOutputs
 import org.gradle.api.tasks.TaskProvider
 import static com.monits.gradle.sca.utils.TaskUtils.registerTask
 
@@ -50,6 +51,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
         // nothing to do for non-android projects
     }
 
+    @SuppressWarnings('UnnecessaryGetter')
     @Override
     void applyAndroidConfig(final Project project, final StaticCodeAnalysisExtension extension) {
         Class<? extends Task> lintTask = getLintTaskClass(project)
@@ -58,7 +60,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
         project.tasks.names.each { String taskName ->
             if (taskName != 'lintFix') { // The new lintFix task in AGP 3.5.0 should not be altered
                 TaskProvider<Task> tp = project.tasks.named(taskName)
-                if (tp instanceof ProviderInternal) {
+                if (tp in ProviderInternal) {
                     // explicit getter call - see GROOVY-7149
                     if (lintTask.isAssignableFrom(tp.getType())) {
                         setupTasks(tp, project, extension)
@@ -96,7 +98,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
         TaskProvider<ResolveAndroidLintTask> resolveTask =
             registerTask(project, 'resolveAndroidLint', ResolveAndroidLintTask)
         TaskProvider<CleanupAndroidLintTask> cleanupTask =
-            registerTask(project,'cleanupAndroidLint', CleanupAndroidLintTask)
+            registerTask(project, 'cleanupAndroidLint', CleanupAndroidLintTask)
 
         lintTask.configure { Task t ->
             t.dependsOn resolveTask
@@ -177,7 +179,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
             // we copy as to not tamper with other lint tasks
             TaskProvider<Copy> copyLintReportTask = project.tasks.register('copyLintReport', Copy)
             copyLintReportTask.configure { Copy it ->
-                FileCollection xmlFiles = lintTask.get().outputs.files.filter { File f -> f.name.endsWith('.xml') }
+                FileCollection xmlFiles = xmlOutputs(lintTask.get().outputs)
 
                 it.from(xmlFiles.singleFile.parent) { CopySpec cs ->
                     cs.include '*.xml'
@@ -189,12 +191,16 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
             }
 
             lintTask.configure { Task t ->
-                FileCollection xmlFiles = t.outputs.files.filter { File f -> f.name.endsWith('.xml') }
+                FileCollection xmlFiles = xmlOutputs(t.outputs)
                 if (!xmlFiles.empty) {
                     t.finalizedBy copyLintReportTask
                 }
             }
         }
+    }
+
+    private FileCollection xmlOutputs(TaskOutputs ouputs) {
+        ouputs.files.filter { File f -> f.name.endsWith('.xml') }
     }
 
     private static void warnUnexpectedException(final Project project, final String message, final Throwable e) {
@@ -212,7 +218,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
             configSource = configLocator.makeDownloadFileTask(project, config.androidLintConfig,
                 String.format('android-lint-%s.xml', project.name), downloadTaskName)
 
-            lintTask.configure {Task t ->
+            lintTask.configure { Task t ->
                 t.dependsOn project.tasks.named(downloadTaskName)
             }
         } else {

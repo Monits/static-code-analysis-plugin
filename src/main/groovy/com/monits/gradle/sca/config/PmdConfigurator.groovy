@@ -35,9 +35,10 @@ import org.gradle.language.base.plugins.LifecycleBasePlugin
 import org.gradle.util.GUtil
 import org.gradle.util.GradleVersion
 import org.gradle.util.VersionNumber
-import static com.monits.gradle.sca.utils.TaskUtils.registerTask
 
 import java.util.regex.Matcher
+
+import static com.monits.gradle.sca.utils.TaskUtils.registerTask
 
 /**
  * A configurator for PMD tasks.
