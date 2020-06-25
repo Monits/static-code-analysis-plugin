@@ -1,7 +1,7 @@
 ## History
 
 # v3.0
-### 3.1.0 - Unreleased
+### 3.1.0
 
 Improvements:
  * All tasks are now created lazily improving configuration time
