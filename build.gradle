@@ -36,6 +36,6 @@ project.sourceCompatibility = JavaVersion.VERSION_1_8
 project.targetCompatibility = JavaVersion.VERSION_1_8
 
 wrapper {
-    gradleVersion = '6.3'
+    gradleVersion = '6.5'
     distributionType = Wrapper.DistributionType.ALL
 }
