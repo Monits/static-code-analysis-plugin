@@ -51,7 +51,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
         // nothing to do for non-android projects
     }
 
-    @SuppressWarnings('UnnecessaryGetter')
+    @SuppressWarnings(['UnnecessaryGetter', 'Instanceof'])
     @Override
     void applyAndroidConfig(final Project project, final StaticCodeAnalysisExtension extension) {
         Class<? extends Task> lintTask = getLintTaskClass(project)
@@ -60,7 +60,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
         project.tasks.names.each { String taskName ->
             if (taskName != 'lintFix') { // The new lintFix task in AGP 3.5.0 should not be altered
                 TaskProvider<Task> tp = project.tasks.named(taskName)
-                if (tp in ProviderInternal) {
+                if (tp instanceof ProviderInternal) {
                     // explicit getter call - see GROOVY-7149
                     if (lintTask.isAssignableFrom(tp.getType())) {
                         setupTasks(tp, project, extension)
