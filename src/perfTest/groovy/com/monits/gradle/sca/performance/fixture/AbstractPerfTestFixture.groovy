@@ -27,7 +27,7 @@ import spock.lang.Specification
 @CompileStatic
 abstract class AbstractPerfTestFixture extends Specification {
     // A sample of gradle versions to be considered in general testing
-    static final List<String> TESTED_GRADLE_VERSIONS = ['5.2', '5.6.4', GradleVersion.current().version]
+    static final List<String> TESTED_GRADLE_VERSIONS = ['5.6.4', GradleVersion.current().version]
         .asImmutable()
     @SuppressWarnings(['DuplicateStringLiteral', 'UnnecessaryCast'])
     static final List<String> TESTED_GRADLE_VERSIONS_FOR_ANDROID = ['5.6.4', GradleVersion.current().version]
