@@ -70,7 +70,7 @@ apply plugin: 'com.monits.staticCodeAnalysis'
 
 Plugin Version | Gradle Version | Android Gradle Plugin Version
 -----|----|-----
-3.x|5.2+|3.3.0+
+3.x|5.6+|3.3.0+
 2.6.12|2.3 up to 5.6.x|1.1.x up to 3.5.x
 
 *Prior to version 3.0.0 Findbugs was used instead of Spotbugs.*

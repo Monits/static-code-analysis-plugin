@@ -42,9 +42,6 @@ class SpotbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         useEmptySuppressionFilter()
         goodCode()
 
-        // Check if the spotbugs plugin is incompatible with the current setup
-        Assume.assumeTrue(VersionNumber.parse(version) >= VersionNumber.parse('5.6'))
-
         when:
         BuildResult result = gradleRunner()
             .withGradleVersion(version)
