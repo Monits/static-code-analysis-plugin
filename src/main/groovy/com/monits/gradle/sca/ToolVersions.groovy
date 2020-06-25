@@ -29,7 +29,7 @@ final class ToolVersions {
     private final static String LATEST_CHECKSTYLE_VERSION = '8.31'
     private final static String LATEST_CHECKSTYLE_VERSION_JAVA_7 = '6.19'
 
-    private final static String SPOTBUGS_TOOL_VERSION = '4.0.1'
+    private final static String SPOTBUGS_TOOL_VERSION = '4.0.6'
     private final static String SPOTBUGS_MONITS_VERSION = '0.2.0'
     private final static String SB_CONTRIB_VERSION = '7.4.7'
 

@@ -14,6 +14,7 @@
 package com.monits.gradle.sca.config
 
 import com.github.spotbugs.snom.SpotBugsExtension
+import com.github.spotbugs.snom.SpotBugsPlugin
 import com.monits.gradle.sca.ClasspathAware
 import com.monits.gradle.sca.dsl.RulesConfig
 import com.monits.gradle.sca.dsl.StaticCodeAnalysisExtension
@@ -23,6 +24,8 @@ import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Namer
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.artifacts.ModuleDependency
 import org.gradle.api.file.FileCollection
 import org.gradle.api.plugins.JavaPluginConvention
@@ -92,6 +95,14 @@ class SpotbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
 
             add(SPOTBUGS_PLUGINS_CONFIGURATION,
                 'com.mebigfatguy.sb-contrib:sb-contrib:' + ToolVersions.sbContribVersion)
+        }
+
+        // Needed by com.monits:findbugs-plugin, used to be shipped with Findbugs
+        // Added this way so that defaultDependencies (which bring SpotBugs itself) will still apply
+        project.configurations.named(SpotBugsPlugin.CONFIG_NAME).configure { Configuration c ->
+            c.withDependencies { DependencySet ds ->
+                ds.add(project.dependencies.create('commons-lang:commons-lang:2.6'))
+            }
         }
 
         project.extensions.configure(SpotBugsExtension) { SpotBugsExtension it ->
