@@ -7,7 +7,7 @@ Improvements:
  * All tasks are now created lazily improving configuration time
  * Fully compatible with AGP 4.0.0+
  * Fully compatible with Gradle 6.4 and later (used SpotBugs plugin was not compatible)
- * Upgraded PMD to 6.24.0
+ * Upgraded PMD to 6.25.0
  * Upgraded Checkstyle to 8.33.0
  * Upgraded SpotBugs to 4.0.6
 
