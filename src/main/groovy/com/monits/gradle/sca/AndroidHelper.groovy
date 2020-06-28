@@ -14,6 +14,7 @@
 package com.monits.gradle.sca
 
 import groovy.transform.CompileStatic
+import groovy.transform.Memoized
 
 import java.util.regex.Matcher
 import org.gradle.api.Project
@@ -183,7 +184,7 @@ final class AndroidHelper {
      * @param project The project on which to analyze the used plugin version.
      * @return The version of the used plugin, or {@see VersionNumber#UNKNOWN} if not known.
      */
-    // FIXME : Use @Memoized ?
+    @Memoized
     private static VersionNumber getCurrentVersion(final Project project) {
         File androidDependency = project.buildscript.configurations.getByName('classpath').resolve()
                 .find { it =~ ANDROID_DEPENDENCY_PATTERN }

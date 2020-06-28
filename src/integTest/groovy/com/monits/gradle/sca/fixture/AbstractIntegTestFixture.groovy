@@ -32,8 +32,8 @@ import spock.util.environment.Jvm
 abstract class AbstractIntegTestFixture extends Specification {
 
     // A sample of gradle versions to be considered in general testing
-    static final List<String> TESTED_GRADLE_VERSIONS = ['5.2', '5.6.4', '6.0', GradleVersion.current().version]
-    static final List<String> ANDROID_PLUGIN_VERSIONS = ['3.3.0', '3.4.0', '3.5.3', '3.6.0'].asImmutable()
+    static final List<String> TESTED_GRADLE_VERSIONS = ['5.6.4', '6.0', GradleVersion.current().version]
+    static final List<String> ANDROID_PLUGIN_VERSIONS = ['3.3.0', '3.4.0', '3.5.3', '3.6.0', '4.0.0'].asImmutable()
 
     static final String DEFAULT_ANDROID_VERSION = '3.4.0'
     protected static final String ANDROID_VERSION = 'androidVersion'
@@ -153,9 +153,6 @@ abstract class AbstractIntegTestFixture extends Specification {
 
     @CompileDynamic
     TestFile writeAndroidBuildFile(Map<String, Object> toolsConfig) {
-        String extraRepository = toolsConfig.get(ANDROID_VERSION, DEFAULT_ANDROID_VERSION).startsWith('3') ? 'google()'
-            : ''
-
         buildScriptFile() << """
             |buildscript {
             |    dependencies {
@@ -166,13 +163,13 @@ abstract class AbstractIntegTestFixture extends Specification {
             |
             |    repositories {
             |        jcenter()
-            |        ${extraRepository}
+            |        google()
             |    }
             |}
             |
             |repositories {
             |    jcenter()
-            |    ${extraRepository}
+            |    google()
             |}
             |
             |apply plugin: 'com.android.library'

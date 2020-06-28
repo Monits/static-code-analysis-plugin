@@ -24,8 +24,12 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.CopySpec
 import org.gradle.api.file.FileCollection
+import org.gradle.api.internal.provider.ProviderInternal
 import org.gradle.api.specs.Specs
 import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.TaskOutputs
+import org.gradle.api.tasks.TaskProvider
+import static com.monits.gradle.sca.utils.TaskUtils.registerTask
 
 /**
  * A configurator for Android Lint tasks.
@@ -47,14 +51,23 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
         // nothing to do for non-android projects
     }
 
+    @SuppressWarnings(['UnnecessaryGetter', 'Instanceof'])
     @Override
     void applyAndroidConfig(final Project project, final StaticCodeAnalysisExtension extension) {
         Class<? extends Task> lintTask = getLintTaskClass(project)
-        project.tasks.withType(lintTask) { Task t ->
-            if (t.name != 'lintFix') { // The new lintFix task in AGP 3.5.0 should not be altered
-                setupTasks(t, project, extension)
 
-                configureLintTask(project, extension, t)
+        // Lazily setup all lint tasks without requiring them to be created
+        project.tasks.names.each { String taskName ->
+            if (taskName != 'lintFix') { // The new lintFix task in AGP 3.5.0 should not be altered
+                TaskProvider<Task> tp = project.tasks.named(taskName)
+                if (tp instanceof ProviderInternal) {
+                    // explicit getter call - see GROOVY-7149
+                    if (lintTask.isAssignableFrom(tp.getType())) {
+                        setupTasks(tp, project, extension)
+
+                        configureLintTask(project, extension, tp)
+                    }
+                }
             }
         }
     }
@@ -79,23 +92,34 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
         }
     }
 
-    private static void setupTasks(final Task lintTask, final Project project,
+    private static void setupTasks(final TaskProvider<Task> lintTask, final Project project,
                                    final StaticCodeAnalysisExtension extension) {
-        Task resolveTask = project.tasks.maybeCreate('resolveAndroidLint', ResolveAndroidLintTask)
-        Task cleanupTask = project.tasks.maybeCreate('cleanupAndroidLint', CleanupAndroidLintTask)
+        // This method is called once a lint task is created and configured, so we can be eager
+        TaskProvider<ResolveAndroidLintTask> resolveTask =
+            registerTask(project, 'resolveAndroidLint', ResolveAndroidLintTask)
+        TaskProvider<CleanupAndroidLintTask> cleanupTask =
+            registerTask(project, 'cleanupAndroidLint', CleanupAndroidLintTask)
 
-        lintTask.dependsOn resolveTask
-        lintTask.finalizedBy cleanupTask
+        lintTask.configure { Task t ->
+            t.dependsOn resolveTask
+            t.finalizedBy cleanupTask
+
+            // Tasks should be skipped if disabled by extension
+            t.onlyIf { extension.androidLint }
+        }
 
         // Tasks should be skipped if disabled by extension
-        lintTask.onlyIf { extension.androidLint }
-        resolveTask.onlyIf { extension.androidLint }
-        cleanupTask.onlyIf { extension.androidLint }
+        resolveTask.configure { Task t ->
+            t.onlyIf { extension.androidLint }
+        }
+        cleanupTask.configure { Task t ->
+            t.onlyIf { extension.androidLint }
+        }
     }
 
     @SuppressWarnings(['NoDef', 'VariableTypeRequired']) // can't specify a type without depending on Android
     private static void configureLintOptions(final Project project, final StaticCodeAnalysisExtension extension,
-                                             final File configSource, final Task lintTask) {
+                                             final File configSource, final TaskProvider<Task> lintTask) {
         def lintOptions = project[ANDROID][LINT_OPTIONS]
 
         // update global config
@@ -109,12 +133,14 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
         }
 
         // Make sure the task has the updated global config
-        lintTask[LINT_OPTIONS] = lintOptions
+        lintTask.configure { Task task ->
+            task[LINT_OPTIONS] = lintOptions
+        }
     }
 
     @SuppressWarnings('CatchThrowable') // yes, we REALLY want to be that generic
     private void configureLintTask(final Project project, final StaticCodeAnalysisExtension extension,
-                                    final Task lintTask) {
+                                    final TaskProvider<Task> lintTask) {
         File config = obtainLintRules(project, extension, lintTask)
 
         configureLintOptions(project, extension, config, lintTask)
@@ -128,10 +154,12 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
              * See https://issuetracker.google.com/issues/141126614
              */
             if (AndroidHelper.shouldAddLintInputsAndOutputs(project)) {
-                configureLintInputsAndOutputs(project, lintTask)
+                lintTask.configure { Task t ->
+                    configureLintInputsAndOutputs(project, t)
 
-                // Allow to cache task result on Gradle 3+!
-                lintTask.outputs.cacheIf(Specs.SATISFIES_ALL)
+                    // Allow to cache task result on Gradle 3+!
+                    t.outputs.cacheIf(Specs.SATISFIES_ALL)
+                }
             }
         } catch (Throwable e) {
             // Something went wrong!
@@ -139,28 +167,40 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
                     'tasks, it will be disabled.', e)
 
             // disable up-to-date caching
-            lintTask.outputs.upToDateWhen {
-                false
+            lintTask.configure { Task t ->
+                t.outputs.upToDateWhen {
+                    false
+                }
             }
         }
 
         if (lintTask.name == GLOBAL_LINT_TASK_NAME) {
-            FileCollection xmlFiles = lintTask.outputs.files.filter { File f -> f.name.endsWith('.xml') }
-            if (!xmlFiles.empty) {
-                // Change output location for consistency with other plugins
-                // we copy as to not tamper with other lint tasks
-                Task copyLintReportTask = project.tasks.create('copyLintReport', Copy) { Copy it ->
-                    it.from(xmlFiles.singleFile.parent)
-                    { CopySpec cs ->
-                        cs.include '*.xml'
-                    }
-                    it.into project.file("${project.buildDir}/reports/android/")
-                    it.rename '.*', 'lint-results.xml'
+            // Change output location for consistency with other plugins
+            // we copy as to not tamper with other lint tasks
+            TaskProvider<Copy> copyLintReportTask = project.tasks.register('copyLintReport', Copy)
+            copyLintReportTask.configure { Copy it ->
+                FileCollection xmlFiles = xmlOutputs(lintTask.get().outputs)
+
+                it.from(xmlFiles.singleFile.parent) { CopySpec cs ->
+                    cs.include '*.xml'
                 }
-                lintTask.finalizedBy copyLintReportTask
-                copyLintReportTask.onlyIf { extension.androidLint }
+                it.into project.file("${project.buildDir}/reports/android/")
+                it.rename '.*', 'lint-results.xml'
+
+                it.onlyIf { extension.androidLint }
+            }
+
+            lintTask.configure { Task t ->
+                FileCollection xmlFiles = xmlOutputs(t.outputs)
+                if (!xmlFiles.empty) {
+                    t.finalizedBy copyLintReportTask
+                }
             }
         }
+    }
+
+    private FileCollection xmlOutputs(TaskOutputs ouputs) {
+        ouputs.files.filter { File f -> f.name.endsWith('.xml') }
     }
 
     private static void warnUnexpectedException(final Project project, final String message, final Throwable e) {
@@ -169,7 +209,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
     }
 
     private File obtainLintRules(final Project project, final StaticCodeAnalysisExtension config,
-                                    final Task lintTask) {
+                                    final TaskProvider<Task> lintTask) {
         boolean remoteLocation = RemoteConfigLocator.isRemoteLocation(config.androidLintConfig)
         File configSource
 
@@ -178,7 +218,9 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
             configSource = configLocator.makeDownloadFileTask(project, config.androidLintConfig,
                 String.format('android-lint-%s.xml', project.name), downloadTaskName)
 
-            lintTask.dependsOn project.tasks.findByName(downloadTaskName)
+            lintTask.configure { Task t ->
+                t.dependsOn project.tasks.named(downloadTaskName)
+            }
         } else {
             configSource = new File(config.androidLintConfig)
         }

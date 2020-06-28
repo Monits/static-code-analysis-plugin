@@ -27,12 +27,12 @@ import spock.lang.Specification
 @CompileStatic
 abstract class AbstractPerfTestFixture extends Specification {
     // A sample of gradle versions to be considered in general testing
-    static final List<String> TESTED_GRADLE_VERSIONS = ['5.2', '5.6.4', GradleVersion.current().version]
+    static final List<String> TESTED_GRADLE_VERSIONS = ['5.6.4', GradleVersion.current().version]
         .asImmutable()
     @SuppressWarnings(['DuplicateStringLiteral', 'UnnecessaryCast'])
     static final List<String> TESTED_GRADLE_VERSIONS_FOR_ANDROID = ['5.6.4', GradleVersion.current().version]
         .takeRight(2).asImmutable()
-    static final String BASELINE_PLUGIN_VERSION = '"com.monits:static-code-analysis-plugin:2.6.12"'
+    static final String BASELINE_PLUGIN_VERSION = '"com.monits:static-code-analysis-plugin:3.0.0"'
 
     static final int NUMBER_OF_CLASSES_TO_ANALYZE = 100
 
@@ -136,8 +136,7 @@ abstract class AbstractPerfTestFixture extends Specification {
             |staticCodeAnalysis {
             |    cpd = ${toolsConfig.get('cpd', false)}
             |    checkstyle = ${toolsConfig.get('checkstyle', false)}
-            |    // use the old property name, so we can compare with SCA 2.x
-            |    findbugs = ${toolsConfig.get('spotbugs', false)}
+            |    spotbugs = ${toolsConfig.get('spotbugs', false)}
             |    pmd = ${toolsConfig.get('pmd', false)}
             |    androidLint = ${toolsConfig.get('androidLint', false)}
             |}

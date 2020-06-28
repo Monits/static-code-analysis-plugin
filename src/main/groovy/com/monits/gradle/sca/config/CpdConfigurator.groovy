@@ -21,6 +21,8 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.FileTree
+import org.gradle.api.tasks.TaskProvider
+import org.gradle.language.base.plugins.LifecycleBasePlugin
 import org.gradle.util.VersionNumber
 
 /**
@@ -34,7 +36,7 @@ class CpdConfigurator implements AnalysisConfigurator {
     @Override
     void applyConfig(final Project project, final StaticCodeAnalysisExtension extension) {
         // prevent applying it twice
-        if (project.tasks.findByName(CPD)) {
+        if (project.tasks.names.contains(CPD)) {
             return
         }
 
@@ -42,7 +44,8 @@ class CpdConfigurator implements AnalysisConfigurator {
         addConfigurations(project)
         configureDefaultDependencies(project)
 
-        Task cpdTask = project.task(CPD, type:CPDTask) { CPDTask it ->
+        TaskProvider<CPDTask> cpdTask = project.tasks.register(CPD, CPDTask)
+        cpdTask.configure { CPDTask it ->
             it.ignoreFailures = extension.getIgnoreErrors()
 
             it.ignoreLiterals = true
@@ -56,7 +59,9 @@ class CpdConfigurator implements AnalysisConfigurator {
             it.outputFile = new File("$project.buildDir/reports/pmd/cpd.xml")
         }
 
-        project.tasks.findByName('check').dependsOn cpdTask
+        project.tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME).configure { Task it ->
+            it.dependsOn cpdTask
+        }
     }
 
     @Override

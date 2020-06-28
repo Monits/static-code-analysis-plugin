@@ -30,7 +30,7 @@ We are on [the Grade Plugin Portal](https://plugins.gradle.org/plugin/com.monits
 
 ```groovy
 plugins {
-  id 'com.monits.staticCodeAnalysis' version '3.0.0'
+  id 'com.monits.staticCodeAnalysis' version '3.1.0'
 }
 ```
 
@@ -44,7 +44,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath 'com.monits:static-code-analysis-plugin:3.0.0'
+    classpath 'com.monits:static-code-analysis-plugin:3.1.0'
   }
 }
 
@@ -59,7 +59,7 @@ buildscript {
     jcenter()
   }
   dependencies {
-    classpath 'com.monits:static-code-analysis-plugin:3.0.0'
+    classpath 'com.monits:static-code-analysis-plugin:3.1.0'
   }
 }
 
@@ -70,7 +70,7 @@ apply plugin: 'com.monits.staticCodeAnalysis'
 
 Plugin Version | Gradle Version | Android Gradle Plugin Version
 -----|----|-----
-3.x|5.2+|3.3.0+
+3.x|5.6+|3.3.0+
 2.6.12|2.3 up to 5.6.x|1.1.x up to 3.5.x
 
 *Prior to version 3.0.0 Findbugs was used instead of Spotbugs.*

@@ -503,13 +503,13 @@ class SpotbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
             |
             |    Task spotbugsTask = project.tasks.getByPath(':spotbugsMain')
             |    spotbugsTask.onlyIf {
-            |        println "Spotbugs main exclude is '" + it.excludeFilter.name + "'"
+            |        println "Spotbugs main exclude is '" + it.excludeFilter.asFile.get().name + "'"
             |        false // don't really run the task
             |    }
             |
             |    Task spotbugsTestTask = project.tasks.getByPath(':spotbugsTest')
             |    spotbugsTestTask.onlyIf {
-            |        println "Spotbugs test exclude is '" + it.excludeFilter.name + "'"
+            |        println "Spotbugs test exclude is '" + it.excludeFilter.asFile.get().name + "'"
             |        false // don't really run the task
             |    }
             |}

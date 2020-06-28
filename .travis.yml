@@ -17,21 +17,19 @@ jdk: oraclejdk8
 env:
   - TEST_SUITE="codenarc integTest"
   # analyze each tool independently
+  - TEST_SUITE="perfTest --tests *.ConfigurationPerfTest.*"
   - TEST_SUITE="perfTest --tests *.PmdPerfTest.*"
   - TEST_SUITE="perfTest --tests *.CheckstylePerfTest.*"
   - TEST_SUITE="perfTest --tests *.CpdPerfTest.*"
-  # split findbugs tests as those are slower and timeout
+  # split spotbugs tests as those are slower and timeout
   - TEST_SUITE="perfTest --tests *.SpotbugsPerfTest.* -PperfTestCategory=com.monits.gradle.sca.performance.categories.AndroidScenario"
   - TEST_SUITE="perfTest --tests *.SpotbugsPerfTest.* -PperfTestCategory=com.monits.gradle.sca.performance.categories.JavaScenario"
 
 android:
   components:
     - tools
-    - build-tools-23.0.2
-    - build-tools-25.0.0
-    - build-tools-26.0.2
-    - build-tools-28.0.2
     - build-tools-28.0.3
+    - build-tools-29.0.2
     - android-23
     - android-25
 

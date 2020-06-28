@@ -82,6 +82,6 @@ class DataSeries extends ArrayList<BigDecimal> {
     @Override
     String toString() {
         "DataSeries{ avg: ${average}, min: ${min}, max: ${max}, stdErr: ${standardError}, " +
-            "meanStdErr: ${standardErrorOfMean}"
+            "meanStdErr: ${standardErrorOfMean}}"
     }
 }

@@ -13,8 +13,8 @@
  */
 package com.monits.gradle.sca.config
 
-import com.github.spotbugs.SpotBugsExtension
-import com.github.spotbugs.SpotBugsReports
+import com.github.spotbugs.snom.SpotBugsExtension
+import com.github.spotbugs.snom.SpotBugsPlugin
 import com.monits.gradle.sca.ClasspathAware
 import com.monits.gradle.sca.dsl.RulesConfig
 import com.monits.gradle.sca.dsl.StaticCodeAnalysisExtension
@@ -24,13 +24,18 @@ import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Namer
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.artifacts.ModuleDependency
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.reporting.ReportingExtension
 import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.compile.JavaCompile
+import org.gradle.language.base.plugins.LifecycleBasePlugin
 import org.gradle.util.GUtil
-import com.github.spotbugs.SpotBugsTask
+import com.github.spotbugs.snom.SpotBugsTask
+import static com.monits.gradle.sca.utils.TaskUtils.registerTask
 
 /**
  * A configurator for Spotbugs tasks
@@ -72,9 +77,8 @@ class SpotbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
                 task.classes = getProjectClassTree(project, sourceSet['name'] as String)
             }
 
-            task.source sourceSet['java']['srcDirs']
-            task.exclude '**/gen/**'
-
+            task.sourceDirs = project.files(sourceSet['java']['srcDirs'])
+        } { TaskProvider<SpotBugsTask> task, sourceSet ->
             setupAndroidClasspathAwareTask(task, project, sourceSet['name'] as String)
         }
     }
@@ -92,20 +96,29 @@ class SpotbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
                 'com.mebigfatguy.sb-contrib:sb-contrib:' + ToolVersions.sbContribVersion)
         }
 
+        // Needed by com.monits:findbugs-plugin, used to be shipped with Findbugs
+        // Added this way so that defaultDependencies (which bring SpotBugs itself) will still apply
+        project.configurations.named(SpotBugsPlugin.CONFIG_NAME).configure { Configuration c ->
+            c.withDependencies { DependencySet ds ->
+                ds.add(project.dependencies.create('commons-lang:commons-lang:2.6'))
+            }
+        }
+
         project.extensions.configure(SpotBugsExtension) { SpotBugsExtension it ->
             it.with {
-                toolVersion = ToolVersions.spotbugsVersion
+                toolVersion.set(ToolVersions.spotbugsVersion)
                 effort = 'max'
-                ignoreFailures = extension.ignoreErrors
+                ignoreFailures.set(extension.ignoreErrors)
             }
         }
     }
 
     private void setupTasksPerSourceSet(final Project project, final StaticCodeAnalysisExtension extension,
                                                final NamedDomainObjectContainer<?> sourceSets,
-                                               final Closure<?> configuration = null) {
+                                               final Closure<?> configuration = null,
+                                               final Closure<?> register = null) {
         // Create a phony spotbugs task that just executes all real spotbugs tasks
-        Task spotbugsRootTask = project.tasks.maybeCreate(SPOTBUGS)
+        TaskProvider<Task> spotbugsRootTask = registerTask(project, SPOTBUGS)
         sourceSets.all { sourceSet ->
             Namer<Object> namer = sourceSets.namer as Namer<Object>
             String sourceSetName = namer.determineName(sourceSet)
@@ -127,28 +140,31 @@ class SpotbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
                 }
             }
 
-            Task spotbugsTask = project.tasks.maybeCreate(generateTaskName(sourceSetName), SpotBugsTask)
-                .configure { SpotBugsTask it ->
-                    it.with {
-                        // most defaults are good enough
-                        if (remoteLocation) {
-                            dependsOn project.tasks.findByName(downloadTaskName)
-                        }
-
-                        if (filterSource) {
-                            excludeFilter = filterSource
-                        }
-
-                        reports { SpotBugsReports r ->
-                            r.xml.with {
-                                destination = new File(
-                                    project.extensions.getByType(ReportingExtension).file(SPOTBUGS),
-                                    "spotbugs-${sourceSetName}.xml")
-                                withMessages = true
-                            }
-                        }
+            TaskProvider<SpotBugsTask> spotbugsTask = registerTask(project,
+                generateTaskName(sourceSetName), SpotBugsTask)
+            spotbugsTask.configure { SpotBugsTask it ->
+                it.with {
+                    // most defaults are good enough
+                    if (remoteLocation) {
+                        dependsOn project.tasks.named(downloadTaskName)
                     }
+
+                    if (filterSource) {
+                        excludeFilter.set(filterSource)
+                    }
+
+                    reports.create('xml').destination = new File(
+                        project.extensions.getByType(ReportingExtension).file(SPOTBUGS),
+                        "spotbugs-${sourceSetName}.xml")
                 }
+
+                it // make the closure return the task to avoid compiler errors
+            }
+
+            if (register) {
+                // Allow registering related tasks
+                register.call(spotbugsTask, sourceSet)
+            }
 
             if (configuration) {
                 // Add the sourceset as second parameter for configuration closure
@@ -158,28 +174,35 @@ class SpotbugsConfigurator implements AnalysisConfigurator, ClasspathAware {
             // For backwards compatibility, create equivalent findbugs* task
             setupPhonyBackwardsCompatibleFindbugsTask(project, spotbugsTask)
 
-            spotbugsRootTask.dependsOn spotbugsTask
+            spotbugsRootTask.configure { Task it ->
+                it.dependsOn spotbugsTask
+            }
         }
 
         // For backwards compatibility, create equivalent findbugs* task
         setupPhonyBackwardsCompatibleFindbugsTask(project, spotbugsRootTask)
 
-        project.tasks.findByName('check').dependsOn spotbugsRootTask
+        project.tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME).configure { Task it ->
+            it.dependsOn spotbugsRootTask
+        }
     }
 
     private static String generateTaskName(final String taskName = SPOTBUGS, final String sourceSetName) {
         GUtil.toLowerCamelCase(String.format('%s %s', taskName, sourceSetName))
     }
 
-    private void setupPhonyBackwardsCompatibleFindbugsTask(final Project project, final Task spotbugsTask) {
+    private void setupPhonyBackwardsCompatibleFindbugsTask(final Project project,
+                                                           final TaskProvider<? extends Task> spotbugsTask) {
         String taskName = spotbugsTask.name.replace(SPOTBUGS, 'findbugs')
-        Task findbugsTask = project.tasks.maybeCreate(taskName)
+        TaskProvider<Task> findbugsTask = registerTask(project, taskName)
 
-        findbugsTask.doFirst { Task t ->
-            t.logger.warn("Using deprecated '${t.path}' task. " +
-                "Please update to use '${spotbugsTask.path}' instead, this task " +
-                'will be removed in the 4.0.0 release.')
+        findbugsTask.configure { Task it ->
+            it.doFirst { Task t ->
+                t.logger.warn("Using deprecated '${t.path}' task. " +
+                    "Please update to use '${spotbugsTask.get().path}' instead, this task " +
+                    'will be removed in the 4.0.0 release.')
+            }
+            it.finalizedBy spotbugsTask
         }
-        findbugsTask.finalizedBy spotbugsTask
     }
 }

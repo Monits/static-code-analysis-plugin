@@ -28,8 +28,11 @@ import org.gradle.api.plugins.quality.CheckstyleExtension
 import org.gradle.api.plugins.quality.CheckstyleReports
 import org.gradle.api.reporting.ReportingExtension
 import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.api.tasks.TaskProvider
+import org.gradle.language.base.plugins.LifecycleBasePlugin
 import org.gradle.util.GUtil
 import org.gradle.util.GradleVersion
+import static com.monits.gradle.sca.utils.TaskUtils.registerTask
 
 /**
  * A configurator for Checkstyle tasks.
@@ -90,7 +93,7 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
                                                final NamedDomainObjectContainer<?> sourceSets,
                                                final Closure<?> configuration = null) {
         // Create a phony checkstyle task that just executes all real checkstyle tasks
-        Task checkstyleRootTask = project.tasks.maybeCreate(CHECKSTYLE)
+        TaskProvider<Task> checkstyleRootTask = registerTask(project, CHECKSTYLE)
 
         sourceSets.all { sourceSet ->
             Namer<Object> namer = sourceSets.namer as Namer<Object>
@@ -107,43 +110,47 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
                 configSource = new File(config.getCheckstyleRules())
             }
 
-            Task checkstyleTask = project.tasks.maybeCreate(generateTaskName(sourceSetName), Checkstyle)
-                .configure { Checkstyle t ->
-                    t.with {
-                        if (remoteLocation) {
-                            dependsOn project.tasks.findByName(downloadTaskName)
-                        }
-
-                        if (GradleVersion.current() < GRADLE7) {
-                            configDir = project.<File> provider { null }
-                        }
-
-                        configFile = configSource
-
-                        reports { CheckstyleReports r ->
-                            r.xml.destination = new File(
-                                project.extensions.getByType(ReportingExtension).file(CHECKSTYLE),
-                                "checkstyle-${sourceSetName}.xml")
-
-                            r.html.enabled = false
-                        }
-
-                        // Setup cache file location per-sourceset
-                        configProperties = [
-                            'checkstyle.cache.file':"${project.buildDir}/checkstyle-${sourceSetName}.cache" as Object,
-                        ]
-                    }
+            TaskProvider<Checkstyle> checkstyleTask = registerTask(project, generateTaskName(sourceSetName), Checkstyle)
+            checkstyleTask.configure { Checkstyle t ->
+                if (remoteLocation) {
+                    t.dependsOn project.tasks.named(downloadTaskName)
                 }
+
+                if (GradleVersion.current() < GRADLE7) {
+                    t.configDir = project.<File> provider { null }
+                }
+
+                t.configFile = configSource
+
+                t.reports { CheckstyleReports r ->
+                    r.xml.destination = new File(
+                        project.extensions.getByType(ReportingExtension).file(CHECKSTYLE),
+                        "checkstyle-${sourceSetName}.xml")
+
+                    r.html.enabled = false
+                }
+
+                // Setup cache file location per-sourceset
+                t.configProperties = [
+                    'checkstyle.cache.file':"${project.buildDir}/checkstyle-${sourceSetName}.cache" as Object,
+                ]
+
+                t // make the closure return the task to avoid compiler errors
+            }
 
             if (configuration) {
                 // Add the sourceset as second parameter for configuration closure
                 checkstyleTask.configure configuration.rcurry(sourceSet)
             }
 
-            checkstyleRootTask.dependsOn checkstyleTask
+            checkstyleRootTask.configure { Task it ->
+                it.dependsOn checkstyleTask
+            }
         }
 
-        project.tasks.findByName('check').dependsOn checkstyleRootTask
+        project.tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME).configure { Task it ->
+            it.dependsOn checkstyleRootTask
+        }
     }
 
     private static String generateTaskName(final String taskName = CHECKSTYLE, final String sourceSetName) {

@@ -16,14 +16,13 @@ package com.monits.gradle.sca.config
 import com.monits.gradle.sca.task.DownloadTask
 import groovy.transform.CompileStatic
 import org.gradle.api.Project
-import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.TaskProvider
 
 /**
- * Abstract class that can efficiently creates download tasks for remote config.
+ * Creates download tasks for remote config.
  */
 @CompileStatic
 class RemoteConfigLocator {
-    private static final Map<String, String> DOWNLOAD_TASKS = [:]
     private final String pluginName
 
     RemoteConfigLocator(final String pluginName) {
@@ -48,43 +47,15 @@ class RemoteConfigLocator {
                                        final String localFileName, final String taskName) {
         File destFile = getDestinationFile(project, localFileName)
 
-        // Make sure it doesn't already exist in the current project
-        if (project.tasks.findByName(taskName) == null) {
-            DownloadTask download = getDownloadTaskIfExists(project, configLocation)
-
-            if (download) {
-                if (download.downloadedFile.absolutePath == destFile.absolutePath) {
-                    // Same file, so we create a NOOP task
-                    project.task(taskName, dependsOn:download.path)
-                } else {
-                    // Already downloading, just wait for it to finish and copy it
-                    project.task(taskName, type:Copy) { Copy it ->
-                        it.from download.downloadedFile.parentFile
-                        it.into getDestinationDirectory(project)
-                        it.include download.downloadedFile.name
-                        it.rename download.downloadedFile.name, localFileName
-                        it.dependsOn download.path
-                    }
-                }
-            } else {
-                download = project.task(taskName, type:DownloadTask) { DownloadTask it ->
-                    it.downloadedFile = destFile
-                    it.resourceUri = configLocation
-                } as DownloadTask
-
-                DOWNLOAD_TASKS[configLocation] = download.path
+        if (!project.tasks.names.contains(taskName)) {
+            TaskProvider<DownloadTask> downloadTask = project.tasks.register(taskName, DownloadTask)
+            downloadTask.configure { DownloadTask it ->
+                it.downloadedFile = destFile
+                it.resourceUri = configLocation
             }
         }
 
         destFile
-    }
-
-    private static DownloadTask getDownloadTaskIfExists(final Project project, final String configLocation) {
-        if (!DOWNLOAD_TASKS.containsKey(configLocation)) {
-            return null
-        }
-
-        project.rootProject.tasks.findByPath(DOWNLOAD_TASKS[configLocation]) as DownloadTask
     }
 
     private String getDestinationDirectory(final Project project) {

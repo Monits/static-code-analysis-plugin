@@ -21,6 +21,7 @@ import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileTree
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.tasks.SourceSet
+import org.gradle.api.tasks.TaskProvider
 
 import java.security.MessageDigest
 import java.util.zip.ZipEntry
@@ -40,8 +41,8 @@ trait ClasspathAware {
 
     private static final String SCACONFIG = 'scaconfig'
 
-    void setupAndroidClasspathAwareTask(final Task taskToConfigure, final Project project,
-                                        final String sourceSetName) {
+    void setupAndroidClasspathAwareTask(final TaskProvider<? extends Task> taskToConfigure,
+                                        final Project project, final String sourceSetName) {
         ClasspathAware cpa = this
 
         /*
@@ -49,15 +50,19 @@ trait ClasspathAware {
          * but we need that configure before execution to be considered in up-to-date check.
          * We do it in a separate task, executing AFTER all other needed tasks are done
          */
-        Task cpTask = project.task(
-                'configureClasspathFor' + taskToConfigure.name.capitalize()) { Task self ->
+        TaskProvider<Task> cpTask = project.tasks.register(
+                'configureClasspathFor' + taskToConfigure.name.capitalize())
+        cpTask.configure { Task self ->
             // we need all other task to be done first
-            self.dependsOn taskToConfigure.dependsOn.findAll { it != self } // avoid cycles
-        }.doLast {
-            cpa.configAndroidClasspath(taskToConfigure, project, sourceSetName)
+            self.dependsOn taskToConfigure.get().dependsOn.findAll { it != cpTask } // avoid cycles
+            self.doLast {
+                cpa.configAndroidClasspath(taskToConfigure.get(), project, sourceSetName)
+            }
         }
 
-        taskToConfigure.dependsOn cpTask
+        taskToConfigure.configure { Task t ->
+            t.dependsOn cpTask
+        }
     }
 
     void configAndroidClasspath(final Task task, final Project project, final String sourceSetName) {
@@ -109,7 +114,8 @@ trait ClasspathAware {
             otherDependantSourceSet = project.files()
         }
 
-        task.setProperty('classpath',
+        String propertyName = task.hasProperty('classpath') ? 'classpath' : 'auxClassPaths'
+        task.setProperty(propertyName,
                 project.files(pathToCompiledClasses(project, sourceSetName)) +
                 otherDependantSourceSet +
                 standaloneRJar +
