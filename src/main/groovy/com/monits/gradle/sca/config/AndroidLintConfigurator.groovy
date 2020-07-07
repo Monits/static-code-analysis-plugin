@@ -179,7 +179,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
             // we copy as to not tamper with other lint tasks
             TaskProvider<Copy> copyLintReportTask = project.tasks.register('copyLintReport', Copy)
             copyLintReportTask.configure { Copy it ->
-                FileCollection xmlFiles = xmlOutputs(lintTask.get().outputs)
+                FileCollection xmlFiles = xmlOutputs(lintTask.get())
 
                 it.from(xmlFiles.singleFile.parent) { CopySpec cs ->
                     cs.include '*.xml'
@@ -191,7 +191,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
             }
 
             lintTask.configure { Task t ->
-                FileCollection xmlFiles = xmlOutputs(t.outputs)
+                FileCollection xmlFiles = xmlOutputs(t)
                 if (!xmlFiles.empty) {
                     t.finalizedBy copyLintReportTask
                 }
@@ -199,8 +199,13 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
         }
     }
 
-    private FileCollection xmlOutputs(TaskOutputs ouputs) {
-        ouputs.files.filter { File f -> f.name.endsWith('.xml') }
+    private FileCollection xmlOutputs(Task task) {
+        FileCollection files = task.outputs.files.filter { File f -> f.name.endsWith('.xml') }
+        if (!files.empty) {
+            return files
+        }
+
+        task.project.files(AndroidHelper.getLintReportDir(task.project) + 'lint-results.xml')
     }
 
     private static void warnUnexpectedException(final Project project, final String message, final Throwable e) {
