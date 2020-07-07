@@ -1,6 +1,12 @@
 ## History
 
 # v3.0
+### 3.1.1
+
+Fixes:
+ * Error copying lint result xml under newer AGP versions.
+ * Error resolving configurations during checkstyle executions.
+
 ### 3.1.0
 
 Improvements:

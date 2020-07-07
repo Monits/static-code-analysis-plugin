@@ -61,13 +61,13 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
             task.source sourceSet['java']['srcDirs']
             task.exclude '**/gen/**'
 
+            task.classpath = project.configurations[sourceSet['packageConfigurationName'] as String]
+        } { TaskProvider<Checkstyle> task, sourceSet ->
             // Make sure the config is resolvable... AGP 3 decided to play with this...
             Configuration config = project.configurations[sourceSet['packageConfigurationName'] as String]
             if (config.state == Configuration.State.UNRESOLVED && !config.canBeResolved) {
                 config.canBeResolved = true
             }
-
-            task.classpath = config
         }
     }
 
@@ -91,7 +91,8 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
     @SuppressWarnings('UnnecessaryGetter')
     private void setupTasksPerSourceSet(final Project project, final StaticCodeAnalysisExtension extension,
                                                final NamedDomainObjectContainer<?> sourceSets,
-                                               final Closure<?> configuration = null) {
+                                               final Closure<?> configuration = null,
+                                               final Closure<?> register = null) {
         // Create a phony checkstyle task that just executes all real checkstyle tasks
         TaskProvider<Task> checkstyleRootTask = registerTask(project, CHECKSTYLE)
 
@@ -145,6 +146,11 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
 
             checkstyleRootTask.configure { Task it ->
                 it.dependsOn checkstyleTask
+            }
+
+            if (register) {
+                // Allow registering related tasks
+                register.call(checkstyleRootTask, sourceSet)
             }
         }
 
