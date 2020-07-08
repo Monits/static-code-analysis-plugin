@@ -27,7 +27,6 @@ import org.gradle.api.file.FileCollection
 import org.gradle.api.internal.provider.ProviderInternal
 import org.gradle.api.specs.Specs
 import org.gradle.api.tasks.Copy
-import org.gradle.api.tasks.TaskOutputs
 import org.gradle.api.tasks.TaskProvider
 import static com.monits.gradle.sca.utils.TaskUtils.registerTask
 
@@ -43,6 +42,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
     private static final String GLOBAL_LINT_TASK_NAME = 'lint'
     private static final String XML = 'xml'
     private static final String HTML = 'html'
+    private static final String LINT_RESULT_XML = 'lint-results.xml'
 
     private final RemoteConfigLocator configLocator = new RemoteConfigLocator(ANDROID)
 
@@ -185,7 +185,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
                     cs.include '*.xml'
                 }
                 it.into project.file("${project.buildDir}/reports/android/")
-                it.rename '.*', 'lint-results.xml'
+                it.rename '.*', LINT_RESULT_XML
 
                 it.onlyIf { extension.androidLint }
             }
@@ -205,7 +205,7 @@ class AndroidLintConfigurator implements AnalysisConfigurator {
             return files
         }
 
-        task.project.files(AndroidHelper.getLintReportDir(task.project) + 'lint-results.xml')
+        task.project.files(AndroidHelper.getLintReportDir(task.project) + LINT_RESULT_XML)
     }
 
     private static void warnUnexpectedException(final Project project, final String message, final Throwable e) {

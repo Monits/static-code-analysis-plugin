@@ -41,6 +41,7 @@ import static com.monits.gradle.sca.utils.TaskUtils.registerTask
 class CheckstyleConfigurator implements AnalysisConfigurator {
     private static final String CHECKSTYLE = 'checkstyle'
     private static final GradleVersion GRADLE7 = GradleVersion.version('7.0.0')
+    private static final String PACKAGE_CONFIGURATION_NAME = 'packageConfigurationName'
 
     private final RemoteConfigLocator configLocator = new RemoteConfigLocator(CHECKSTYLE)
 
@@ -61,10 +62,10 @@ class CheckstyleConfigurator implements AnalysisConfigurator {
             task.source sourceSet['java']['srcDirs']
             task.exclude '**/gen/**'
 
-            task.classpath = project.configurations[sourceSet['packageConfigurationName'] as String]
+            task.classpath = project.configurations[sourceSet[PACKAGE_CONFIGURATION_NAME] as String]
         } { TaskProvider<Checkstyle> task, sourceSet ->
             // Make sure the config is resolvable... AGP 3 decided to play with this...
-            Configuration config = project.configurations[sourceSet['packageConfigurationName'] as String]
+            Configuration config = project.configurations[sourceSet[PACKAGE_CONFIGURATION_NAME] as String]
             if (config.state == Configuration.State.UNRESOLVED && !config.canBeResolved) {
                 config.canBeResolved = true
             }
