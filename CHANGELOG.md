@@ -1,7 +1,7 @@
 ## History
 
 # v3.0
-### 3.1.2
+### 3.2.0
 
 Improvements:
  * Upgraded SpotBugs to 4.1.1
