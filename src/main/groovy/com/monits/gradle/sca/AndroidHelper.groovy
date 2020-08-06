@@ -42,8 +42,10 @@ final class AndroidHelper {
     private static final VersionNumber STANDALONE_R_JAR = VersionNumber.parse('3.3.0')
     private static final String MAIN_SOURCESET = 'main'
     private static final String DEBUG_SOURCESET = 'debug'
-    private static final Set<String> NO_R_JAR_SOURCESETS = ([MAIN_SOURCESET, 'test',
-                                           'testAndroid'] as Set<String>).asImmutable()
+    private static final String TEST_SOURCESET = 'test'
+    private static final String ANDROID_TEST_SOURCESET = 'androidTest'
+    private static final Set<String> NO_R_JAR_SOURCESETS = ([MAIN_SOURCESET, TEST_SOURCESET,
+                                             ANDROID_TEST_SOURCESET] as Set<String>).asImmutable()
 
     /**
      * Checks if the current Android build is using the build-cache.
@@ -98,8 +100,8 @@ final class AndroidHelper {
     static String getCompileOutputDir(final Project project, final String sourceSetName, final String sourceSetPath) {
         VersionNumber currentVersion = getCurrentVersion(project)
         if (currentVersion >= USES_JAVAC_TASK_OUTPUTS) {
-            String outputDir = sourceSetName == 'androidTest' ? 'debugAndroidTest' :
-                sourceSetName == 'test' ? 'debugUnitTest' :
+            String outputDir = sourceSetName == ANDROID_TEST_SOURCESET ? 'debugAndroidTest' :
+                sourceSetName == TEST_SOURCESET ? 'debugUnitTest' :
                     sourceSetName == MAIN_SOURCESET ? DEBUG_SOURCESET : sourceSetName
 
             if (currentVersion >= FLAT_JAVAC_TASK_OUTPUTS) {

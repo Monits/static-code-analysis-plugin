@@ -244,7 +244,7 @@ class SpotbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         gradleVersion = gradleVersionForAndroid(androidVersion)
     }
 
-    @Unroll('Android generated classes are not analyzed when using android gradle plugin #androidVersion and gradle #gradleVersion')
+    @Unroll('Android generated classes are not analyzed when using AGP #androidVersion and gradle #gradleVersion')
     @SuppressWarnings('MethodName')
     void 'Android generated classes are not analyzed'() {
         given:
@@ -268,8 +268,10 @@ class SpotbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
             result.task(taskName(sourceSet)).outcome == SUCCESS
 
             reportFile(sourceSet).exists()
-            reportFile(sourceSet).assertContents(not(matchesPattern('(?s).*<FileStats path="[^"]+\\/R\\.java".*')))
-            reportFile(sourceSet).assertContents(not(matchesPattern('(?s).*<FileStats path="[^"]+\\/BuildConfig\\.java".*')))
+            reportFile(sourceSet).assertContents(
+                not(matchesPattern('(?s).*<FileStats path="[^"]+\\/R\\.java".*')))
+            reportFile(sourceSet).assertContents(
+                not(matchesPattern('(?s).*<FileStats path="[^"]+\\/BuildConfig\\.java".*')))
         }
 
         where:
