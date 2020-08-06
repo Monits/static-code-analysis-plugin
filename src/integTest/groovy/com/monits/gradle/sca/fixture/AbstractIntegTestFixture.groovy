@@ -182,6 +182,10 @@ abstract class AbstractIntegTestFixture extends Specification {
         """
             |android {
             |    compileSdkVersion ${TARGET_ANDROID_VERSION}
+            |    defaultConfig { // force BuildConfig and R* generation
+            |        buildConfigField "String", "foo", '"bar"'
+            |        resValue "string", "foo", "bar"
+            |    }
             |}
         """.stripMargin() as TestFile
     }
@@ -191,6 +195,8 @@ abstract class AbstractIntegTestFixture extends Specification {
             |<manifest xmlns:android="http://schemas.android.com/apk/res/android"
             |    package="${packageName}"
             |    android:versionCode="1">
+            |
+            |    <uses-permission android:name="android.permission.INTERNET" />
             |</manifest>
         """.stripMargin() as TestFile
     }

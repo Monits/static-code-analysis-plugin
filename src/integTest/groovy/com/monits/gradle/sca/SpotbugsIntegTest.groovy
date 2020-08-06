@@ -24,6 +24,7 @@ import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import static org.hamcrest.CoreMatchers.containsString
 import static org.hamcrest.CoreMatchers.is
 import static org.hamcrest.core.IsNot.not
+import static org.hamcrest.text.MatchesPattern.matchesPattern
 import static org.junit.Assert.assertThat
 
 /**
@@ -218,39 +219,9 @@ class SpotbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         writeAndroidBuildFile(androidVersion)
         writeAndroidManifest()
         useEmptySuppressionFilter()
-        file('src/main/java/com/monits/ClassA.java') << '''
-            |package com.monits;
-            |
-            |import android.view.View;
-            |
-            |public class ClassA {
-            |    public boolean isFoo() {
-            |        return new View(null).callOnClick();
-            |    }
-            |}
-        '''.stripMargin()
-        file('src/test/java/com/monits/ClassATest.java') << '''
-            |package com.monits;
-            |
-            |import android.view.View;
-            |
-            |public class ClassATest {
-            |    public boolean isFoo() {
-            |        return new View(null).callOnClick();
-            |    }
-            |}
-        '''.stripMargin()
-        file('src/androidTest/java/com/monits/ClassAAndroidTest.java') << '''
-            |package com.monits;
-            |
-            |import android.view.View;
-            |
-            |public class ClassAAndroidTest {
-            |    public boolean isFoo() {
-            |        return new View(null).callOnClick();
-            |    }
-            |}
-        '''.stripMargin()
+        writeDummyAndroidClass('src/main/java', 'ClassA')
+        writeDummyAndroidClass('src/test/java', 'ClassATest')
+        writeDummyAndroidClass('src/androidTest/java', 'ClassAAndroidTest')
 
         when:
         BuildResult result = gradleRunner()
@@ -260,9 +231,46 @@ class SpotbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
         then:
         result.task(taskName()).outcome == SUCCESS
 
-        // The report must exist, and not complain on missing classes from liba
-        reportFile().exists()
-        reportFile().assertContents(containsString('<Errors errors="0" missingClasses="0">'))
+        // The report must exist, and not complain on missing classes (Android SDK, R, BuildConfig)
+        ['main', 'test', 'androidTest'].each { String sourceSet ->
+            result.task(taskName(sourceSet)).outcome == SUCCESS
+
+            reportFile(sourceSet).exists()
+            reportFile(sourceSet).assertContents(containsString('<Errors errors="0" missingClasses="0">'))
+        }
+
+        where:
+        androidVersion << AndroidLintIntegTest.ANDROID_PLUGIN_VERSIONS
+        gradleVersion = gradleVersionForAndroid(androidVersion)
+    }
+
+    @Unroll('Android generated classes are not analyzed when using android gradle plugin #androidVersion and gradle #gradleVersion')
+    @SuppressWarnings('MethodName')
+    void 'Android generated classes are not analyzed'() {
+        given:
+        writeAndroidBuildFile(androidVersion)
+        writeAndroidManifest()
+        useEmptySuppressionFilter()
+        writeDummyAndroidClass('src/main/java', 'ClassA')
+        writeDummyAndroidClass('src/test/java', 'ClassATest')
+        writeDummyAndroidClass('src/androidTest/java', 'ClassAAndroidTest')
+
+        when:
+        BuildResult result = gradleRunner()
+            .withGradleVersion(gradleVersion)
+            .build()
+
+        then:
+        result.task(taskName()).outcome == SUCCESS
+
+        // The report must exist, and not complain on missing classes (Android SDK, R, BuildConfig)
+        ['main', 'test', 'androidTest'].each { String sourceSet ->
+            result.task(taskName(sourceSet)).outcome == SUCCESS
+
+            reportFile(sourceSet).exists()
+            reportFile(sourceSet).assertContents(not(matchesPattern('(?s).*<FileStats path="[^"]+\\/R\\.java".*')))
+            reportFile(sourceSet).assertContents(not(matchesPattern('(?s).*<FileStats path="[^"]+\\/BuildConfig\\.java".*')))
+        }
 
         where:
         androidVersion << AndroidLintIntegTest.ANDROID_PLUGIN_VERSIONS
@@ -602,5 +610,24 @@ class SpotbugsIntegTest extends AbstractPerSourceSetPluginIntegTestFixture {
 
     TestFile suppressionFilter(final String sourceSet = null) {
         file("config/spotbugs/excludeFilter${sourceSet ? "-${sourceSet}" : ''}.xml")
+    }
+
+    TestFile writeDummyAndroidClass(final String sourceDir, final String className) {
+        file("${sourceDir}/com/monits/${className}.java") << """
+            |package com.monits;
+            |
+            |import android.view.View;
+            |import android.util.Log;
+            |import com.monits.staticCodeAnalysis.R;
+            |import com.monits.staticCodeAnalysis.BuildConfig;
+            |
+            |public class ${className} {
+            |    public boolean isFoo() {
+            |        Log.d("${className}", Integer.toString(R.string.foo));
+            |        Log.d("${className}", BuildConfig.foo);
+            |        return new View(null).callOnClick();
+            |    }
+            |}
+        """.stripMargin()
     }
 }
