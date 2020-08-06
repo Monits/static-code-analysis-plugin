@@ -16,10 +16,11 @@ configurations {
 
 dependencies {
     integTestCompile gradleTestKit()
-    integTestCompile('org.spockframework:spock-core:1.0-groovy-2.4') {
+    integTestCompile('org.spockframework:spock-core:1.3-groovy-2.5') {
         exclude module: 'groovy-all'
     }
     integTestCompile 'org.apache.commons:commons-lang3:3.4'
+    integTestCompile 'org.hamcrest:hamcrest-core:2.2'
 }
 
 task integTest(type: Test) {

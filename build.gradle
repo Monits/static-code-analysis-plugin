@@ -28,7 +28,7 @@ dependencies {
     compileOnly gradleApi()
     compileOnly localGroovy()
 
-    implementation 'gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.4.3'
+    implementation 'gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.5.0'
 }
 
 // Java versions
