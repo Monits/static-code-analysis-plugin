@@ -42,6 +42,8 @@ final class AndroidHelper {
     private static final VersionNumber STANDALONE_R_JAR = VersionNumber.parse('3.3.0')
     private static final String MAIN_SOURCESET = 'main'
     private static final String DEBUG_SOURCESET = 'debug'
+    private static final Set<String> NO_R_JAR_SOURCESETS = ([MAIN_SOURCESET, 'test',
+                                           'testAndroid'] as Set<String>).asImmutable()
 
     /**
      * Checks if the current Android build is using the build-cache.
@@ -119,8 +121,8 @@ final class AndroidHelper {
             return null
         }
 
-        // main sourceset maps to debug
-        String actualSourceSet = sourceSetName != MAIN_SOURCESET ?: DEBUG_SOURCESET
+        // some sourcesets don't generate R.jar files and map to debug
+        String actualSourceSet = NO_R_JAR_SOURCESETS.contains(sourceSetName) ? DEBUG_SOURCESET : sourceSetName
 
         String intermediatePath = ''
         if (currentVersion.major == 3) {
