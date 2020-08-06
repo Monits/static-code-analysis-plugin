@@ -32,7 +32,7 @@ abstract class AbstractPerfTestFixture extends Specification {
     @SuppressWarnings(['DuplicateStringLiteral', 'UnnecessaryCast'])
     static final List<String> TESTED_GRADLE_VERSIONS_FOR_ANDROID = ['5.6.4', GradleVersion.current().version]
         .takeRight(2).asImmutable()
-    static final String BASELINE_PLUGIN_VERSION = '"com.monits:static-code-analysis-plugin:3.0.0"'
+    static final String BASELINE_PLUGIN_VERSION = '"com.monits:static-code-analysis-plugin:3.2.0"'
 
     static final int NUMBER_OF_CLASSES_TO_ANALYZE = 100
 
